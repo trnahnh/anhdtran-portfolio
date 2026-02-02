@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 
 export const metadata = {
   title: "Anh Tran",
-  description: "All projects by Anh Tran - Full-stack Developer",
+  description: "The Most 'Finance-Bro' Tech Bro",
 };
 
 export default function ProjectsPage() {

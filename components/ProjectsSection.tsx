@@ -1,4 +1,7 @@
+"use client";
+
 import UnderlineLink from "./UnderlineLink";
+import ProjectCard from "./ProjectCard";
 import { currentProjects, allProjects, type Project } from "@/lib/data/projects";
 
 interface ProjectsSectionProps {
@@ -15,19 +18,27 @@ export default function ProjectsSection({ showAll = false }: ProjectsSectionProp
         {showAll ? "All Projects" : "Projects"}
       </h2>
       <div className="space-y-4 pl-6 sm:pl-7">
-        {projects.map((project) => (
-          <div key={project.name} className="text-muted-foreground">
-            <span className="mr-2">&#8627;</span>
-            <UnderlineLink href={project.link} external className="text-foreground font-medium">
-              {project.name}
-              {project.nameAlt && (
-                <span className="ml-1 font-normal">{project.nameAlt}</span>
-              )}
-            </UnderlineLink>
-            <span className="mx-2">—</span>
-            <span>{project.description}</span>
-          </div>
-        ))}
+        {showAll ? (
+          // Expandable cards on /projects page
+          projects.map((project) => (
+            <ProjectCard key={project.name} project={project} />
+          ))
+        ) : (
+          // Simple list on landing page
+          projects.map((project) => (
+            <div key={project.name} className="text-muted-foreground">
+              <span className="mr-2">&#8627;</span>
+              <UnderlineLink href={project.link} external className="text-foreground font-medium">
+                {project.name}
+                {project.nameAlt && (
+                  <span className="ml-1 font-normal">{project.nameAlt}</span>
+                )}
+              </UnderlineLink>
+              <span className="mx-2">—</span>
+              <span>{project.description}</span>
+            </div>
+          ))
+        )}
       </div>
     </section>
   );
