@@ -1,17 +1,20 @@
 import Header from "@/components/Header";
-import ExperienceSection from "@/components/ExperienceSection";
 import ProjectsSection from "@/components/ProjectsSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 
-export default function Home() {
+export const metadata = {
+  title: "Anh Tran",
+  description: "All projects by Anh Tran - Full-stack Developer",
+};
+
+export default function ProjectsPage() {
   return (
     <div className="min-h-screen">
       <main className="max-w-2xl mx-auto px-6 py-16 sm:py-24">
         <div className="space-y-16">
           <Header />
-          <ExperienceSection />
-          <ProjectsSection />
+          <ProjectsSection showAll />
           <ContactSection />
           <Footer />
         </div>
