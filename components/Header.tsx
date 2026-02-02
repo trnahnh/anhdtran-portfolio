@@ -35,7 +35,7 @@ export default function Header() {
       <p className="text-muted-foreground pl-6 sm:pl-7">
         <span className="mr-2">&#8627;</span>
         <RotatingText
-          texts={["Full-stack Developer", "Powerlifting Enthusiast"]}
+          texts={["Full-stack Developer", "Powerlifting Enthusiast", "The Most 'Finance-Bro' Tech Bro"]}
           interval={3000}
         />
       </p>

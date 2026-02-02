@@ -1,7 +1,40 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import UnderlineLink from "./UnderlineLink";
 import { contacts } from "@/lib/data/contacts";
 
 export default function ContactSection() {
+  const [isDark, setIsDark] = useState(true);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains("dark"));
+    };
+
+    checkTheme();
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "class") {
+          checkTheme();
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const getIconSrc = (contact: typeof contacts[0]) => {
+    if (contact.iconLight && contact.iconDark) {
+      return isDark ? contact.iconDark : contact.iconLight;
+    }
+    return contact.icon;
+  };
+
   return (
     <section id="contact" className="fade-in-up fade-in-up-delay-3">
       <h2 className="text-lg font-medium mb-4">
@@ -9,17 +42,29 @@ export default function ContactSection() {
         Contact
       </h2>
       <div className="space-y-2 pl-6 sm:pl-7">
-        {contacts.map((contact) => (
-          <div key={contact.label} className="text-muted-foreground">
-            <span className="mr-2">&#8627;</span>
-            <span className="text-foreground">{contact.label}:</span>
-            <span className="ml-2">
-              <UnderlineLink href={contact.href} external>
-                {contact.value}
-              </UnderlineLink>
-            </span>
-          </div>
-        ))}
+        {contacts.map((contact) => {
+          const iconSrc = getIconSrc(contact);
+          return (
+            <div key={contact.label} className="text-muted-foreground flex items-center">
+              <span className="mr-2">&#8627;</span>
+              {iconSrc && (
+                <Image
+                  src={iconSrc}
+                  alt={contact.label}
+                  width={18}
+                  height={18}
+                  className="mr-2"
+                />
+              )}
+              <span className="text-foreground">{contact.label}:</span>
+              <span className="ml-2">
+                <UnderlineLink href={contact.href} external>
+                  {contact.value}
+                </UnderlineLink>
+              </span>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

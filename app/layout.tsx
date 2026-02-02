@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Anh Tran" }],
   openGraph: {
-    title: "Anh Tran | Full-stack Developer",
+    title: "Anh Tran",
     description:
       "Full-stack Developer and Powerlifting Enthusiast. Building innovative solutions with AI and modern web technologies.",
     type: "website",
