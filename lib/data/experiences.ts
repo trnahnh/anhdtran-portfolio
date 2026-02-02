@@ -33,4 +33,8 @@ export const pastExperiences: Experience[] = [
     title: "Fitness Floor Coordinator",
     company: "UC Campus Recreation Center",
   },
+  {
+    title: "Lead Robot Designer",
+    company: "UC College of Engineering & Applied Science"
+  }
 ];
