@@ -11,7 +11,7 @@ export const currentProjects: Project[] = [
     name: "Inyeon",
     nameAlt: "(인연)",
     description:
-      "AI-powered git companion that analyzes diffs, generates commits, and reviews code with multi-agent intelligence.",
+      "Agentic AI Git companion that analyzes diffs, generates commits, and reviews code with multi-agent intelligence.",
     link: "https://github.com/suka712/inyeon-upstream",
     techStack: ["FastAPI", "Pydantic", "LangChain", "LangGraph", "Ollama", "ChromaDB", "Gemini Embeddings", "Docker"],
   },
@@ -36,14 +36,14 @@ export const pastProjects: Project[] = [
   {
     name: "ResumeHippocrates",
     description:
-      "AI-powered full-stack resume builder optimizing content for ATS with OpenAI integration.",
+      "AI-powered full-stack resume builder optimizing content for ATS (Applicant Tracking System) with OpenAI integration.",
     link: "https://github.com/trnahnh/Resume-Hippocrates",
     techStack: ["Gemini API", "ImageKit", "MongoDB", "Express.js", "React", "Node.js"],
   },
   {
     name: "DietApollo",
     description:
-      "Pixel-themed web app for managing meal plans, grocery lists, and calorie intake in a retro-styled interface.",
+      "Pixel-themed web application for managing meal plans, grocery lists, and calorie intake in a retro-styled interface.",
     link: "https://github.com/trnahnh/DietApollo",
     techStack: ["Django", "Django REST", "React", "SQLite", "REST API"],
   },
