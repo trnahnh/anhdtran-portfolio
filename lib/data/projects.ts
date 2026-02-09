@@ -11,9 +11,9 @@ export const currentProjects: Project[] = [
     name: "Inyeon",
     nameAlt: "(인연)",
     description:
-      "Agentic AI Git companion that analyzes diffs, generates commits, and reviews code with multi-agent intelligence.",
+      "Agentic AI Git companion that analyzes diffs, generates commits, reviews code, and split changes into atomic commits with multi-agent intelligence.",
     link: "https://github.com/suka712/inyeon-upstream",
-    techStack: ["FastAPI", "Pydantic", "LangChain", "LangGraph", "Ollama", "ChromaDB", "Gemini Embeddings", "Docker"],
+    techStack: ["FastAPI", "Pydantic", "LangChain", "LangGraph", "Ollama", "ChromaDB", "Gemini Embeddings", "scikit-learn", "NumPy", "Docker"],
   },
   {
     name: "AnyuDock",
