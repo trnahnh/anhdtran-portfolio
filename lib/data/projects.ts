@@ -21,7 +21,7 @@ export const currentProjects: Project[] = [
     description:
       "Pronounced ànyǔ (ahn-yoo). Simple S3 file storage for sharing files and env configs between machines.",
     link: "https://github.com/suka712/anyu-dock",
-    techStack: ["AWS S3", "Bun", "Hono", "PostgreSQL"],
+    techStack: ["AWS S3", "Bun", "Hono", "TypeScript", "PostgreSQL"],
   },
 ];
 
