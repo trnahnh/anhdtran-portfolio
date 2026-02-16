@@ -21,7 +21,7 @@ export const currentProjects: Project[] = [
     description:
       "Pronounced ànyǔ (ahn-yoo). Simple S3 file storage for sharing files and env configs between machines.",
     link: "https://github.com/suka712/anyu-dock",
-    techStack: ["AWS S3", "Bun", "Hono", "TypeScript", "PostgreSQL"],
+    techStack: ["AWS S3", "Bun", "Hono", "TypeScript", "PostgreSQL", "GitHub Actions CI/CD"],
   },
 ];
 
@@ -38,7 +38,7 @@ export const pastProjects: Project[] = [
     description:
       "AI-powered full-stack resume builder optimizing content for ATS (Applicant Tracking System) with OpenAI integration.",
     link: "https://github.com/trnahnh/Resume-Hippocrates",
-    techStack: ["Gemini API", "ImageKit", "MongoDB", "Express.js", "React", "Node.js"],
+    techStack: ["Gemini API", "OpenAI", "ImageKit", "MongoDB", "Express.js", "React", "Node.js"],
   },
   {
     name: "DietApollo",
