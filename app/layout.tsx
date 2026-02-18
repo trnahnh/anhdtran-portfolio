@@ -3,6 +3,7 @@ import { Playfair_Display, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import { SplashCursor } from "@/components/SplashCursor";
 import GradientBlobs from "@/components/GradientBlobs";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -50,7 +51,9 @@ export default function RootLayout({
           fontFamily: "var(--font-source-sans), system-ui, sans-serif",
         }}
       >
-        <SplashCursor />
+        <ErrorBoundary>
+          <SplashCursor />
+        </ErrorBoundary>
         <GradientBlobs />
         {children}
       </body>
