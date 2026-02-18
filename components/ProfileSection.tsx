@@ -1,5 +1,6 @@
 import Image from "next/image";
 import NowPlaying from "./NowPlaying";
+import SpotifyEmbed from "./SpotifyEmbed";
 
 const photos = [
   {
@@ -58,16 +59,7 @@ export default function ProfileSection() {
           Currently Playing
         </h2>
         <NowPlaying />
-        <iframe
-          style={{ borderRadius: "12px" }}
-          src="https://open.spotify.com/embed/playlist/59J1xc7HyfCa3EusuWcPd8?utm_source=generator&theme=0"
-          width="100%"
-          height="352"
-          frameBorder="0"
-          allowFullScreen
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          loading="lazy"
-        />
+        <SpotifyEmbed />
       </section>
     </>
   );

@@ -5,6 +5,16 @@ import RotatingText from "./RotatingText";
 import UnderlineLink from "./UnderlineLink";
 import ThemeToggle from "./ThemeToggle";
 
+const DOB = new Date(2006, 4, 11); // May 11, 2006
+
+function getAge(): number {
+  const today = new Date();
+  let age = today.getFullYear() - DOB.getFullYear();
+  const m = today.getMonth() - DOB.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < DOB.getDate())) age--;
+  return age;
+}
+
 export default function Header() {
   const pathname = usePathname();
 
@@ -14,7 +24,7 @@ export default function Header() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-medium tracking-tight">
             <span className="text-muted-foreground mr-2">&#9670;</span>
-            Anh Tran, 20
+            Anh Tran, {getAge()}
           </h1>
         </div>
         <div className="flex items-center gap-6">

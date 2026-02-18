@@ -8,6 +8,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 const inter = Inter({ subsets: ["latin"], weight: ["200", "300", "700"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://anhdtrn.com"),
   title: "Anh Tran",
   description:
     "Full-stack Developer and Powerlifting Enthusiast. Building innovative solutions with AI and modern web technologies.",
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
     description:
       "Full-stack Developer and Powerlifting Enthusiast. Building innovative solutions with AI and modern web technologies.",
     type: "website",
+    images: [{ url: "/profile/portrait.png" }],
   },
 };
 

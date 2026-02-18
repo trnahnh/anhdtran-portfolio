@@ -1,9 +1,10 @@
 import Header from "@/components/Header";
 import ProfileSection from "@/components/ProfileSection";
+import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 
 export const metadata = {
-  title: "Anh Tran — Profile",
+  title: "Anh Tran",
   description: "The Most 'Finance-Bro' Tech Bro",
 };
 
@@ -14,6 +15,7 @@ export default function ProfilePage() {
         <div className="space-y-16">
           <Header />
           <ProfileSection />
+          <ContactSection />
           <Footer />
         </div>
       </main>
