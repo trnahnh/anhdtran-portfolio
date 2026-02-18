@@ -10,7 +10,7 @@ export const currentExperiences: Experience[] = [
     title: "Founding Engineer",
     company: "KatanaID",
     companyUrl: "https://www.katanaid.com",
-    description: "AI-integrated Authentication Toolkit",
+    description: "AI-integrated Branding Toolkit",
   },
   {
     title: "Full-stack Software Engineer Fellowship",
