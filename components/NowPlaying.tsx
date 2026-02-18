@@ -21,7 +21,7 @@ export default function NowPlaying() {
         .then(setTrack);
 
     fetch_();
-    const interval = setInterval(fetch_, 30_000);
+    const interval = setInterval(fetch_, 20_000);
     return () => clearInterval(interval);
   }, []);
 
