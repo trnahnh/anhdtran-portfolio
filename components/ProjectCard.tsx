@@ -31,7 +31,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             {project.techStack && project.techStack.length > 0 && (
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="p-1 rounded-md hover:bg-muted transition-colors interactive"
+                className="p-2 rounded-md hover:bg-muted transition-colors interactive"
                 aria-label={isExpanded ? "Collapse tech stack" : "Expand tech stack"}
               >
                 <ChevronDown

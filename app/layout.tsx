@@ -1,21 +1,11 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Source_Sans_3 } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { SplashCursor } from "@/components/SplashCursor";
 import GradientBlobs from "@/components/GradientBlobs";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const sourceSans = Source_Sans_3({
-  variable: "--font-source-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
+const inter = Inter({ subsets: ["latin"], weight: ["200", "300", "700"] });
 
 export const metadata: Metadata = {
   title: "Anh Tran",
@@ -46,10 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
-        className={`${playfair.variable} ${sourceSans.variable} antialiased`}
-        style={{
-          fontFamily: "var(--font-source-sans), system-ui, sans-serif",
-        }}
+        className={`${inter.className} antialiased`}
       >
         <ErrorBoundary>
           <SplashCursor />

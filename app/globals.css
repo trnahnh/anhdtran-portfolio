@@ -3,29 +3,13 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Custom fonts */
-@font-face {
-  font-family: 'Playfair Display';
-  font-style: normal;
-  font-weight: 400 700;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/playfairdisplay/v37/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvXDXbtM.woff2') format('woff2');
-}
-
-@font-face {
-  font-family: 'Source Sans 3';
-  font-style: normal;
-  font-weight: 300 700;
-  font-display: swap;
-  src: url('https://fonts.gstatic.com/s/sourcesans3/v15/nwpBtKy2OAdR1K-IwhWudF-R9QMylBJAV3Bo8Kw461EN_io6npfB.woff2') format('woff2');
-}
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Source Sans 3', system-ui, sans-serif;
-  --font-serif: 'Playfair Display', Georgia, serif;
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -155,7 +139,7 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-serif);
+    font-family: inherit;
   }
 }
 
@@ -195,6 +179,15 @@ html.theme-transitioning * {
   transform: scaleX(1);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .underline-link {
+    transition: none;
+  }
+  .underline-link::after {
+    transition: none;
+  }
+}
+
 /* Fade in animation */
 @keyframes fadeInUp {
   from {
@@ -210,6 +203,13 @@ html.theme-transitioning * {
 .fade-in-up {
   animation: fadeInUp 0.6s ease forwards;
   opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-up {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 .fade-in-up-delay-1 {
@@ -250,6 +250,12 @@ html.theme-transitioning * {
 
 .animate-blob {
   animation: blob 20s infinite ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-blob {
+    animation: none;
+  }
 }
 
 .animate-blob-delay-2 {

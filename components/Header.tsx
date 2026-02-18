@@ -7,7 +7,6 @@ import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
   const pathname = usePathname();
-  const isProjectsPage = pathname === "/projects";
 
   return (
     <header className="fade-in-up">
@@ -20,12 +19,10 @@ export default function Header() {
         </div>
         <div className="flex items-center gap-6">
           <nav className="flex items-center gap-4 text-sm">
-            {isProjectsPage && <UnderlineLink href="/">Home</UnderlineLink>}
-            <UnderlineLink href="/projects">Projects</UnderlineLink>
-            <UnderlineLink
-              href="/resume/Resume_Anh_Tran.pdf"
-              external
-            >
+            {pathname !== "/" && <UnderlineLink href="/">Home</UnderlineLink>}
+            {pathname !== "/projects" && <UnderlineLink href="/projects">Projects</UnderlineLink>}
+            {pathname !== "/profile" && <UnderlineLink href="/profile">Profile</UnderlineLink>}
+            <UnderlineLink href="/resume/Resume_Anh_Tran.pdf" external>
               Resume
             </UnderlineLink>
           </nav>
