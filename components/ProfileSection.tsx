@@ -44,8 +44,8 @@ export default function ProfileSection() {
                 className="w-full h-auto transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 640px) 50vw, 320px"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <p className="absolute bottom-3 left-3 right-3 text-xs text-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 leading-snug">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300" />
+              <p className="absolute bottom-3 left-3 right-3 text-xs text-white/90 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 leading-snug">
                 {caption}
               </p>
             </div>
