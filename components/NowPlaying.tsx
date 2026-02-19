@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import UnderlineLink from "./UnderlineLink";
 
 interface Track {
   isPlaying: boolean;
@@ -18,7 +19,8 @@ export default function NowPlaying() {
     const fetch_ = () =>
       fetch("/api/spotify")
         .then((r) => r.json())
-        .then(setTrack);
+        .then(setTrack)
+        .catch(() => {});
 
     fetch_();
     const interval = setInterval(fetch_, 20_000);
@@ -45,14 +47,13 @@ export default function NowPlaying() {
             </span>
           </div>
           <div className="min-w-0">
-            <a
-              href={track.songUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-foreground truncate block hover:underline"
+            <UnderlineLink
+              href={track.songUrl ?? ""}
+              external
+              className="font-medium text-foreground truncate block"
             >
               {track.title}
-            </a>
+            </UnderlineLink>
             <p className="text-muted-foreground truncate">{track.artist}</p>
           </div>
         </>

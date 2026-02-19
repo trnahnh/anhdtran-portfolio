@@ -8,13 +8,13 @@ export default function ExperienceSection() {
         {/* Current Experience */}
         <div>
           <h2 className="text-lg font-medium mb-4">
-            <span className="text-muted-foreground mr-2">&#9670;</span>
+            <span className="text-muted-foreground mr-2" aria-hidden="true">&#9670;</span>
             Current Experience
           </h2>
           <div className="space-y-3 pl-6 sm:pl-7">
             {currentExperiences.map((exp) => (
               <div key={`${exp.title}-${exp.company}`} className="text-muted-foreground">
-                <span className="mr-2">&#8627;</span>
+                <span className="mr-2" aria-hidden="true">&#8627;</span>
                 <span className="text-foreground">{exp.title}</span>
                 <span className="mx-2">@</span>
                 {exp.companyUrl ? (
@@ -38,13 +38,13 @@ export default function ExperienceSection() {
         {/* Past Experience */}
         <div>
           <h2 className="text-lg font-medium mb-4">
-            <span className="text-muted-foreground mr-2">&#9670;</span>
+            <span className="text-muted-foreground mr-2" aria-hidden="true">&#9670;</span>
             Past Experience
           </h2>
           <div className="space-y-3 pl-6 sm:pl-7">
             {pastExperiences.map((exp) => (
               <div key={`${exp.title}-${exp.company}`} className="text-muted-foreground">
-                <span className="mr-2">&#8627;</span>
+                <span className="mr-2" aria-hidden="true">&#8627;</span>
                 <span className="text-foreground">{exp.title}</span>
                 <span className="mx-2">@</span>
                 {exp.companyUrl ? (

@@ -23,7 +23,7 @@ export default function Header() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
         <div>
           <h1 className="text-2xl sm:text-3xl font-medium tracking-tight">
-            <span className="text-muted-foreground mr-2">&#9670;</span>
+            <span className="text-muted-foreground mr-2" aria-hidden="true">&#9670;</span>
             Anh Tran, {getAge()}
           </h1>
         </div>
@@ -40,7 +40,7 @@ export default function Header() {
         </div>
       </div>
       <p className="text-muted-foreground pl-6 sm:pl-7">
-        <span className="mr-2">&#8627;</span>
+        <span className="mr-2" aria-hidden="true">&#8627;</span>
         <RotatingText
           texts={["Full-stack Developer", "Powerlifting Enthusiast", "The Most 'Finance-Bro' Tech Bro"]}
           interval={3000}

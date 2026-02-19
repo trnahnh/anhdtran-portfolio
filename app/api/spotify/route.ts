@@ -31,7 +31,7 @@ export async function GET() {
     headers: { Authorization: `Bearer ${access_token}` },
   });
 
-  if (res.status === 204 || res.status > 400) {
+  if (res.status === 204 || res.status >= 400) {
     return NextResponse.json({ isPlaying: false });
   }
 

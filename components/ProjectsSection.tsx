@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import UnderlineLink from "./UnderlineLink";
 import ProjectCard from "./ProjectCard";
 import { currentProjects, allProjects, type Project } from "@/lib/data/projects";
@@ -10,12 +11,23 @@ interface ProjectsSectionProps {
 
 export default function ProjectsSection({ showAll = false }: ProjectsSectionProps) {
   const projects: Project[] = showAll ? allProjects : currentProjects;
+  const [dots, setDots] = useState(".");
+
+  useEffect(() => {
+    if (showAll) return;
+    const interval = setInterval(() => {
+      setDots((prev) => (prev.length >= 3 ? "." : prev + "."));
+    }, 500);
+    return () => clearInterval(interval);
+  }, [showAll]);
 
   return (
     <section className="fade-in-up fade-in-up-delay-2">
       <h2 className="text-lg font-medium mb-4">
-        <span className="text-muted-foreground mr-2">&#9670;</span>
-        {showAll ? "All Projects" : "Projects"}
+        <span className="text-muted-foreground mr-2" aria-hidden="true">&#9670;</span>
+        {showAll ? "All Projects" : (
+          <>Currently building<span aria-hidden="true">{dots}</span></>
+        )}
       </h2>
       <div className="space-y-4 pl-6 sm:pl-7">
         {showAll ? (
@@ -27,7 +39,7 @@ export default function ProjectsSection({ showAll = false }: ProjectsSectionProp
           // Simple list on landing page
           projects.map((project) => (
             <div key={project.name} className="text-muted-foreground">
-              <span className="mr-2">&#8627;</span>
+              <span className="mr-2" aria-hidden="true">&#8627;</span>
               <UnderlineLink href={project.link} external className="text-foreground font-medium">
                 {project.name}
                 {project.nameAlt && (
