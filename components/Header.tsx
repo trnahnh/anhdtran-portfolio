@@ -5,7 +5,7 @@ import RotatingText from "./RotatingText";
 import UnderlineLink from "./UnderlineLink";
 import ThemeToggle from "./ThemeToggle";
 
-const DOB = new Date(2006, 4, 11); // May 11, 2006
+const DOB = new Date(2006, 4, 11); // May 11, 2006 since JS/TS is based-0
 
 function getAge(): number {
   const today = new Date();
@@ -42,7 +42,7 @@ export default function Header() {
       <p className="text-muted-foreground pl-6 sm:pl-7">
         <span className="mr-2" aria-hidden="true">&#8627;</span>
         <RotatingText
-          texts={["Full-stack Developer", "Powerlifting Enthusiast", "The Most 'Finance-Bro' Tech Bro"]}
+          texts={["Full-stack Developer", "Powerlifting Enthusiast", "The Most 'Finance-Bro' Tech Bro", "Anatomy Connoisseur"]}
           interval={3000}
         />
       </p>

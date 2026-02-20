@@ -13,7 +13,7 @@ export const projects: Project[] = [
     nameAlt: "(인연)",
     description:
       "Agentic AI Git companion that orchestrates the full workflow in one command.",
-    link: "https://github.com/suka712/inyeon-upstream",
+    link: "https://inyeon-upstream.vercel.app",
     techStack: ["FastAPI", "Pydantic", "LangChain", "LangGraph", "Ollama", "ChromaDB", "Gemini Embeddings", "scikit-learn", "NumPy", "Docker"],
     status: "current",
   },
