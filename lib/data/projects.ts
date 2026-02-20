@@ -22,7 +22,7 @@ export const projects: Project[] = [
     nameAlt: "(暗语-Dock)",
     description:
       "Pronounced ànyǔ (ahn-yoo). Simple S3 file storage for sharing files and env configs between machines.",
-    link: "https://github.com/suka712/anyu-dock",
+    link: "https://github.com/suka712/renga-anyu-s3",
     techStack: ["AWS S3", "Bun", "Hono", "TypeScript", "PostgreSQL", "GitHub Actions CI/CD"],
     status: "current",
   },
@@ -47,7 +47,7 @@ export const projects: Project[] = [
     description:
       "Pixel-themed web application for managing meal plans, grocery lists, and calorie intake in a retro-styled interface.",
     link: "https://github.com/trnahnh/DietApollo",
-    techStack: ["Django", "Django REST", "React", "SQLite", "REST API"],
+    techStack: ["Django", "Django REST", "vanilla JS", "SQLite", "REST API"],
     status: "past",
   },
 ];
