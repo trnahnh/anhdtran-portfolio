@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 
-const SEGMENTS = [
+const SEGMENTS_DARK = [
   { text: "console", className: "text-blue-400" },
   { text: ".", className: "text-zinc-300" },
   { text: "log", className: "text-yellow-300" },
@@ -12,13 +12,24 @@ const SEGMENTS = [
   { text: ";", className: "text-zinc-500" },
 ];
 
-const FULL_TEXT = SEGMENTS.map((s) => s.text).join("");
+const SEGMENTS_LIGHT = [
+  { text: "console", className: "text-blue-600" },
+  { text: ".", className: "text-zinc-600" },
+  { text: "log", className: "text-amber-600" },
+  { text: "(", className: "text-zinc-600" },
+  { text: '"Hello, World!"', className: "text-green-700" },
+  { text: ")", className: "text-zinc-600" },
+  { text: ";", className: "text-zinc-400" },
+];
+
+const FULL_TEXT = SEGMENTS_DARK.map((s) => s.text).join("");
 
 let hasPlayed = false;
 
-function renderSegments(charCount: number) {
+function renderSegments(charCount: number, isDark: boolean) {
+  const segments = isDark ? SEGMENTS_DARK : SEGMENTS_LIGHT;
   let remaining = charCount;
-  return SEGMENTS.map((seg, i) => {
+  return segments.map((seg, i) => {
     if (remaining <= 0) return null;
     const visible = seg.text.slice(0, remaining);
     remaining -= seg.text.length;
@@ -31,10 +42,18 @@ function renderSegments(charCount: number) {
 }
 
 export default function IntroScreen() {
+  const [mounted, setMounted] = useState(false);
   const [show, setShow] = useState(!hasPlayed);
   const [charCount, setCharCount] = useState(0);
   const [fading, setFading] = useState(false);
+  const [isDark, setIsDark] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("theme");
+    setIsDark(saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
+    setMounted(true);
+  }, []);
 
   const skip = useCallback(() => {
     if (timerRef.current) {
@@ -66,41 +85,71 @@ export default function IntroScreen() {
     };
   }, []);
 
-  if (!show) return null;
+  if (!mounted || !show) return null;
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zinc-950 transition-opacity duration-500 cursor-pointer ${
-        fading ? "opacity-0 pointer-events-none" : "opacity-100"
-      }`}
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center transition-opacity duration-500 cursor-pointer ${
+        isDark ? "bg-zinc-950" : "bg-white"
+      } ${fading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       onClick={skip}
     >
       {/* IDE Window */}
-      <div className="w-[85%] max-w-xl rounded-xl overflow-hidden shadow-2xl border border-zinc-800">
+      <div
+        className={`w-[85%] max-w-xl rounded-xl overflow-hidden shadow-2xl border ${
+          isDark ? "border-zinc-800" : "border-zinc-200"
+        }`}
+      >
         {/* Title bar */}
-        <div className="bg-zinc-900 px-4 py-3 flex items-center gap-2">
+        <div
+          className={`px-4 py-3 flex items-center gap-2 ${
+            isDark ? "bg-zinc-900" : "bg-zinc-100"
+          }`}
+        >
           <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
           <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
           <span className="w-3 h-3 rounded-full bg-[#28c840]" />
-          <span className="ml-4 text-xs text-zinc-500 font-mono">index.tsx</span>
+          <span
+            className={`ml-4 text-xs font-mono ${
+              isDark ? "text-zinc-500" : "text-zinc-400"
+            }`}
+          >
+            anhdtran-portfolio.tsx
+          </span>
         </div>
 
         {/* Code area */}
-        <div className="bg-zinc-950 px-4 sm:px-6 py-6 sm:py-10 font-mono text-base sm:text-xl lg:text-2xl flex items-start gap-3 sm:gap-5">
-          <span className="text-zinc-600 select-none pt-0.5">1</span>
+        <div
+          className={`px-4 sm:px-6 py-6 sm:py-10 font-mono text-base sm:text-xl lg:text-2xl flex items-start gap-3 sm:gap-5 ${
+            isDark ? "bg-zinc-950" : "bg-white"
+          }`}
+        >
+          <span
+            className={`select-none pt-0.5 ${
+              isDark ? "text-zinc-600" : "text-zinc-400"
+            }`}
+          >
+            1
+          </span>
           <p>
-            {renderSegments(charCount)}
+            {renderSegments(charCount, isDark)}
             <span
-              className={`inline-block w-[2px] h-5 sm:h-6 lg:h-7 bg-zinc-300 ml-0.5 align-middle ${
-                fading ? "opacity-0" : "animate-pulse"
-              }`}
+              className={`inline-block w-[2px] h-5 sm:h-6 lg:h-7 ml-0.5 align-middle ${
+                isDark ? "bg-zinc-300" : "bg-zinc-700"
+              } ${fading ? "opacity-0" : "animate-pulse"}`}
             />
           </p>
         </div>
       </div>
 
       {/* Skip hint */}
-      <p className="mt-5 text-sm text-zinc-600 select-none">Tap anywhere to skip.</p>
+      <p
+        className={`mt-5 text-sm select-none ${
+          isDark ? "text-zinc-600" : "text-zinc-400"
+        }`}
+      >
+        Tap anywhere to skip.
+      </p>
     </div>
   );
 }
