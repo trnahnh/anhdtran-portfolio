@@ -56,10 +56,10 @@ export default function IntroScreen() {
       if (index === FULL_TEXT.length) {
         clearInterval(timerRef.current!);
         timerRef.current = null;
-        setTimeout(() => setFading(true), 600);
-        setTimeout(() => setShow(false), 1100);
+        setTimeout(() => setFading(true), 500);
+        setTimeout(() => setShow(false), 1000);
       }
-    }, 80);
+    }, 67);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
