@@ -24,8 +24,6 @@ const SEGMENTS_LIGHT = [
 
 const FULL_TEXT = SEGMENTS_DARK.map((s) => s.text).join("");
 
-let hasPlayed = false;
-
 function renderSegments(charCount: number, isDark: boolean) {
   const segments = isDark ? SEGMENTS_DARK : SEGMENTS_LIGHT;
   let remaining = charCount;
@@ -43,7 +41,7 @@ function renderSegments(charCount: number, isDark: boolean) {
 
 export default function IntroScreen() {
   const [mounted, setMounted] = useState(false);
-  const [show, setShow] = useState(!hasPlayed);
+  const [show, setShow] = useState(true);
   const [charCount, setCharCount] = useState(0);
   const [fading, setFading] = useState(false);
   const [isDark, setIsDark] = useState(true);
@@ -65,9 +63,6 @@ export default function IntroScreen() {
   }, []);
 
   useEffect(() => {
-    if (hasPlayed) return;
-    hasPlayed = true;
-
     let index = 0;
     timerRef.current = setInterval(() => {
       index++;
