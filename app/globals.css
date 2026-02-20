@@ -188,6 +188,22 @@ html.theme-transitioning * {
   }
 }
 
+/* Page transition */
+@keyframes pageFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.page-transition {
+  animation: pageFadeIn 0.3s ease forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition {
+    animation: none;
+  }
+}
+
 /* Fade in animation */
 @keyframes fadeInUp {
   from {

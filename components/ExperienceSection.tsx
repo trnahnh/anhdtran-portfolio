@@ -16,7 +16,7 @@ export default function ExperienceSection() {
               <div key={`${exp.title}-${exp.company}`} className="text-muted-foreground">
                 <span className="mr-2" aria-hidden="true">&#8627;</span>
                 <span className="text-foreground">{exp.title}</span>
-                <span className="mx-2">@</span>
+                <span className="mx-2">꩜</span>
                 {exp.companyUrl ? (
                   <UnderlineLink href={exp.companyUrl} external>
                     {exp.company}
@@ -46,7 +46,7 @@ export default function ExperienceSection() {
               <div key={`${exp.title}-${exp.company}`} className="text-muted-foreground">
                 <span className="mr-2" aria-hidden="true">&#8627;</span>
                 <span className="text-foreground">{exp.title}</span>
-                <span className="mx-2">@</span>
+                <span className="mx-2">꩜</span>
                 {exp.companyUrl ? (
                   <UnderlineLink href={exp.companyUrl} external>
                     {exp.company}

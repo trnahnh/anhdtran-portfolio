@@ -4,6 +4,7 @@ import "./globals.css";
 import { SplashCursor } from "@/components/SplashCursor";
 import GradientBlobs from "@/components/GradientBlobs";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import PageTransition from "@/components/PageTransition";
 
 const inter = Inter({ subsets: ["latin"], weight: ["200", "300", "700"] });
 
@@ -44,7 +45,7 @@ export default function RootLayout({
           <SplashCursor />
         </ErrorBoundary>
         <GradientBlobs />
-        {children}
+        <PageTransition>{children}</PageTransition>
       </body>
     </html>
   );
