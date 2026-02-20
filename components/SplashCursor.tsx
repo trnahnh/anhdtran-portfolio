@@ -1297,7 +1297,7 @@ function SplashCursor({
   ]);
 
   return (
-    <div className="fixed inset-0 z-0 pointer-events-none">
+    <div className="fixed inset-0 z-[200] pointer-events-none">
       <canvas ref={canvasRef} className="w-full h-full" style={{ willChange: 'contents' }} />
     </div>
   );
