@@ -76,7 +76,7 @@ export default function IntroScreen() {
       onClick={skip}
     >
       {/* IDE Window */}
-      <div className="w-full max-w-xl mx-4 sm:mx-6 rounded-xl overflow-hidden shadow-2xl border border-zinc-800">
+      <div className="w-[85%] max-w-xl rounded-xl overflow-hidden shadow-2xl border border-zinc-800">
         {/* Title bar */}
         <div className="bg-zinc-900 px-4 py-3 flex items-center gap-2">
           <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
