@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 export default function ScrollToTop() {
   const [visible, setVisible] = useState(false);
@@ -12,26 +13,32 @@ export default function ScrollToTop() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (!visible) return null;
-
   return (
-    <button
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      aria-label="Scroll to top"
-      className="
-        fixed bottom-6 right-6 z-50
-        w-11 h-11 sm:w-10 sm:h-10
-        flex items-center justify-center
-        rounded-full
-        bg-background border border-border
-        text-muted-foreground hover:text-foreground
-        hover:bg-muted
-        shadow-md
-        transition-colors duration-200
-        cursor-pointer
-      "
-    >
-      <ArrowUp className="w-4 h-4" />
-    </button>
+    <AnimatePresence>
+      {visible && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: 8 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Scroll to top"
+          className="
+            fixed bottom-6 right-6 z-50
+            w-11 h-11 sm:w-10 sm:h-10
+            flex items-center justify-center
+            rounded-full
+            bg-background border border-border
+            text-muted-foreground hover:text-foreground
+            hover:bg-muted
+            shadow-md
+            transition-colors duration-200
+            cursor-pointer
+          "
+        >
+          <ArrowUp className="w-4 h-4" />
+        </motion.button>
+      )}
+    </AnimatePresence>
   );
 }
