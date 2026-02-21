@@ -8,18 +8,11 @@ const SEGMENTS = [
   { text: "anhdtran.space", className: "text-green-400" },
 ];
 
-const SEGMENTS_LIGHT = [
-  { text: "ssh", className: "text-amber-600" },
-  { text: " ", className: "" },
-  { text: "anhdtran.space", className: "text-green-700" },
-];
-
 const FULL_TEXT = SEGMENTS.map((s) => s.text).join("");
 
-function renderSegments(charCount: number, isDark: boolean) {
-  const segments = isDark ? SEGMENTS : SEGMENTS_LIGHT;
+function renderSegments(charCount: number) {
   let remaining = charCount;
-  return segments.map((seg, i) => {
+  return SEGMENTS.map((seg, i) => {
     if (remaining <= 0) return null;
     const visible = seg.text.slice(0, remaining);
     remaining -= seg.text.length;
@@ -33,28 +26,26 @@ function renderSegments(charCount: number, isDark: boolean) {
 
 export default function ProfileIntroScreen() {
   const [mounted, setMounted] = useState(false);
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const [fading, setFading] = useState(false);
-  const [isDark, setIsDark] = useState(true);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    setIsDark(saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
-    setMounted(true);
+  const timerRef       = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearAll = useCallback(() => {
+    if (timerRef.current)       { clearInterval(timerRef.current);       timerRef.current = null; }
+    if (fadeTimeoutRef.current) { clearTimeout(fadeTimeoutRef.current);  fadeTimeoutRef.current = null; }
+    if (hideTimeoutRef.current) { clearTimeout(hideTimeoutRef.current);  hideTimeoutRef.current = null; }
   }, []);
 
-  const skip = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    setFading(true);
-    setTimeout(() => setShow(false), 500);
-  }, []);
+  const startIntro = useCallback(() => {
+    clearAll();
+    setCharCount(0);
+    setFading(false);
+    setShow(true);
 
-  useEffect(() => {
     let index = 0;
     timerRef.current = setInterval(() => {
       index++;
@@ -62,65 +53,99 @@ export default function ProfileIntroScreen() {
       if (index === FULL_TEXT.length) {
         clearInterval(timerRef.current!);
         timerRef.current = null;
-        setTimeout(() => setFading(true), 500);
-        setTimeout(() => setShow(false), 1000);
+        fadeTimeoutRef.current = setTimeout(() => setFading(true), 500);
+        hideTimeoutRef.current = setTimeout(() => setShow(false), 1000);
       }
     }, 67);
+  }, [clearAll]);
+
+  const skip = useCallback(() => {
+    clearAll();
+    setFading(true);
+    hideTimeoutRef.current = setTimeout(() => setShow(false), 500);
+  }, [clearAll]);
+
+  useEffect(() => {
+    setMounted(true);
+
+    const isDarkNow = () => document.documentElement.classList.contains("dark");
+
+    // Initial show: first visit or hard reload, dark mode only
+    if (isDarkNow()) {
+      const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+      const isReload = navEntry?.type === "reload";
+      const hasSeenIntro = sessionStorage.getItem("profile-intro-seen") === "true";
+
+      if (!hasSeenIntro || isReload) {
+        sessionStorage.setItem("profile-intro-seen", "true");
+        startIntro();
+      }
+    }
+
+    // Watch for theme toggles
+    let prevDark = isDarkNow();
+    const observer = new MutationObserver(() => {
+      const nowDark = isDarkNow();
+      if (nowDark === prevDark) return;
+      prevDark = nowDark;
+
+      if (nowDark) {
+        // Toggled to dark → show intro
+        startIntro();
+      } else {
+        // Toggled to light → fade out if showing
+        clearAll();
+        setFading(true);
+        hideTimeoutRef.current = setTimeout(() => setShow(false), 500);
+      }
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
 
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      clearAll();
+      observer.disconnect();
     };
-  }, []);
+  }, [startIntro, clearAll]);
 
   if (!mounted || !show) return null;
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center transition-opacity duration-500 cursor-pointer ${
-        isDark ? "bg-zinc-950" : "bg-white"
-      } ${fading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zinc-950 transition-opacity duration-500 cursor-pointer ${
+        fading ? "opacity-0 pointer-events-none" : "opacity-100"
+      }`}
       onClick={skip}
     >
       {/* IDE Window */}
-      <div
-        className={`w-[85%] max-w-xl rounded-xl overflow-hidden shadow-2xl border ${
-          isDark ? "border-zinc-800" : "border-zinc-200"
-        }`}
-      >
+      <div className="w-[85%] max-w-xl rounded-xl overflow-hidden shadow-2xl border border-zinc-800">
         {/* Title bar */}
-        <div
-          className={`px-4 py-3 flex items-center gap-2 ${
-            isDark ? "bg-zinc-900" : "bg-zinc-100"
-          }`}
-        >
+        <div className="px-4 py-3 flex items-center gap-2 bg-zinc-900">
           <span className="w-3 h-3 rounded-full bg-[#ff5f57]" />
           <span className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
           <span className="w-3 h-3 rounded-full bg-[#28c840]" />
-          <span className={`ml-4 text-xs font-mono ${isDark ? "text-zinc-500" : "text-zinc-400"}`}>
-            zsh
-          </span>
+          <span className="ml-4 text-xs font-mono text-zinc-500">zsh</span>
         </div>
 
         {/* Terminal area */}
-        <div
-          className={`px-4 sm:px-6 py-6 sm:py-10 font-mono text-base sm:text-xl lg:text-2xl flex items-center gap-3 sm:gap-5 ${
-            isDark ? "bg-zinc-950" : "bg-white"
-          }`}
-        >
-          <span className={isDark ? "text-zinc-600" : "text-zinc-400"}>$</span>
+        <div className="px-4 sm:px-6 py-6 sm:py-10 font-mono text-base sm:text-xl lg:text-2xl flex items-center gap-3 sm:gap-5 bg-zinc-950">
+          <span className="text-zinc-600">$</span>
           <p>
-            {renderSegments(charCount, isDark)}
+            {renderSegments(charCount)}
             <span
-              className={`inline-block w-[2px] h-5 sm:h-6 lg:h-7 ml-0.5 align-middle ${
-                isDark ? "bg-zinc-300" : "bg-zinc-700"
-              } ${fading ? "opacity-0" : "animate-pulse"}`}
+              className={`inline-block w-[2px] h-5 sm:h-6 lg:h-7 ml-0.5 align-middle bg-zinc-300 ${
+                fading ? "opacity-0" : "animate-pulse"
+              }`}
             />
           </p>
         </div>
       </div>
 
       {/* Skip hint */}
-      <p className={`mt-5 text-sm select-none ${isDark ? "text-zinc-600" : "text-zinc-400"}`}>
+      <p className="mt-5 text-sm select-none text-zinc-600">
         Tap anywhere to skip.
       </p>
     </div>
