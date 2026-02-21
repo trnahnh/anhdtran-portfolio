@@ -28,7 +28,7 @@ export default function EnterSpaceButton() {
     <AnimatePresence>
       {isDark && (
         <motion.div
-          className="flex justify-center pt-6 pb-2"
+          className="flex flex-col items-center gap-2 pt-6 pb-2"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
@@ -61,6 +61,9 @@ export default function EnterSpaceButton() {
               Enter Space Mode
             </span>
           </motion.button>
+          <p className="text-white/20 text-[10px] tracking-widest uppercase">
+            best experienced on desktop
+          </p>
         </motion.div>
       )}
     </AnimatePresence>

@@ -391,18 +391,12 @@ export default function SpacePage() {
   const handsActiveRef = useRef(false);
   const [camState, setCamState] = useState<"loading" | "ready" | "denied" | "error">("loading");
 
-  // ── Dark mode guard — redirect to /profile in light mode ───────────────────
+  // ── Dark mode guard — redirect to /profile if accessed in light mode ─────────
+  // Only checked at mount; "dark" is hardcoded in layout so this is purely defensive.
   useEffect(() => {
-    const isDark = () => document.documentElement.classList.contains("dark");
-    if (!isDark()) {
+    if (!document.documentElement.classList.contains("dark")) {
       router.replace("/profile");
-      return;
     }
-    const observer = new MutationObserver(() => {
-      if (!isDark()) router.replace("/profile");
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
-    return () => observer.disconnect();
   }, [router]);
 
   // ── Three.js scene ─────────────────────────────────────────────────────────
@@ -428,7 +422,7 @@ export default function SpacePage() {
 
     // Camera
     const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1200);
-    camera.position.set(0, 55, 220); // entry start position
+    camera.position.set(0, isMobile ? 40 : 55, isMobile ? 160 : 220); // entry start position
     camera.lookAt(0, 0, 0);
 
     // ── Lighting ───────────────────────────────────────────────────────────
@@ -692,10 +686,10 @@ export default function SpacePage() {
     let animId: number;
     const clock = new THREE.Clock();
 
-    // Entry animation constants
-    const ENTRY_DURATION = 3.8;
-    const ENTRY_Z0 = 220, ENTRY_Z1 = 95;
-    const ENTRY_Y0 = 55,  ENTRY_Y1 = 20;
+    // Entry animation constants — mobile starts closer so the scene is immediately visible
+    const ENTRY_DURATION = isMobile ? 2.5 : 3.8;
+    const ENTRY_Z0 = isMobile ? 160 : 220, ENTRY_Z1 = 95;
+    const ENTRY_Y0 = isMobile ? 40  : 55,  ENTRY_Y1 = 20;
     let entryActive = true;
 
     const animate = () => {
@@ -980,7 +974,7 @@ export default function SpacePage() {
         className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 pointer-events-none"
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 2.4 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
       >
         <div className="flex items-center gap-2 text-white/30 text-xs tracking-widest uppercase">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/60 animate-pulse" />
