@@ -3,6 +3,7 @@ import ProfileSection from "@/components/ProfileSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import ProfileIntroScreen from "@/components/ProfileIntroScreen";
+import SolarSystem from "@/components/SolarSystem";
 
 export const metadata = {
   title: "Anh Tran",
@@ -11,9 +12,10 @@ export const metadata = {
 
 export default function ProfilePage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative z-10">
+      <SolarSystem />
       <ProfileIntroScreen />
-      <main className="max-w-2xl mx-auto px-6 py-16 sm:py-24">
+      <main className="relative z-[2] max-w-2xl mx-auto px-6 py-16 sm:py-24">
         <div className="space-y-16">
           <Header />
           <ProfileSection />

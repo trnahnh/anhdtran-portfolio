@@ -5,6 +5,7 @@ import { SplashCursor } from "@/components/SplashCursor";
 import GradientBlobs from "@/components/GradientBlobs";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import PageTransition from "@/components/PageTransition";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const inter = Inter({ subsets: ["latin"], weight: ["200", "300", "700"] });
 
@@ -46,6 +47,7 @@ export default function RootLayout({
         </ErrorBoundary>
         <GradientBlobs />
         <PageTransition>{children}</PageTransition>
+        <ScrollToTop />
       </body>
     </html>
   );

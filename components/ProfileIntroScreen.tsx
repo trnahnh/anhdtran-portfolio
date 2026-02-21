@@ -5,13 +5,13 @@ import { useState, useEffect, useRef, useCallback } from "react";
 const SEGMENTS = [
   { text: "ssh", className: "text-yellow-300" },
   { text: " ", className: "" },
-  { text: "anhdtran.com", className: "text-green-400" },
+  { text: "anhdtran.space", className: "text-green-400" },
 ];
 
 const SEGMENTS_LIGHT = [
   { text: "ssh", className: "text-amber-600" },
   { text: " ", className: "" },
-  { text: "anhdtran.com", className: "text-green-700" },
+  { text: "anhdtran.space", className: "text-green-700" },
 ];
 
 const FULL_TEXT = SEGMENTS.map((s) => s.text).join("");

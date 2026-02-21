@@ -1,6 +1,7 @@
 import Image from "next/image";
 import NowPlaying from "./NowPlaying";
 import SpotifyEmbed from "./SpotifyEmbed";
+import QuotesSection from "./QuotesSection";
 
 const photos = [
   {
@@ -54,7 +55,9 @@ export default function ProfileSection() {
         </div>
       </section>
 
-      <section className="fade-in-up fade-in-up-delay-2 space-y-6">
+      <QuotesSection />
+
+      <section className="fade-in-up fade-in-up-delay-3 space-y-6">
         <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
           Currently Playing
         </h2>
