@@ -4,6 +4,7 @@ import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
 import ProfileIntroScreen from "@/components/ProfileIntroScreen";
 import SolarSystem from "@/components/SolarSystem";
+import EnterSpaceButton from "@/components/EnterSpaceButton";
 
 export const metadata = {
   title: "Anh Tran",
@@ -20,6 +21,7 @@ export default function ProfilePage() {
           <Header />
           <ProfileSection />
           <ContactSection />
+          <EnterSpaceButton />
           <Footer />
         </div>
       </main>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SplashCursor } from "@/components/SplashCursor";
+import ConditionalSplashCursor from "@/components/ConditionalSplashCursor";
 import GradientBlobs from "@/components/GradientBlobs";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import PageTransition from "@/components/PageTransition";
@@ -43,7 +43,7 @@ export default function RootLayout({
         className={`${inter.className} antialiased`}
       >
         <ErrorBoundary>
-          <SplashCursor />
+          <ConditionalSplashCursor />
         </ErrorBoundary>
         <GradientBlobs />
         <PageTransition>{children}</PageTransition>
