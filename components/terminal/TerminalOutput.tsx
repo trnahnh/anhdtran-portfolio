@@ -21,8 +21,8 @@ const TerminalOutput = forwardRef<HTMLDivElement, TerminalOutputProps>(
               </span>
             ) : line.columns ? (
               <div className="flex font-mono text-xs sm:text-sm">
-                <span style={{ display: "inline-block", width: "120px", flexShrink: 0 }}>{line.columns[0]}</span>
-                <span>{line.columns[1]}</span>
+                <span className="shrink-0 w-20 sm:w-28 inline-block">{line.columns[0]}</span>
+                <span className="min-w-0 break-words">{line.columns[1]}</span>
               </div>
             ) : (
               <pre className="whitespace-pre-wrap font-mono text-xs sm:text-sm">{line.text}</pre>
