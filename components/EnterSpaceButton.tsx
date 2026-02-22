@@ -15,7 +15,7 @@ export default function EnterSpaceButton() {
 
     check();
 
-    const observer = new MutationObserver(check);
+    const observer = new MutationObserver(() => requestAnimationFrame(check));
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],

@@ -15,15 +15,8 @@ export default function ContactSection() {
 
     checkTheme();
 
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === "class") {
-          checkTheme();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, { attributes: true });
+    const observer = new MutationObserver(() => requestAnimationFrame(checkTheme));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
     return () => observer.disconnect();
   }, []);

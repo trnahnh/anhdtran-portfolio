@@ -99,7 +99,7 @@ export default function SolarSystem() {
     window.addEventListener("resize", updateScale, { passive: true });
 
     // Watch for theme class changes on <html>
-    const observer = new MutationObserver(updateTheme);
+    const observer = new MutationObserver(() => requestAnimationFrame(updateTheme));
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
