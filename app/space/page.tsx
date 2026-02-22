@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import * as THREE from "three";
+import SpaceIntroScreen from "@/components/SpaceIntroScreen";
 
 // ── Planet data — all 8 ──────────────────────────────────────────────────────
 // axialTilt: radians (realistic)  spinRate: multiplier vs Earth baseline
@@ -399,6 +400,41 @@ export default function SpacePage() {
     }
   }, [router]);
 
+  // ── Space background audio ─────────────────────────────────────────────────
+  useEffect(() => {
+    const audio = new Audio("/sfx/space-background.mp3");
+    audio.loop = true;
+
+    const unlock = () => {
+      document.removeEventListener("click", unlock);
+      document.removeEventListener("keydown", unlock);
+      document.removeEventListener("touchstart", unlock);
+      document.removeEventListener("mousemove", unlock);
+      audio.play().catch(() => {});
+    };
+
+    const removeUnlock = () => {
+      document.removeEventListener("click", unlock);
+      document.removeEventListener("keydown", unlock);
+      document.removeEventListener("touchstart", unlock);
+      document.removeEventListener("mousemove", unlock);
+    };
+
+    audio.play().catch((err: unknown) => {
+      if (!(err instanceof DOMException && err.name === "NotAllowedError")) return;
+      document.addEventListener("click", unlock);
+      document.addEventListener("keydown", unlock);
+      document.addEventListener("touchstart", unlock);
+      document.addEventListener("mousemove", unlock);
+    });
+
+    return () => {
+      removeUnlock();
+      audio.pause();
+      audio.src = "";
+    };
+  }, []);
+
   // ── Three.js scene ─────────────────────────────────────────────────────────
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -536,7 +572,7 @@ export default function SpacePage() {
             emissiveIntensity: 0.5,
             metalness: p.metalness,
             roughness: p.roughness,
-            map: surfaceTexture ?? undefined,
+            ...(surfaceTexture ? { map: surfaceTexture } : {}),
           })
         : new THREE.MeshPhysicalMaterial({
             color: matColor,
@@ -551,7 +587,7 @@ export default function SpacePage() {
             clearcoatRoughness: 0.25,
             transparent: !surfaceTexture,
             opacity: surfaceTexture ? 1 : 0.97,
-            map: surfaceTexture ?? undefined,
+            ...(surfaceTexture ? { map: surfaceTexture } : {}),
           });
       const planetMesh = new THREE.Mesh(geo, mat);
 
@@ -684,7 +720,7 @@ export default function SpacePage() {
 
     // ── Animation loop ─────────────────────────────────────────────────────
     let animId: number;
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
 
     // Entry animation constants — mobile starts closer so the scene is immediately visible
     const ENTRY_DURATION = isMobile ? 2.5 : 3.8;
@@ -694,7 +730,8 @@ export default function SpacePage() {
 
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      const elapsed = clock.getElapsedTime();
+      timer.update();
+      const elapsed = timer.getElapsed();
 
       // ── Camera ────────────────────────────────────────────────────────
       if (entryActive) {
@@ -966,6 +1003,8 @@ export default function SpacePage() {
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#00000a]">
+      <SpaceIntroScreen />
+
       {/* Three.js canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 

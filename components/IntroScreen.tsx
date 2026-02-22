@@ -45,7 +45,10 @@ export default function IntroScreen() {
   const [charCount, setCharCount] = useState(0);
   const [fading, setFading] = useState(false);
   const [isDark, setIsDark] = useState(true);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fadeRef   = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const hideRef   = useRef<ReturnType<typeof setTimeout>  | null>(null);
+  const audioRef  = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("theme");
@@ -53,16 +56,51 @@ export default function IntroScreen() {
     setMounted(true);
   }, []);
 
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+  }, []);
+
   const skip = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    stopAudio();
     setFading(true);
     setTimeout(() => setShow(false), 500);
-  }, []);
+  }, [stopAudio]);
 
   useEffect(() => {
+    const audio = new Audio("/sfx/keyboard-typing.mp3");
+    audioRef.current = audio;
+
+    const unlock = () => {
+      document.removeEventListener("click", unlock);
+      document.removeEventListener("keydown", unlock);
+      document.removeEventListener("touchstart", unlock);
+      document.removeEventListener("mousemove", unlock);
+      if (audioRef.current) audioRef.current.play().catch(() => {});
+    };
+
+    const removeUnlock = () => {
+      document.removeEventListener("click", unlock);
+      document.removeEventListener("keydown", unlock);
+      document.removeEventListener("touchstart", unlock);
+      document.removeEventListener("mousemove", unlock);
+    };
+
+    audio.play().catch((err: unknown) => {
+      if (!(err instanceof DOMException && err.name === "NotAllowedError")) return;
+      document.addEventListener("click", unlock);
+      document.addEventListener("keydown", unlock);
+      document.addEventListener("touchstart", unlock);
+      document.addEventListener("mousemove", unlock);
+    });
+
     let index = 0;
     timerRef.current = setInterval(() => {
       index++;
@@ -70,15 +108,20 @@ export default function IntroScreen() {
       if (index === FULL_TEXT.length) {
         clearInterval(timerRef.current!);
         timerRef.current = null;
-        setTimeout(() => setFading(true), 500);
-        setTimeout(() => setShow(false), 1000);
+        stopAudio();
+        fadeRef.current = setTimeout(() => setFading(true), 500);
+        hideRef.current = setTimeout(() => setShow(false), 1000);
       }
     }, 67);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (fadeRef.current)  clearTimeout(fadeRef.current);
+      if (hideRef.current)  clearTimeout(hideRef.current);
+      removeUnlock();
+      stopAudio();
     };
-  }, []);
+  }, [stopAudio]);
 
   if (!mounted || !show) return null;
 

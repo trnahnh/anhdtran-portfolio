@@ -30,14 +30,18 @@ export default function ProfileIntroScreen() {
   const [charCount, setCharCount] = useState(0);
   const [fading, setFading] = useState(false);
 
-  const timerRef       = useRef<ReturnType<typeof setInterval> | null>(null);
-  const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerRef        = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fadeTimeoutRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimeoutRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioRef        = useRef<HTMLAudioElement | null>(null);
+  const removeUnlockRef = useRef<(() => void) | null>(null);
 
   const clearAll = useCallback(() => {
-    if (timerRef.current)       { clearInterval(timerRef.current);       timerRef.current = null; }
-    if (fadeTimeoutRef.current) { clearTimeout(fadeTimeoutRef.current);  fadeTimeoutRef.current = null; }
-    if (hideTimeoutRef.current) { clearTimeout(hideTimeoutRef.current);  hideTimeoutRef.current = null; }
+    if (timerRef.current)        { clearInterval(timerRef.current);        timerRef.current = null; }
+    if (fadeTimeoutRef.current)  { clearTimeout(fadeTimeoutRef.current);   fadeTimeoutRef.current = null; }
+    if (hideTimeoutRef.current)  { clearTimeout(hideTimeoutRef.current);   hideTimeoutRef.current = null; }
+    if (audioRef.current)        { audioRef.current.pause(); audioRef.current.src = ""; audioRef.current = null; }
+    if (removeUnlockRef.current) { removeUnlockRef.current();              removeUnlockRef.current = null; }
   }, []);
 
   const startIntro = useCallback(() => {
@@ -46,6 +50,32 @@ export default function ProfileIntroScreen() {
     setFading(false);
     setShow(true);
 
+    const audio = new Audio("/sfx/keyboard-typing.mp3");
+    audioRef.current = audio;
+
+    const unlock = () => {
+      document.removeEventListener("click", unlock);
+      document.removeEventListener("keydown", unlock);
+      document.removeEventListener("touchstart", unlock);
+      document.removeEventListener("mousemove", unlock);
+      removeUnlockRef.current = null;
+      if (audioRef.current) audioRef.current.play().catch(() => {});
+    };
+
+    audio.play().catch((err: unknown) => {
+      if (!(err instanceof DOMException && err.name === "NotAllowedError")) return;
+      document.addEventListener("click", unlock);
+      document.addEventListener("keydown", unlock);
+      document.addEventListener("touchstart", unlock);
+      document.addEventListener("mousemove", unlock);
+      removeUnlockRef.current = () => {
+        document.removeEventListener("click", unlock);
+        document.removeEventListener("keydown", unlock);
+        document.removeEventListener("touchstart", unlock);
+        document.removeEventListener("mousemove", unlock);
+      };
+    });
+
     let index = 0;
     timerRef.current = setInterval(() => {
       index++;
@@ -53,6 +83,7 @@ export default function ProfileIntroScreen() {
       if (index === FULL_TEXT.length) {
         clearInterval(timerRef.current!);
         timerRef.current = null;
+        if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; audioRef.current = null; }
         fadeTimeoutRef.current = setTimeout(() => setFading(true), 500);
         hideTimeoutRef.current = setTimeout(() => setShow(false), 1000);
       }
