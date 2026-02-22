@@ -19,6 +19,11 @@ const TerminalOutput = forwardRef<HTMLDivElement, TerminalOutputProps>(
                 <span className="sm:hidden">~$ </span>
                 <span>{line.text}</span>
               </span>
+            ) : line.columns ? (
+              <div className="flex font-mono text-xs sm:text-sm">
+                <span style={{ display: "inline-block", width: "120px", flexShrink: 0 }}>{line.columns[0]}</span>
+                <span>{line.columns[1]}</span>
+              </div>
             ) : (
               <pre className="whitespace-pre-wrap font-mono text-xs sm:text-sm">{line.text}</pre>
             )}

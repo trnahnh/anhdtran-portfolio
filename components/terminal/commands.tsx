@@ -7,6 +7,7 @@ export type OutputLineType = "command" | "response" | "error" | "system" | "acce
 export interface OutputLine {
   type: OutputLineType;
   text: string;
+  columns?: [string, string];
 }
 
 const DOB = new Date(2006, 4, 11);
@@ -29,13 +30,12 @@ const COMMANDS: Record<string, CommandDef> = {
     description: "List all available commands",
     execute: () => {
       const entries = Object.entries(COMMANDS);
-      const maxLen = Math.max(...entries.map(([name]) => name.length));
-      const pad = maxLen + 3;
       const lines: OutputLine[] = [{ type: "accent", text: "" }];
       for (const [name, cmd] of entries) {
         lines.push({
           type: "response",
-          text: `${name.padEnd(pad)}${cmd.description}`,
+          text: "",
+          columns: [name, cmd.description],
         });
       }
       lines.push({ type: "accent", text: "" });
@@ -106,7 +106,7 @@ const COMMANDS: Record<string, CommandDef> = {
     execute: () => {
       const lines: OutputLine[] = [{ type: "accent", text: "" }];
       contacts.forEach((c) => {
-        lines.push({ type: "response", text: `${c.label.padEnd(12)} ${c.value}` });
+        lines.push({ type: "response", text: "", columns: [c.label, c.value] });
       });
       lines.push({ type: "accent", text: "" });
       return lines;
