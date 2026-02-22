@@ -9,9 +9,7 @@ import type { OutputLine } from "./commands";
 export function useTerminal() {
   const router = useRouter();
 
-  const [history, setHistory] = useState<OutputLine[]>(() =>
-    WELCOME_LINES.map((l) => ({ type: l.type, text: l.text }))
-  );
+  const [history, setHistory] = useState<OutputLine[]>(() => [...WELCOME_LINES]);
   const [inputValue, setInputValue] = useState("");
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -44,6 +42,7 @@ export function useTerminal() {
       setInputValue("");
       setCommandHistory((prev) => [...prev, trimmed]);
       setHistoryIndex(-1);
+      scrollToBottom();
       return;
     }
 
