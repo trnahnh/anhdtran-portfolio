@@ -132,6 +132,11 @@ const COMMANDS: Record<string, CommandDef> = {
     execute: () => [],
   },
 
+  exit: {
+    description: "Exit terminal",
+    execute: () => [],
+  },
+
   theme: {
     description: "Toggle dark/light theme",
     execute: () => {

@@ -36,6 +36,12 @@ export function useTerminal() {
       return;
     }
 
+    // Special-case exit
+    if (trimmed.toLowerCase() === "exit") {
+      router.back();
+      return;
+    }
+
     // Special-case clear
     if (trimmed.toLowerCase() === "clear") {
       setHistory([]);
