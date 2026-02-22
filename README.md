@@ -8,7 +8,7 @@ live at **[anhdtrn.com](https://anhdtrn.com)**
 
 ## what's in here
 
-personal portfolio built with Next.js. nothing crazy, just a solar system, real-time hand tracking, a fluid simulation cursor, and a spotify widget. you know, the usual.
+personal portfolio built with Next.js. nothing crazy, just a solar system, real-time hand tracking, a fluid simulation cursor, sfx typa thing, and a spotify widget. you know, the usual.
 
 ---
 
