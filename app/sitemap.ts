@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 const baseUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://anhdtran-portfolio.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://anhdtrn.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
