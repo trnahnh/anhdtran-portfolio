@@ -31,19 +31,10 @@ personal portfolio built with Next.js. nothing crazy, just a solar system, real-
 
 **`/terminal`** — macOS-style interactive terminal. browse the portfolio via CLI commands (`help`, `whoami`, `about`, `projects`, `experience`, `contact`, `skills`, `theme`, `clear`). boot sequence intro with typing SFX, arrow key history, tab completion, live Cincinnati timezone clock. light/dark mode adaptive. press Esc to exit.
 
-**cursor** — fluid WebGL simulation that follows your mouse around. feels good. credit to **[Diwen Huang](https://github.com/diwenne)** for the original implementation.
+**cursor** — fluid WebGL simulation that follows your mouse around. feels good.
 
 ---
 
-## run it
+## acknowledgements
 
-```bash
-npm install
-npm run dev
-```
-
----
-
-## credits
-
-cursor fluid effect — **[Diwen Huang](https://github.com/diwenne)**
+WebGL cursor fluid effect — **[Diwen Huang](https://github.com/diwenne)**
