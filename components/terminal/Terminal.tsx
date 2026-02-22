@@ -96,6 +96,11 @@ export default function Terminal() {
           />
         </div>
       </div>
+
+      {/* Footer */}
+      <p className="mt-4 text-[10px] sm:text-xs text-black/40 dark:text-white/30 font-mono select-none transition-colors duration-300">
+        &copy; 2026 Anh Tran. All rights reserved.
+      </p>
     </div>
   );
 }
