@@ -5,6 +5,6 @@ import { SplashCursor } from "./SplashCursor";
 
 export default function ConditionalSplashCursor() {
   const pathname = usePathname();
-  if (pathname === "/space") return null;
+  if (pathname === "/space" || pathname === "/terminal") return null;
   return <SplashCursor />;
 }
