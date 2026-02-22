@@ -10,6 +10,7 @@ const BOOT_LINES = [
   { text: "Initializing network interfaces ... OK", delay: 220 },
   { text: "Loading user profile: visitor@anhdtran ... OK", delay: 280 },
   { text: "Starting terminal session ...", delay: 400 },
+  { text: "Go Bearcats!", delay: 85 },
 ];
 
 interface Props {
