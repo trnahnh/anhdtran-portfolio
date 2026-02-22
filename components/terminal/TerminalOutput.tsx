@@ -1,13 +1,13 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, memo } from "react";
 import type { OutputLine } from "./commands";
 
 interface TerminalOutputProps {
   history: OutputLine[];
 }
 
-const TerminalOutput = forwardRef<HTMLDivElement, TerminalOutputProps>(
+const TerminalOutput = memo(forwardRef<HTMLDivElement, TerminalOutputProps>(
   ({ history }, ref) => {
     return (
       <div ref={ref} className="flex-1 overflow-y-auto px-4 sm:px-5 pt-4 pb-2 scroll-smooth">
@@ -32,7 +32,7 @@ const TerminalOutput = forwardRef<HTMLDivElement, TerminalOutputProps>(
       </div>
     );
   }
-);
+));
 
 TerminalOutput.displayName = "TerminalOutput";
 

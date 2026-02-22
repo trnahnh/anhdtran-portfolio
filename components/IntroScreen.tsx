@@ -149,7 +149,7 @@ export default function IntroScreen() {
           <span className="w-3 h-3 rounded-full bg-[#28c840]" />
           <span
             className={`ml-4 text-xs font-mono ${
-              isDark ? "text-zinc-500" : "text-zinc-400"
+              isDark ? "text-zinc-400" : "text-zinc-500"
             }`}
           >
             anhdtran-portfolio.tsx

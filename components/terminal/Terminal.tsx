@@ -40,8 +40,6 @@ export default function Terminal() {
   const time = useCincinnatiTime();
   const {
     history,
-    inputValue,
-    setInputValue,
     handleSubmit,
     handleKeyDown,
     inputRef,
@@ -89,8 +87,6 @@ export default function Terminal() {
           <TerminalOutput ref={outputRef} history={history} />
           <TerminalInput
             ref={inputRef}
-            value={inputValue}
-            onChange={setInputValue}
             onSubmit={handleSubmit}
             onKeyDown={handleKeyDown}
           />
