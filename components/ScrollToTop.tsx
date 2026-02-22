@@ -6,12 +6,22 @@ import { AnimatePresence, motion } from "framer-motion";
 
 export default function ScrollToTop() {
   const [visible, setVisible] = useState(false);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    // Defer scroll listener setup to avoid blocking initial paint
+    const id = requestAnimationFrame(() => {
+      setReady(true);
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
     const onScroll = () => setVisible(window.scrollY > 300);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [ready]);
 
   return (
     <AnimatePresence>

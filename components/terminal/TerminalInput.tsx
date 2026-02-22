@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, memo, useImperativeHandle, useRef } from "react";
 
 export interface TerminalInputHandle {
   getValue: () => string;
@@ -13,7 +13,7 @@ interface TerminalInputProps {
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>, value: string) => void;
 }
 
-const TerminalInput = forwardRef<TerminalInputHandle, TerminalInputProps>(
+const TerminalInput = memo(forwardRef<TerminalInputHandle, TerminalInputProps>(
   ({ onSubmit, onKeyDown }, ref) => {
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -51,7 +51,7 @@ const TerminalInput = forwardRef<TerminalInputHandle, TerminalInputProps>(
       </div>
     );
   }
-);
+));
 
 TerminalInput.displayName = "TerminalInput";
 

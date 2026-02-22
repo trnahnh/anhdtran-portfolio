@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { useRouter } from "next/navigation";
 import { useTerminal } from "./useTerminal";
 import TerminalOutput from "./TerminalOutput";
 import TerminalInput from "./TerminalInput";
 
-function useCincinnatiTime() {
+const CincinnatiClock = memo(function CincinnatiClock() {
   const [time, setTime] = useState("");
 
   useEffect(() => {
@@ -32,12 +32,17 @@ function useCincinnatiTime() {
     return () => clearInterval(id);
   }, []);
 
-  return time;
-}
+  if (!time) return null;
+
+  return (
+    <p className="mb-3 text-black/60 dark:text-white/40 text-[10px] sm:text-[11px] tracking-widest font-mono select-none transition-colors duration-300">
+      Cincinnati, OH — {time}
+    </p>
+  );
+});
 
 export default function Terminal() {
   const router = useRouter();
-  const time = useCincinnatiTime();
   const {
     history,
     handleSubmit,
@@ -52,11 +57,7 @@ export default function Terminal() {
       onClick={() => inputRef.current?.focus()}
     >
       {/* Timezone subtitle */}
-      {time && (
-        <p className="mb-3 text-black/60 dark:text-white/40 text-[10px] sm:text-[11px] tracking-widest font-mono select-none transition-colors duration-300">
-          Cincinnati, OH — {time}
-        </p>
-      )}
+      <CincinnatiClock />
 
       {/* macOS terminal window */}
       <div className="w-full max-w-3xl h-[75vh] sm:h-[min(75vh,600px)] flex flex-col rounded-xl overflow-hidden shadow-2xl shadow-black/40 dark:shadow-black/60 border border-black/[0.08] dark:border-white/[0.08] transition-colors duration-300">
