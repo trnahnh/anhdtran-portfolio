@@ -1,14 +1,12 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { WELCOME_LINES } from "./asciiArt";
+import { WELCOME_LINES } from "./welcome";
 import { executeCommand, COMMAND_NAMES } from "./commands";
 import type { OutputLine } from "./commands";
 import type { TerminalInputHandle } from "./TerminalInput";
 
-export function useTerminal() {
-  const router = useRouter();
+export function useTerminal(onExit: () => void) {
 
   const [history, setHistory] = useState<OutputLine[]>(() => [...WELCOME_LINES]);
   const commandHistory = useRef<string[]>([]);
@@ -38,7 +36,7 @@ export function useTerminal() {
 
     // Special-case exit
     if (trimmed.toLowerCase() === "exit") {
-      router.back();
+      onExit();
       return;
     }
 
@@ -59,7 +57,7 @@ export function useTerminal() {
     historyIndex.current = -1;
     if (inputRef.current) inputRef.current.setValue("");
     scrollToBottom();
-  }, [scrollToBottom, router]);
+  }, [scrollToBottom, onExit]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>, value: string) => {
@@ -91,10 +89,10 @@ export function useTerminal() {
           if (inputRef.current) inputRef.current.setValue(matches[0]);
         }
       } else if (e.key === "Escape") {
-        router.back();
+        onExit();
       }
     },
-    [router]
+    [onExit]
   );
 
   return {

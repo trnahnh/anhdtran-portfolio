@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, memo } from "react";
-import { useRouter } from "next/navigation";
 import { useTerminal } from "./useTerminal";
 import TerminalOutput from "./TerminalOutput";
 import TerminalInput from "./TerminalInput";
@@ -41,15 +40,18 @@ const CincinnatiClock = memo(function CincinnatiClock() {
   );
 });
 
-export default function Terminal() {
-  const router = useRouter();
+interface TerminalProps {
+  onExit: () => void;
+}
+
+export default function Terminal({ onExit }: TerminalProps) {
   const {
     history,
     handleSubmit,
     handleKeyDown,
     inputRef,
     outputRef,
-  } = useTerminal();
+  } = useTerminal(onExit);
 
   return (
     <div
@@ -66,7 +68,7 @@ export default function Terminal() {
           {/* Traffic lights */}
           <div className="flex items-center gap-2">
             <button
-              onClick={(e) => { e.stopPropagation(); router.back(); }}
+              onClick={(e) => { e.stopPropagation(); onExit(); }}
               className="group w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-110 transition-all cursor-pointer flex items-center justify-center"
               aria-label="Close"
             >
