@@ -27,8 +27,11 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const removeUnlockRef = useRef<(() => void) | null>(null);
+  const finishedRef = useRef(false);
 
   const finish = useCallback(() => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
     timersRef.current.forEach(clearTimeout);
     timersRef.current = [];
     if (removeUnlockRef.current) {
@@ -41,10 +44,11 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
       audioRef.current = null;
     }
     setFading(true);
-    setTimeout(() => {
+    const t = setTimeout(() => {
       setShow(false);
       onComplete();
     }, 500);
+    timersRef.current.push(t);
   }, [onComplete]);
 
   useEffect(() => {
@@ -86,18 +90,7 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
       timersRef.current.push(t);
     });
 
-    const finishTimer = setTimeout(() => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-        audioRef.current = null;
-      }
-      setFading(true);
-      setTimeout(() => {
-        setShow(false);
-        onComplete();
-      }, 500);
-    }, elapsed + 600);
+    const finishTimer = setTimeout(finish, elapsed + 600);
     timersRef.current.push(finishTimer);
 
     return () => {
@@ -112,7 +105,7 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
         audioRef.current = null;
       }
     };
-  }, [onComplete]);
+  }, [onComplete, finish]);
 
   if (!mounted || !show) return null;
 
@@ -126,7 +119,7 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
       <div className="flex-1 flex flex-col justify-center px-6 sm:px-12 max-w-2xl mx-auto w-full">
         <div className="font-mono text-xs sm:text-sm space-y-1.5">
           {BOOT_LINES.slice(0, visibleLines).map((line, i) => (
-            <div key={i} className="text-gray-900 dark:text-white animate-fade-in">
+            <div key={i} className="text-gray-900 dark:text-white animate-in fade-in duration-300">
               <span className="text-black/30 dark:text-white/30 mr-2">[{String(i).padStart(2, "0")}]</span>
               {line.text}
             </div>

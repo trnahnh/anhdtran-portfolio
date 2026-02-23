@@ -32,7 +32,6 @@ export default function Header() {
             {pathname !== "/" && <UnderlineLink href="/">Home</UnderlineLink>}
             {pathname !== "/projects" && <UnderlineLink href="/projects">Projects</UnderlineLink>}
             {pathname !== "/profile" && <UnderlineLink href="/profile">Profile</UnderlineLink>}
-            {pathname !== "/terminal" && <UnderlineLink href="/terminal">Terminal</UnderlineLink>}
             <UnderlineLink href="/resume/Resume_Anh_Tran.pdf" external>
               Resume
             </UnderlineLink>
