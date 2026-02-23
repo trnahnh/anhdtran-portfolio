@@ -9,7 +9,8 @@ export default function TerminalShortcut() {
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.ctrlKey && e.key === "`") {
+      const modifier = e.metaKey || e.ctrlKey;
+      if (modifier && e.key === "`") {
         e.preventDefault();
         if (pathname !== "/terminal") {
           router.push("/terminal");
