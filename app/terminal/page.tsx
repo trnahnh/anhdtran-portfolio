@@ -14,11 +14,9 @@ export default function TerminalPage() {
 
   // Track whether we were navigated to (vs direct URL entry)
   useEffect(() => {
-    // If referrer is same origin, we have internal history to go back to
-    hasHistoryRef.current =
-      typeof document !== "undefined" &&
-      document.referrer !== "" &&
-      new URL(document.referrer).origin === window.location.origin;
+    // history.length > 1 means there's a previous entry to go back to
+    // (works with both client-side navigation and browser history)
+    hasHistoryRef.current = window.history.length > 1;
   }, []);
 
   const handleExit = useCallback(() => {
