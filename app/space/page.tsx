@@ -1022,7 +1022,7 @@ export default function SpacePage() {
 
         <button
           onClick={() => router.push("/profile")}
-          className="pointer-events-auto group flex items-center gap-2 px-4 py-2 text-xs tracking-widest uppercase text-white/40 border border-white/10 rounded-full bg-white/[0.04] hover:text-white hover:border-white/25 hover:bg-white/[0.08] transition-all duration-300 cursor-pointer"
+          className="pointer-events-auto group flex items-center gap-2 px-4 py-2 text-xs tracking-widest uppercase text-white/40 border border-white/10 rounded-full bg-white/4 hover:text-white hover:border-white/25 hover:bg-white/8 transition-all duration-300 cursor-pointer"
         >
           <span className="text-base leading-none">←</span>
           Exit
