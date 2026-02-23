@@ -16,7 +16,7 @@ export default function ProfilePage() {
     <div className="min-h-screen relative z-10">
       <SolarSystem />
       <ProfileIntroScreen />
-      <main className="relative z-[2] max-w-2xl mx-auto px-6 py-16 sm:py-24">
+      <main className="relative z-2 max-w-2xl mx-auto px-6 py-16 sm:py-24">
         <div className="space-y-16">
           <Header />
           <ProfileSection />
