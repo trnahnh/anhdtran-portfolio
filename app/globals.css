@@ -354,6 +354,32 @@ html.theme-transitioning * {
   }
 }
 
+/* Page peel expand animation */
+@keyframes peelExpand {
+  0% {
+    clip-path: polygon(0 100%, 0 100%, 0 100%);
+  }
+  100% {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+@keyframes peelPromptFade {
+  from { opacity: 0; }
+  to   { opacity: 0.5; }
+}
+
+.peel-expand-overlay {
+  animation: peelExpand 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peel-expand-overlay {
+    animation: none;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
 /* Mobile: show default cursor */
 @media (hover: none) and (pointer: coarse) {
   body {

@@ -6,6 +6,7 @@ import GradientBlobs from "@/components/GradientBlobs";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import PageTransition from "@/components/PageTransition";
 import ScrollToTop from "@/components/ScrollToTop";
+import PagePeel from "@/components/PagePeel";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -50,6 +51,7 @@ export default function RootLayout({
         <GradientBlobs />
         <PageTransition>{children}</PageTransition>
         <ScrollToTop />
+        <PagePeel />
         <SpeedInsights />
         <Analytics />
       </body>
