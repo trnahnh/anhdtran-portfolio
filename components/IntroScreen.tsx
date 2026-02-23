@@ -45,14 +45,18 @@ export default function IntroScreen() {
   const [charCount, setCharCount] = useState(0);
   const [fading, setFading] = useState(false);
   const [isDark, setIsDark] = useState(true);
-  const timerRef  = useRef<ReturnType<typeof setInterval> | null>(null);
-  const fadeRef   = useRef<ReturnType<typeof setTimeout>  | null>(null);
-  const hideRef   = useRef<ReturnType<typeof setTimeout>  | null>(null);
-  const audioRef  = useRef<HTMLAudioElement | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fadeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("theme");
-    setIsDark(saved ? saved === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches);
+    setIsDark(
+      saved
+        ? saved === "dark"
+        : window.matchMedia("(prefers-color-scheme: dark)").matches,
+    );
     setMounted(true);
   }, []);
 
@@ -94,7 +98,8 @@ export default function IntroScreen() {
     };
 
     audio.play().catch((err: unknown) => {
-      if (!(err instanceof DOMException && err.name === "NotAllowedError")) return;
+      if (!(err instanceof DOMException && err.name === "NotAllowedError"))
+        return;
       document.addEventListener("click", unlock);
       document.addEventListener("keydown", unlock);
       document.addEventListener("touchstart", unlock);
@@ -116,8 +121,8 @@ export default function IntroScreen() {
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
-      if (fadeRef.current)  clearTimeout(fadeRef.current);
-      if (hideRef.current)  clearTimeout(hideRef.current);
+      if (fadeRef.current) clearTimeout(fadeRef.current);
+      if (hideRef.current) clearTimeout(hideRef.current);
       removeUnlock();
       stopAudio();
     };

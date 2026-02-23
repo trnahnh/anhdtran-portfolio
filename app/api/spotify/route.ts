@@ -6,7 +6,7 @@ const NOW_PLAYING_ENDPOINT =
 
 async function getAccessToken() {
   const credentials = Buffer.from(
-    `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`
+    `${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`,
   ).toString("base64");
 
   const res = await fetch(TOKEN_ENDPOINT, {

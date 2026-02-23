@@ -42,9 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body
-        className={`${inter.className} antialiased`}
-      >
+      <body className={`${inter.className} antialiased`}>
         <ErrorBoundary>
           <ConditionalSplashCursor />
         </ErrorBoundary>

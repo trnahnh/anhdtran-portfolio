@@ -30,18 +30,34 @@ export default function ProfileIntroScreen() {
   const [charCount, setCharCount] = useState(0);
   const [fading, setFading] = useState(false);
 
-  const timerRef        = useRef<ReturnType<typeof setInterval> | null>(null);
-  const fadeTimeoutRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hideTimeoutRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const audioRef        = useRef<HTMLAudioElement | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const removeUnlockRef = useRef<(() => void) | null>(null);
 
   const clearAll = useCallback(() => {
-    if (timerRef.current)        { clearInterval(timerRef.current);        timerRef.current = null; }
-    if (fadeTimeoutRef.current)  { clearTimeout(fadeTimeoutRef.current);   fadeTimeoutRef.current = null; }
-    if (hideTimeoutRef.current)  { clearTimeout(hideTimeoutRef.current);   hideTimeoutRef.current = null; }
-    if (audioRef.current)        { audioRef.current.pause(); audioRef.current.src = ""; audioRef.current = null; }
-    if (removeUnlockRef.current) { removeUnlockRef.current();              removeUnlockRef.current = null; }
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (fadeTimeoutRef.current) {
+      clearTimeout(fadeTimeoutRef.current);
+      fadeTimeoutRef.current = null;
+    }
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
+    if (removeUnlockRef.current) {
+      removeUnlockRef.current();
+      removeUnlockRef.current = null;
+    }
   }, []);
 
   const startIntro = useCallback(() => {
@@ -63,7 +79,8 @@ export default function ProfileIntroScreen() {
     };
 
     audio.play().catch((err: unknown) => {
-      if (!(err instanceof DOMException && err.name === "NotAllowedError")) return;
+      if (!(err instanceof DOMException && err.name === "NotAllowedError"))
+        return;
       document.addEventListener("click", unlock);
       document.addEventListener("keydown", unlock);
       document.addEventListener("touchstart", unlock);
@@ -83,7 +100,11 @@ export default function ProfileIntroScreen() {
       if (index === FULL_TEXT.length) {
         clearInterval(timerRef.current!);
         timerRef.current = null;
-        if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; audioRef.current = null; }
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.src = "";
+          audioRef.current = null;
+        }
         fadeTimeoutRef.current = setTimeout(() => setFading(true), 500);
         hideTimeoutRef.current = setTimeout(() => setShow(false), 1000);
       }
@@ -103,9 +124,12 @@ export default function ProfileIntroScreen() {
 
     // Initial show: first visit or hard reload, dark mode only
     if (isDarkNow()) {
-      const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+      const navEntry = performance.getEntriesByType("navigation")[0] as
+        | PerformanceNavigationTiming
+        | undefined;
       const isReload = navEntry?.type === "reload";
-      const hasSeenIntro = sessionStorage.getItem("profile-intro-seen") === "true";
+      const hasSeenIntro =
+        sessionStorage.getItem("profile-intro-seen") === "true";
 
       if (!hasSeenIntro || isReload) {
         sessionStorage.setItem("profile-intro-seen", "true");

@@ -14,7 +14,18 @@ export const projects: Project[] = [
     description:
       "Agentic AI Git companion that orchestrates the full workflow in one command.",
     link: "https://inyeon-upstream.vercel.app",
-    techStack: ["FastAPI", "Pydantic", "LangChain", "LangGraph", "Ollama", "ChromaDB", "Gemini Embeddings", "scikit-learn", "NumPy", "Docker"],
+    techStack: [
+      "FastAPI",
+      "Pydantic",
+      "LangChain",
+      "LangGraph",
+      "Ollama",
+      "ChromaDB",
+      "Gemini Embeddings",
+      "scikit-learn",
+      "NumPy",
+      "Docker",
+    ],
     status: "current",
   },
   {
@@ -23,7 +34,14 @@ export const projects: Project[] = [
     description:
       "Pronounced ànyǔ (ahn-yoo). Simple S3 file storage for sharing files and env configs between machines.",
     link: "https://github.com/suka712/renga-anyu-s3",
-    techStack: ["AWS S3", "Bun", "Hono", "TypeScript", "PostgreSQL", "GitHub Actions CI/CD"],
+    techStack: [
+      "AWS S3",
+      "Bun",
+      "Hono",
+      "TypeScript",
+      "PostgreSQL",
+      "GitHub Actions CI/CD",
+    ],
     status: "current",
   },
   {
@@ -31,7 +49,16 @@ export const projects: Project[] = [
     description:
       "AI-powered web application that helps users diagnose and fix broken household items.",
     link: "https://github.com/jamesvo2103/Fix-Buddy",
-    techStack: ["LangChain", "Youtube Data API", "Gemini API", "MongoDB", "Express.js", "React", "Tailwind CSS", "Node.js"],
+    techStack: [
+      "LangChain",
+      "Youtube Data API",
+      "Gemini API",
+      "MongoDB",
+      "Express.js",
+      "React",
+      "Tailwind CSS",
+      "Node.js",
+    ],
     status: "past",
   },
   {
@@ -39,7 +66,15 @@ export const projects: Project[] = [
     description:
       "AI-powered full-stack resume builder optimizing content for ATS (Applicant Tracking System) with OpenAI integration.",
     link: "https://github.com/trnahnh/Resume-Hippocrates",
-    techStack: ["Gemini API", "OpenAI", "ImageKit", "MongoDB", "Express.js", "React", "Node.js"],
+    techStack: [
+      "Gemini API",
+      "OpenAI",
+      "ImageKit",
+      "MongoDB",
+      "Express.js",
+      "React",
+      "Node.js",
+    ],
     status: "past",
   },
   {

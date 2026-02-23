@@ -15,7 +15,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   return (
     <div className="text-muted-foreground">
       <div className="flex items-start gap-2">
-        <span className="mt-0.5" aria-hidden="true">&#8627;</span>
+        <span className="mt-0.5" aria-hidden="true">
+          &#8627;
+        </span>
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <UnderlineLink
@@ -32,7 +34,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="p-2 rounded-md hover:bg-muted transition-colors interactive"
-                aria-label={isExpanded ? "Collapse tech stack" : "Expand tech stack"}
+                aria-label={
+                  isExpanded ? "Collapse tech stack" : "Expand tech stack"
+                }
                 aria-expanded={isExpanded}
               >
                 <ChevronDown

@@ -98,7 +98,10 @@ export default function PagePeel() {
         lineRef.current.setAttribute("y1", String(boxSize));
         lineRef.current.setAttribute("x2", String(0));
         lineRef.current.setAttribute("y2", String(boxSize - s));
-        lineRef.current.setAttribute("stroke-width", String(1 + progress * 0.5));
+        lineRef.current.setAttribute(
+          "stroke-width",
+          String(1 + progress * 0.5),
+        );
       }
       if (promptRef.current) {
         promptRef.current.style.fontSize = `${Math.max(9, s * 0.18)}px`;
@@ -113,7 +116,7 @@ export default function PagePeel() {
         hitRef.current.style.height = `${hit}px`;
       }
     },
-    [triggerThreshold, boxSize]
+    [triggerThreshold, boxSize],
   );
 
   const triggerExpand = useCallback(() => {
@@ -140,7 +143,7 @@ export default function PagePeel() {
 
       if (hitRef.current) hitRef.current.style.cursor = "grabbing";
     },
-    [expanding]
+    [expanding],
   );
 
   const handlePointerMove = useCallback(
@@ -159,7 +162,14 @@ export default function PagePeel() {
         if (dist >= triggerThreshold) triggerExpand();
       });
     },
-    [expanding, triggerExpand, triggerThreshold, idleSize, maxDrag, applyPeelSize]
+    [
+      expanding,
+      triggerExpand,
+      triggerThreshold,
+      idleSize,
+      maxDrag,
+      applyPeelSize,
+    ],
   );
 
   const handlePointerUp = useCallback(() => {
@@ -173,17 +183,24 @@ export default function PagePeel() {
       const dur = "300ms";
       shadowRef.current?.style.setProperty(
         "transition",
-        `clip-path ${dur} ease-out, background ${dur} ease-out`
+        `clip-path ${dur} ease-out, background ${dur} ease-out`,
       );
       curlRef.current?.style.setProperty(
         "transition",
-        `clip-path ${dur} ease-out, filter ${dur} ease-out`
+        `clip-path ${dur} ease-out, filter ${dur} ease-out`,
       );
       lineRef.current?.style.setProperty("transition", `all ${dur} ease-out`);
       applyPeelSize(hovered ? idleSize + hoverExtra : idleSize);
       if (hitRef.current) hitRef.current.style.cursor = "grab";
     }
-  }, [triggerExpand, triggerThreshold, applyPeelSize, hovered, idleSize, hoverExtra]);
+  }, [
+    triggerExpand,
+    triggerThreshold,
+    applyPeelSize,
+    hovered,
+    idleSize,
+    hoverExtra,
+  ]);
 
   const handleHoverEnter = useCallback(() => {
     setHovered(true);
@@ -204,7 +221,7 @@ export default function PagePeel() {
         triggerExpand();
       }
     },
-    [triggerExpand]
+    [triggerExpand],
   );
 
   useEffect(() => {
@@ -292,7 +309,9 @@ export default function PagePeel() {
             y1={boxSize}
             x2={0}
             y2={boxSize - s}
-            stroke={isDark ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.15)"}
+            stroke={
+              isDark ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.15)"
+            }
             strokeWidth={1}
             style={{ transition: "all 300ms ease-out" }}
           />

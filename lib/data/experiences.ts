@@ -43,5 +43,7 @@ export const experiences: Experience[] = [
   },
 ];
 
-export const currentExperiences = experiences.filter((e) => e.status === "current");
+export const currentExperiences = experiences.filter(
+  (e) => e.status === "current",
+);
 export const pastExperiences = experiences.filter((e) => e.status === "past");

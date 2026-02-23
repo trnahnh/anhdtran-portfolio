@@ -36,7 +36,10 @@ export default function ProfileSection() {
 
         <div className="grid grid-cols-2 gap-3">
           {photos.map(({ src, alt, caption }) => (
-            <div key={src} className="relative group rounded-xl overflow-hidden">
+            <div
+              key={src}
+              className="relative group rounded-xl overflow-hidden"
+            >
               <Image
                 src={src}
                 alt={alt}

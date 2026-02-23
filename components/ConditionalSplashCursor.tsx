@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const SplashCursor = dynamic(
   () => import("./SplashCursor").then((mod) => mod.SplashCursor),
-  { ssr: false }
+  { ssr: false },
 );
 
 export default function ConditionalSplashCursor() {

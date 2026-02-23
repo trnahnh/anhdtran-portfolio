@@ -66,7 +66,8 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
     };
 
     audio.play().catch((err: unknown) => {
-      if (!(err instanceof DOMException && err.name === "NotAllowedError")) return;
+      if (!(err instanceof DOMException && err.name === "NotAllowedError"))
+        return;
       document.addEventListener("click", unlock);
       document.addEventListener("keydown", unlock);
       document.addEventListener("touchstart", unlock);
@@ -118,8 +119,13 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
       <div className="flex-1 flex flex-col justify-center px-6 sm:px-12 max-w-2xl mx-auto w-full">
         <div className="font-mono text-xs sm:text-sm space-y-1.5">
           {BOOT_LINES.slice(0, visibleLines).map((line, i) => (
-            <div key={i} className="text-gray-900 dark:text-white animate-in fade-in duration-300">
-              <span className="text-black/30 dark:text-white/30 mr-2">[{String(i).padStart(2, "0")}]</span>
+            <div
+              key={i}
+              className="text-gray-900 dark:text-white animate-in fade-in duration-300"
+            >
+              <span className="text-black/30 dark:text-white/30 mr-2">
+                [{String(i).padStart(2, "0")}]
+              </span>
               {line.text}
             </div>
           ))}

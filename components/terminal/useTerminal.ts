@@ -7,8 +7,9 @@ import type { OutputLine } from "./commands";
 import type { TerminalInputHandle } from "./TerminalInput";
 
 export function useTerminal(onExit: () => void) {
-
-  const [history, setHistory] = useState<OutputLine[]>(() => [...WELCOME_LINES]);
+  const [history, setHistory] = useState<OutputLine[]>(() => [
+    ...WELCOME_LINES,
+  ]);
   const commandHistory = useRef<string[]>([]);
   const historyIndex = useRef(-1);
 
@@ -23,41 +24,44 @@ export function useTerminal(onExit: () => void) {
     });
   }, []);
 
-  const handleSubmit = useCallback((value: string) => {
-    const trimmed = value.trim();
+  const handleSubmit = useCallback(
+    (value: string) => {
+      const trimmed = value.trim();
 
-    const commandLine: OutputLine = { type: "command", text: trimmed };
-    if (!trimmed) {
-      setHistory((prev) => [...prev, commandLine]);
-      if (inputRef.current) inputRef.current.setValue("");
-      scrollToBottom();
-      return;
-    }
+      const commandLine: OutputLine = { type: "command", text: trimmed };
+      if (!trimmed) {
+        setHistory((prev) => [...prev, commandLine]);
+        if (inputRef.current) inputRef.current.setValue("");
+        scrollToBottom();
+        return;
+      }
 
-    // Special-case exit
-    if (trimmed.toLowerCase() === "exit") {
-      onExit();
-      return;
-    }
+      // Special-case exit
+      if (trimmed.toLowerCase() === "exit") {
+        onExit();
+        return;
+      }
 
-    // Special-case clear
-    if (trimmed.toLowerCase() === "clear") {
-      setHistory([]);
-      if (inputRef.current) inputRef.current.setValue("");
+      // Special-case clear
+      if (trimmed.toLowerCase() === "clear") {
+        setHistory([]);
+        if (inputRef.current) inputRef.current.setValue("");
+        commandHistory.current = [...commandHistory.current, trimmed];
+        historyIndex.current = -1;
+        scrollToBottom();
+        return;
+      }
+
+      const output = executeCommand(trimmed);
+
+      setHistory((prev) => [...prev, commandLine, ...output]);
       commandHistory.current = [...commandHistory.current, trimmed];
       historyIndex.current = -1;
+      if (inputRef.current) inputRef.current.setValue("");
       scrollToBottom();
-      return;
-    }
-
-    const output = executeCommand(trimmed);
-
-    setHistory((prev) => [...prev, commandLine, ...output]);
-    commandHistory.current = [...commandHistory.current, trimmed];
-    historyIndex.current = -1;
-    if (inputRef.current) inputRef.current.setValue("");
-    scrollToBottom();
-  }, [scrollToBottom, onExit]);
+    },
+    [scrollToBottom, onExit],
+  );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>, value: string) => {
@@ -65,7 +69,10 @@ export function useTerminal(onExit: () => void) {
         e.preventDefault();
         const cmds = commandHistory.current;
         if (cmds.length === 0) return;
-        const newIndex = historyIndex.current === -1 ? cmds.length - 1 : Math.max(0, historyIndex.current - 1);
+        const newIndex =
+          historyIndex.current === -1
+            ? cmds.length - 1
+            : Math.max(0, historyIndex.current - 1);
         historyIndex.current = newIndex;
         if (inputRef.current) inputRef.current.setValue(cmds[newIndex]);
       } else if (e.key === "ArrowDown") {
@@ -84,7 +91,9 @@ export function useTerminal(onExit: () => void) {
         e.preventDefault();
         const trimmed = value.trim();
         if (!trimmed) return;
-        const matches = COMMAND_NAMES.filter((c) => c.startsWith(trimmed.toLowerCase()));
+        const matches = COMMAND_NAMES.filter((c) =>
+          c.startsWith(trimmed.toLowerCase()),
+        );
         if (matches.length === 1) {
           if (inputRef.current) inputRef.current.setValue(matches[0]);
         }
@@ -92,7 +101,7 @@ export function useTerminal(onExit: () => void) {
         onExit();
       }
     },
-    [onExit]
+    [onExit],
   );
 
   return {

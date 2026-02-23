@@ -8,25 +8,44 @@ const INTERVAL = 90; // ms per character — slightly slower for drama
 
 export default function SpaceIntroScreen() {
   const [mounted, setMounted] = useState(false);
-  const [show, setShow]       = useState(true);
-  const [fading, setFading]   = useState(false);
-  const [line1, setLine1]     = useState(0);
-  const [line2, setLine2]     = useState<number | null>(null);
+  const [show, setShow] = useState(true);
+  const [fading, setFading] = useState(false);
+  const [line1, setLine1] = useState(0);
+  const [line2, setLine2] = useState<number | null>(null);
 
-  const timerRef        = useRef<ReturnType<typeof setInterval> | null>(null);
-  const t1Ref           = useRef<ReturnType<typeof setTimeout>  | null>(null);
-  const t2Ref           = useRef<ReturnType<typeof setTimeout>  | null>(null);
-  const t3Ref           = useRef<ReturnType<typeof setTimeout>  | null>(null);
-  const audioRef        = useRef<HTMLAudioElement | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const t1Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const t2Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const t3Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const removeUnlockRef = useRef<(() => void) | null>(null);
 
   const skip = useCallback(() => {
-    if (timerRef.current)        { clearInterval(timerRef.current);  timerRef.current = null; }
-    if (t1Ref.current)           { clearTimeout(t1Ref.current);      t1Ref.current = null; }
-    if (t2Ref.current)           { clearTimeout(t2Ref.current);      t2Ref.current = null; }
-    if (t3Ref.current)           { clearTimeout(t3Ref.current);      t3Ref.current = null; }
-    if (removeUnlockRef.current) { removeUnlockRef.current();        removeUnlockRef.current = null; }
-    if (audioRef.current)        { audioRef.current.pause(); audioRef.current.src = ""; audioRef.current = null; }
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    if (t1Ref.current) {
+      clearTimeout(t1Ref.current);
+      t1Ref.current = null;
+    }
+    if (t2Ref.current) {
+      clearTimeout(t2Ref.current);
+      t2Ref.current = null;
+    }
+    if (t3Ref.current) {
+      clearTimeout(t3Ref.current);
+      t3Ref.current = null;
+    }
+    if (removeUnlockRef.current) {
+      removeUnlockRef.current();
+      removeUnlockRef.current = null;
+    }
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = "";
+      audioRef.current = null;
+    }
     setFading(true);
     setTimeout(() => setShow(false), 500);
   }, []);
@@ -36,25 +55,26 @@ export default function SpaceIntroScreen() {
     audioRef.current = audio;
 
     const unlock = () => {
-      document.removeEventListener("click",      unlock);
-      document.removeEventListener("keydown",    unlock);
+      document.removeEventListener("click", unlock);
+      document.removeEventListener("keydown", unlock);
       document.removeEventListener("touchstart", unlock);
-      document.removeEventListener("mousemove",  unlock);
+      document.removeEventListener("mousemove", unlock);
       removeUnlockRef.current = null;
       if (audioRef.current) audioRef.current.play().catch(() => {});
     };
 
     audio.play().catch((err: unknown) => {
-      if (!(err instanceof DOMException && err.name === "NotAllowedError")) return;
-      document.addEventListener("click",      unlock);
-      document.addEventListener("keydown",    unlock);
+      if (!(err instanceof DOMException && err.name === "NotAllowedError"))
+        return;
+      document.addEventListener("click", unlock);
+      document.addEventListener("keydown", unlock);
       document.addEventListener("touchstart", unlock);
-      document.addEventListener("mousemove",  unlock);
+      document.addEventListener("mousemove", unlock);
       removeUnlockRef.current = () => {
-        document.removeEventListener("click",      unlock);
-        document.removeEventListener("keydown",    unlock);
+        document.removeEventListener("click", unlock);
+        document.removeEventListener("keydown", unlock);
         document.removeEventListener("touchstart", unlock);
-        document.removeEventListener("mousemove",  unlock);
+        document.removeEventListener("mousemove", unlock);
       };
     });
 
@@ -79,9 +99,13 @@ export default function SpaceIntroScreen() {
             if (idx2 === LINE_2.length) {
               clearInterval(timerRef.current!);
               timerRef.current = null;
-              if (audioRef.current) { audioRef.current.pause(); audioRef.current.src = ""; audioRef.current = null; }
-              t2Ref.current = setTimeout(() => setFading(true),     1200);
-              t3Ref.current = setTimeout(() => setShow(false),      1700);
+              if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.src = "";
+                audioRef.current = null;
+              }
+              t2Ref.current = setTimeout(() => setFading(true), 1200);
+              t3Ref.current = setTimeout(() => setShow(false), 1700);
             }
           }, INTERVAL);
         }, 700);
@@ -89,16 +113,25 @@ export default function SpaceIntroScreen() {
     }, INTERVAL);
 
     return () => {
-      if (timerRef.current)        clearInterval(timerRef.current);
-      if (t1Ref.current)           clearTimeout(t1Ref.current);
-      if (t2Ref.current)           clearTimeout(t2Ref.current);
-      if (t3Ref.current)           clearTimeout(t3Ref.current);
-      if (removeUnlockRef.current) { removeUnlockRef.current(); removeUnlockRef.current = null; }
-      if (audioRef.current)        { audioRef.current.pause(); audioRef.current.src = ""; audioRef.current = null; }
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (t1Ref.current) clearTimeout(t1Ref.current);
+      if (t2Ref.current) clearTimeout(t2Ref.current);
+      if (t3Ref.current) clearTimeout(t3Ref.current);
+      if (removeUnlockRef.current) {
+        removeUnlockRef.current();
+        removeUnlockRef.current = null;
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
+      }
     };
   }, []);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   if (!mounted || !show) return null;
 
@@ -126,7 +159,9 @@ export default function SpaceIntroScreen() {
             {LINE_2.slice(0, line2)}
             <span
               className={`inline-block w-[1.5px] h-3.5 sm:h-4 ml-0.5 align-middle bg-white/35 ${
-                line2 === LINE_2.length || fading ? "opacity-0" : "animate-pulse"
+                line2 === LINE_2.length || fading
+                  ? "opacity-0"
+                  : "animate-pulse"
               }`}
             />
           </p>

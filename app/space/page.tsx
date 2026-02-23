@@ -11,63 +11,117 @@ import SpaceIntroScreen from "@/components/SpaceIntroScreen";
 const PLANET_DATA = [
   {
     name: "Mercury",
-    orbitR: 9,    size: 0.38, speed: 0.8,
-    axialTilt: 0.034, spinRate: 0.017,
-    color: new THREE.Color(0x9ab0c8), emissive: new THREE.Color(0x1a2635),
-    atmoColor: new THREE.Color(0x7090b0), metalness: 0.45, roughness: 0.68,
+    orbitR: 9,
+    size: 0.38,
+    speed: 0.8,
+    axialTilt: 0.034,
+    spinRate: 0.017,
+    color: new THREE.Color(0x9ab0c8),
+    emissive: new THREE.Color(0x1a2635),
+    atmoColor: new THREE.Color(0x7090b0),
+    metalness: 0.45,
+    roughness: 0.68,
   },
   {
     name: "Venus",
-    orbitR: 14,   size: 0.72, speed: 0.5,
-    axialTilt: 3.096, spinRate: -0.004,   // retrograde spin
-    color: new THREE.Color(0xd4aa70), emissive: new THREE.Color(0x2a1800),
-    atmoColor: new THREE.Color(0xe8c060), metalness: 0.08, roughness: 0.82,
+    orbitR: 14,
+    size: 0.72,
+    speed: 0.5,
+    axialTilt: 3.096,
+    spinRate: -0.004, // retrograde spin
+    color: new THREE.Color(0xd4aa70),
+    emissive: new THREE.Color(0x2a1800),
+    atmoColor: new THREE.Color(0xe8c060),
+    metalness: 0.08,
+    roughness: 0.82,
   },
   {
     name: "Earth",
-    orbitR: 20,   size: 0.76, speed: 0.38,
-    axialTilt: 0.409, spinRate: 1.0,
-    color: new THREE.Color(0x3a7acc), emissive: new THREE.Color(0x001122),
-    atmoColor: new THREE.Color(0x55aaee), metalness: 0.12, roughness: 0.52,
+    orbitR: 20,
+    size: 0.76,
+    speed: 0.38,
+    axialTilt: 0.409,
+    spinRate: 1.0,
+    color: new THREE.Color(0x3a7acc),
+    emissive: new THREE.Color(0x001122),
+    atmoColor: new THREE.Color(0x55aaee),
+    metalness: 0.12,
+    roughness: 0.52,
   },
   {
     name: "Mars",
-    orbitR: 27,   size: 0.55, speed: 0.26,
-    axialTilt: 0.440, spinRate: 0.97,
-    color: new THREE.Color(0xcc6644), emissive: new THREE.Color(0x1a0800),
-    atmoColor: new THREE.Color(0xdd7755), metalness: 0.18, roughness: 0.75,
+    orbitR: 27,
+    size: 0.55,
+    speed: 0.26,
+    axialTilt: 0.44,
+    spinRate: 0.97,
+    color: new THREE.Color(0xcc6644),
+    emissive: new THREE.Color(0x1a0800),
+    atmoColor: new THREE.Color(0xdd7755),
+    metalness: 0.18,
+    roughness: 0.75,
   },
   {
     name: "Jupiter",
-    orbitR: 38,   size: 1.85, speed: 0.14,
-    axialTilt: 0.054, spinRate: 2.4,     // fastest spinner
-    color: new THREE.Color(0xc8a878), emissive: new THREE.Color(0x1a1000),
-    atmoColor: new THREE.Color(0xddbb88), metalness: 0.05, roughness: 0.9,
+    orbitR: 38,
+    size: 1.85,
+    speed: 0.14,
+    axialTilt: 0.054,
+    spinRate: 2.4, // fastest spinner
+    color: new THREE.Color(0xc8a878),
+    emissive: new THREE.Color(0x1a1000),
+    atmoColor: new THREE.Color(0xddbb88),
+    metalness: 0.05,
+    roughness: 0.9,
   },
   {
     name: "Saturn",
-    orbitR: 51,   size: 1.55, speed: 0.09,
-    axialTilt: 0.467, spinRate: 2.25,
-    color: new THREE.Color(0xd4c090), emissive: new THREE.Color(0x181000),
-    atmoColor: new THREE.Color(0xe8d8a0), metalness: 0.05, roughness: 0.88,
-    hasRings: true, ringColor: new THREE.Color(0xb8a070),
-    ringInner: 2.1, ringOuter: 3.8, ringTilt: 0.46,
+    orbitR: 51,
+    size: 1.55,
+    speed: 0.09,
+    axialTilt: 0.467,
+    spinRate: 2.25,
+    color: new THREE.Color(0xd4c090),
+    emissive: new THREE.Color(0x181000),
+    atmoColor: new THREE.Color(0xe8d8a0),
+    metalness: 0.05,
+    roughness: 0.88,
+    hasRings: true,
+    ringColor: new THREE.Color(0xb8a070),
+    ringInner: 2.1,
+    ringOuter: 3.8,
+    ringTilt: 0.46,
   },
   {
     name: "Uranus",
-    orbitR: 64,   size: 1.1,  speed: 0.055,
-    axialTilt: 1.706, spinRate: 1.4,     // ~98° — rolls on its side
-    color: new THREE.Color(0x7dd8e0), emissive: new THREE.Color(0x001820),
-    atmoColor: new THREE.Color(0x88eeff), metalness: 0.1, roughness: 0.6,
-    hasRings: true, ringColor: new THREE.Color(0x55aaaa),
-    ringInner: 1.5, ringOuter: 2.2, ringTilt: 1.5,
+    orbitR: 64,
+    size: 1.1,
+    speed: 0.055,
+    axialTilt: 1.706,
+    spinRate: 1.4, // ~98° — rolls on its side
+    color: new THREE.Color(0x7dd8e0),
+    emissive: new THREE.Color(0x001820),
+    atmoColor: new THREE.Color(0x88eeff),
+    metalness: 0.1,
+    roughness: 0.6,
+    hasRings: true,
+    ringColor: new THREE.Color(0x55aaaa),
+    ringInner: 1.5,
+    ringOuter: 2.2,
+    ringTilt: 1.5,
   },
   {
     name: "Neptune",
-    orbitR: 78,   size: 1.05, speed: 0.034,
-    axialTilt: 0.494, spinRate: 1.5,
-    color: new THREE.Color(0x3355cc), emissive: new THREE.Color(0x000820),
-    atmoColor: new THREE.Color(0x4466ee), metalness: 0.12, roughness: 0.58,
+    orbitR: 78,
+    size: 1.05,
+    speed: 0.034,
+    axialTilt: 0.494,
+    spinRate: 1.5,
+    color: new THREE.Color(0x3355cc),
+    emissive: new THREE.Color(0x000820),
+    atmoColor: new THREE.Color(0x4466ee),
+    metalness: 0.12,
+    roughness: 0.58,
   },
 ];
 
@@ -103,7 +157,7 @@ function buildPlanetRings(
   tilt = Math.PI / 2.5,
 ) {
   const radius = (innerR + outerR) / 2;
-  const tube   = (outerR - innerR) / 2;
+  const tube = (outerR - innerR) / 2;
   const geo = new THREE.TorusGeometry(radius, tube, 3, 80);
   const mat = new THREE.MeshBasicMaterial({
     color,
@@ -122,7 +176,9 @@ function buildOrbitRing(radius: number) {
   const segments = 128;
   for (let i = 0; i <= segments; i++) {
     const theta = (i / segments) * Math.PI * 2;
-    points.push(new THREE.Vector3(Math.cos(theta) * radius, 0, Math.sin(theta) * radius));
+    points.push(
+      new THREE.Vector3(Math.cos(theta) * radius, 0, Math.sin(theta) * radius),
+    );
   }
   const geo = new THREE.BufferGeometry().setFromPoints(points);
   const mat = new THREE.LineBasicMaterial({
@@ -134,7 +190,8 @@ function buildOrbitRing(radius: number) {
 }
 
 function buildNebula(): THREE.Mesh {
-  const W = 2048, H = 1024;
+  const W = 2048,
+    H = 1024;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
@@ -144,14 +201,24 @@ function buildNebula(): THREE.Mesh {
   ctx.clearRect(0, 0, W, H);
 
   // Each entry: [cx%, cy%, radiusX%, radiusY%, rotAngle, r, g, b, maxOpacity]
-  const blobs: [number,number,number,number,number,number,number,number,number][] = [
-    [0.18, 0.35, 0.40, 0.22,  0.4,  58,  26, 106, 0.28], // large purple cloud
-    [0.72, 0.55, 0.32, 0.18, -0.3,  10,  32,  80, 0.24], // deep blue
-    [0.50, 0.18, 0.26, 0.14,  0.8,  35,  10,  90, 0.18], // violet wisp
-    [0.88, 0.30, 0.22, 0.15,  0.2,  10,  55,  55, 0.20], // teal
-    [0.30, 0.72, 0.28, 0.17, -0.5,  70,  10,  55, 0.16], // magenta
-    [0.62, 0.78, 0.20, 0.12,  0.1,  85,  35,  10, 0.14], // warm orange (star formation)
-    [0.05, 0.60, 0.18, 0.12,  0.6,  20,  10,  70, 0.15], // indigo edge
+  const blobs: [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
+  ][] = [
+    [0.18, 0.35, 0.4, 0.22, 0.4, 58, 26, 106, 0.28], // large purple cloud
+    [0.72, 0.55, 0.32, 0.18, -0.3, 10, 32, 80, 0.24], // deep blue
+    [0.5, 0.18, 0.26, 0.14, 0.8, 35, 10, 90, 0.18], // violet wisp
+    [0.88, 0.3, 0.22, 0.15, 0.2, 10, 55, 55, 0.2], // teal
+    [0.3, 0.72, 0.28, 0.17, -0.5, 70, 10, 55, 0.16], // magenta
+    [0.62, 0.78, 0.2, 0.12, 0.1, 85, 35, 10, 0.14], // warm orange (star formation)
+    [0.05, 0.6, 0.18, 0.12, 0.6, 20, 10, 70, 0.15], // indigo edge
   ];
 
   blobs.forEach(([cx, cy, rx, ry, angle, r, g, b, maxOp]) => {
@@ -166,10 +233,13 @@ function buildNebula(): THREE.Mesh {
     ctx.scale(1, rY / rX); // squash into ellipse
 
     const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, rX);
-    grad.addColorStop(0,    `rgba(${r},${g},${b},${maxOp})`);
-    grad.addColorStop(0.40, `rgba(${r},${g},${b},${(maxOp * 0.45).toFixed(3)})`);
-    grad.addColorStop(0.75, `rgba(${r},${g},${b},${(maxOp * 0.12).toFixed(3)})`);
-    grad.addColorStop(1,    `rgba(${r},${g},${b},0)`);
+    grad.addColorStop(0, `rgba(${r},${g},${b},${maxOp})`);
+    grad.addColorStop(0.4, `rgba(${r},${g},${b},${(maxOp * 0.45).toFixed(3)})`);
+    grad.addColorStop(
+      0.75,
+      `rgba(${r},${g},${b},${(maxOp * 0.12).toFixed(3)})`,
+    );
+    grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
 
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -194,20 +264,25 @@ function buildNebula(): THREE.Mesh {
 // Shared helper: draw a soft elliptical blob on a canvas 2d context
 function ellipseBlob(
   ctx: CanvasRenderingContext2D,
-  cx: number, cy: number,   // 0-1 fractions of canvas size
-  rx: number, ry: number,   // 0-1 fractions of canvas size
+  cx: number,
+  cy: number, // 0-1 fractions of canvas size
+  rx: number,
+  ry: number, // 0-1 fractions of canvas size
   angle: number,
-  r: number, g: number, b: number,
+  r: number,
+  g: number,
+  b: number,
   alpha: number,
-  W: number, H: number,
+  W: number,
+  H: number,
 ) {
   ctx.save();
   ctx.translate(cx * W, cy * H);
   ctx.rotate(angle);
   const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
-  grad.addColorStop(0,    `rgba(${r},${g},${b},${alpha})`);
+  grad.addColorStop(0, `rgba(${r},${g},${b},${alpha})`);
   grad.addColorStop(0.65, `rgba(${r},${g},${b},${(alpha * 0.55).toFixed(3)})`);
-  grad.addColorStop(1,    `rgba(${r},${g},${b},0)`);
+  grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
   ctx.scale(rx * W, ry * H);
   ctx.fillStyle = grad;
   ctx.beginPath();
@@ -217,9 +292,11 @@ function ellipseBlob(
 }
 
 function buildJupiterTexture(): THREE.CanvasTexture {
-  const W = 512, H = 256;
+  const W = 512,
+    H = 256;
   const cv = document.createElement("canvas");
-  cv.width = W; cv.height = H;
+  cv.width = W;
+  cv.height = H;
   const ctx = cv.getContext("2d")!;
 
   // Warm tan base
@@ -228,50 +305,81 @@ function buildJupiterTexture(): THREE.CanvasTexture {
 
   // Horizontal cloud bands [y, height, r, g, b, alpha]
   const bands: [number, number, number, number, number, number][] = [
-    [0.00, 0.055, 50,  30,  12,  0.80],
-    [0.06, 0.045, 220, 165,  85, 0.55],
-    [0.11, 0.075, 100,  58,  22, 0.82],
+    [0.0, 0.055, 50, 30, 12, 0.8],
+    [0.06, 0.045, 220, 165, 85, 0.55],
+    [0.11, 0.075, 100, 58, 22, 0.82],
     [0.19, 0.045, 240, 205, 125, 0.48],
-    [0.24, 0.065, 80,  48,  18, 0.78],
-    [0.31, 0.075, 210, 155,  85, 0.52],
-    [0.39, 0.050, 58,  34,  12, 0.80],
+    [0.24, 0.065, 80, 48, 18, 0.78],
+    [0.31, 0.075, 210, 155, 85, 0.52],
+    [0.39, 0.05, 58, 34, 12, 0.8],
     [0.44, 0.085, 235, 190, 110, 0.46],
-    [0.53, 0.060, 110,  62,  24, 0.78],
-    [0.59, 0.075, 215, 158,  88, 0.52],
-    [0.67, 0.050, 55,  32,  10, 0.80],
-    [0.72, 0.080, 230, 185, 105, 0.48],
-    [0.80, 0.055, 95,  55,  20, 0.78],
-    [0.86, 0.060, 205, 155,  80, 0.52],
-    [0.92, 0.080, 50,  28,  10, 0.80],
+    [0.53, 0.06, 110, 62, 24, 0.78],
+    [0.59, 0.075, 215, 158, 88, 0.52],
+    [0.67, 0.05, 55, 32, 10, 0.8],
+    [0.72, 0.08, 230, 185, 105, 0.48],
+    [0.8, 0.055, 95, 55, 20, 0.78],
+    [0.86, 0.06, 205, 155, 80, 0.52],
+    [0.92, 0.08, 50, 28, 10, 0.8],
   ];
 
   bands.forEach(([y, h, r, g, b, a]) => {
     // Soft edge: gradient fades in/out so bands blend
     const grad = ctx.createLinearGradient(0, y * H, 0, (y + h) * H);
-    grad.addColorStop(0,   `rgba(${r},${g},${b},0)`);
+    grad.addColorStop(0, `rgba(${r},${g},${b},0)`);
     grad.addColorStop(0.2, `rgba(${r},${g},${b},${a})`);
     grad.addColorStop(0.8, `rgba(${r},${g},${b},${a})`);
-    grad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+    grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
     ctx.fillStyle = grad;
     ctx.fillRect(0, y * H - 2, W, h * H + 4);
   });
 
   // Great Red Spot — oval storm, southern hemisphere
-  const grsX = 0.55, grsY = 0.61, grsRx = 0.068, grsRy = 0.095;
+  const grsX = 0.55,
+    grsY = 0.61,
+    grsRx = 0.068,
+    grsRy = 0.095;
   // Outer glow
-  ellipseBlob(ctx, grsX, grsY, grsRx * 1.7, grsRy * 1.5, 0, 160, 40,  8,  0.35, W, H);
+  ellipseBlob(
+    ctx,
+    grsX,
+    grsY,
+    grsRx * 1.7,
+    grsRy * 1.5,
+    0,
+    160,
+    40,
+    8,
+    0.35,
+    W,
+    H,
+  );
   // Core
-  ellipseBlob(ctx, grsX, grsY, grsRx,       grsRy,       0, 195, 55, 18,  0.90, W, H);
+  ellipseBlob(ctx, grsX, grsY, grsRx, grsRy, 0, 195, 55, 18, 0.9, W, H);
   // Inner bright centre
-  ellipseBlob(ctx, grsX, grsY, grsRx * 0.4, grsRy * 0.4, 0, 215, 80, 30,  0.70, W, H);
+  ellipseBlob(
+    ctx,
+    grsX,
+    grsY,
+    grsRx * 0.4,
+    grsRy * 0.4,
+    0,
+    215,
+    80,
+    30,
+    0.7,
+    W,
+    H,
+  );
 
   return new THREE.CanvasTexture(cv);
 }
 
 function buildSaturnTexture(): THREE.CanvasTexture {
-  const W = 512, H = 256;
+  const W = 512,
+    H = 256;
   const cv = document.createElement("canvas");
-  cv.width = W; cv.height = H;
+  cv.width = W;
+  cv.height = H;
   const ctx = cv.getContext("2d")!;
 
   ctx.fillStyle = "#d8c880";
@@ -279,25 +387,25 @@ function buildSaturnTexture(): THREE.CanvasTexture {
 
   // Subtler, paler bands than Jupiter
   const bands: [number, number, number, number, number, number][] = [
-    [0.00, 0.06, 140, 110,  45, 0.38],
-    [0.08, 0.07, 170, 148,  80, 0.30],
-    [0.17, 0.08, 125,  98,  35, 0.40],
+    [0.0, 0.06, 140, 110, 45, 0.38],
+    [0.08, 0.07, 170, 148, 80, 0.3],
+    [0.17, 0.08, 125, 98, 35, 0.4],
     [0.27, 0.06, 185, 165, 100, 0.28],
-    [0.35, 0.09, 148, 118,  48, 0.38],
-    [0.46, 0.07, 175, 155,  85, 0.30],
-    [0.55, 0.08, 132, 105,  40, 0.38],
-    [0.65, 0.06, 180, 160,  95, 0.28],
-    [0.73, 0.08, 138, 110,  44, 0.36],
-    [0.83, 0.06, 165, 142,  75, 0.30],
-    [0.91, 0.09, 128, 100,  36, 0.38],
+    [0.35, 0.09, 148, 118, 48, 0.38],
+    [0.46, 0.07, 175, 155, 85, 0.3],
+    [0.55, 0.08, 132, 105, 40, 0.38],
+    [0.65, 0.06, 180, 160, 95, 0.28],
+    [0.73, 0.08, 138, 110, 44, 0.36],
+    [0.83, 0.06, 165, 142, 75, 0.3],
+    [0.91, 0.09, 128, 100, 36, 0.38],
   ];
 
   bands.forEach(([y, h, r, g, b, a]) => {
     const grad = ctx.createLinearGradient(0, y * H, 0, (y + h) * H);
-    grad.addColorStop(0,   `rgba(${r},${g},${b},0)`);
+    grad.addColorStop(0, `rgba(${r},${g},${b},0)`);
     grad.addColorStop(0.2, `rgba(${r},${g},${b},${a})`);
     grad.addColorStop(0.8, `rgba(${r},${g},${b},${a})`);
-    grad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+    grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
     ctx.fillStyle = grad;
     ctx.fillRect(0, y * H - 2, W, h * H + 4);
   });
@@ -313,9 +421,11 @@ function buildSaturnTexture(): THREE.CanvasTexture {
 }
 
 function buildEarthTexture(): THREE.CanvasTexture {
-  const W = 512, H = 256;
+  const W = 512,
+    H = 256;
   const cv = document.createElement("canvas");
-  cv.width = W; cv.height = H;
+  cv.width = W;
+  cv.height = H;
   const ctx = cv.getContext("2d")!;
 
   // Deep ocean base
@@ -328,25 +438,25 @@ function buildEarthTexture(): THREE.CanvasTexture {
 
   // Continents — approximate equirectangular positions
   // North America
-  ellipseBlob(ctx, 0.12, 0.31, 0.095, 0.17, -0.2,  55, 100,  35, 0.90, W, H);
-  ellipseBlob(ctx, 0.17, 0.21, 0.055, 0.10,  0.1,  60, 110,  40, 0.85, W, H);
-  ellipseBlob(ctx, 0.09, 0.40, 0.040, 0.08, -0.1,  65, 105,  38, 0.80, W, H);
+  ellipseBlob(ctx, 0.12, 0.31, 0.095, 0.17, -0.2, 55, 100, 35, 0.9, W, H);
+  ellipseBlob(ctx, 0.17, 0.21, 0.055, 0.1, 0.1, 60, 110, 40, 0.85, W, H);
+  ellipseBlob(ctx, 0.09, 0.4, 0.04, 0.08, -0.1, 65, 105, 38, 0.8, W, H);
   // South America
-  ellipseBlob(ctx, 0.22, 0.62, 0.052, 0.17,  0.15, 48,  92,  28, 0.90, W, H);
-  ellipseBlob(ctx, 0.24, 0.50, 0.030, 0.06,  0.0,  52, 100,  32, 0.80, W, H);
+  ellipseBlob(ctx, 0.22, 0.62, 0.052, 0.17, 0.15, 48, 92, 28, 0.9, W, H);
+  ellipseBlob(ctx, 0.24, 0.5, 0.03, 0.06, 0.0, 52, 100, 32, 0.8, W, H);
   // Europe
-  ellipseBlob(ctx, 0.49, 0.24, 0.038, 0.09,  0.1,  62, 108,  42, 0.85, W, H);
-  ellipseBlob(ctx, 0.47, 0.18, 0.020, 0.05, -0.2,  58, 102,  38, 0.78, W, H);
+  ellipseBlob(ctx, 0.49, 0.24, 0.038, 0.09, 0.1, 62, 108, 42, 0.85, W, H);
+  ellipseBlob(ctx, 0.47, 0.18, 0.02, 0.05, -0.2, 58, 102, 38, 0.78, W, H);
   // Africa
-  ellipseBlob(ctx, 0.52, 0.52, 0.068, 0.20,  0.05, 78, 108,  44, 0.92, W, H);
-  ellipseBlob(ctx, 0.50, 0.36, 0.048, 0.09, -0.1,  72,  98,  38, 0.82, W, H);
+  ellipseBlob(ctx, 0.52, 0.52, 0.068, 0.2, 0.05, 78, 108, 44, 0.92, W, H);
+  ellipseBlob(ctx, 0.5, 0.36, 0.048, 0.09, -0.1, 72, 98, 38, 0.82, W, H);
   // Asia — multiple overlapping blobs
-  ellipseBlob(ctx, 0.68, 0.26, 0.135, 0.18,  0.1,  58,  98,  36, 0.90, W, H);
-  ellipseBlob(ctx, 0.81, 0.20, 0.075, 0.12, -0.2,  54,  92,  34, 0.85, W, H);
-  ellipseBlob(ctx, 0.62, 0.37, 0.058, 0.09,  0.2,  62, 104,  40, 0.80, W, H);
-  ellipseBlob(ctx, 0.75, 0.35, 0.045, 0.08,  0.1,  56,  96,  35, 0.78, W, H);
+  ellipseBlob(ctx, 0.68, 0.26, 0.135, 0.18, 0.1, 58, 98, 36, 0.9, W, H);
+  ellipseBlob(ctx, 0.81, 0.2, 0.075, 0.12, -0.2, 54, 92, 34, 0.85, W, H);
+  ellipseBlob(ctx, 0.62, 0.37, 0.058, 0.09, 0.2, 62, 104, 40, 0.8, W, H);
+  ellipseBlob(ctx, 0.75, 0.35, 0.045, 0.08, 0.1, 56, 96, 35, 0.78, W, H);
   // Australia — warm arid tones
-  ellipseBlob(ctx, 0.84, 0.67, 0.052, 0.10,  0.1, 148, 118,  52, 0.88, W, H);
+  ellipseBlob(ctx, 0.84, 0.67, 0.052, 0.1, 0.1, 148, 118, 52, 0.88, W, H);
   // Greenland
   ellipseBlob(ctx, 0.27, 0.11, 0.038, 0.08, -0.3, 205, 228, 242, 0.78, W, H);
 
@@ -365,17 +475,17 @@ function buildEarthTexture(): THREE.CanvasTexture {
 
   // Cloud patches (soft white blobs)
   const clouds: [number, number, number, number][] = [
-    [0.08, 0.30, 0.11, 0.055],
-    [0.36, 0.44, 0.10, 0.050],
-    [0.60, 0.34, 0.12, 0.055],
+    [0.08, 0.3, 0.11, 0.055],
+    [0.36, 0.44, 0.1, 0.05],
+    [0.6, 0.34, 0.12, 0.055],
     [0.74, 0.56, 0.09, 0.048],
-    [0.20, 0.66, 0.08, 0.048],
-    [0.91, 0.40, 0.10, 0.052],
-    [0.45, 0.20, 0.07, 0.040],
-    [0.55, 0.70, 0.08, 0.045],
+    [0.2, 0.66, 0.08, 0.048],
+    [0.91, 0.4, 0.1, 0.052],
+    [0.45, 0.2, 0.07, 0.04],
+    [0.55, 0.7, 0.08, 0.045],
   ];
   clouds.forEach(([cx, cy, rx, ry]) =>
-    ellipseBlob(ctx, cx, cy, rx, ry, 0, 255, 255, 255, 0.42, W, H)
+    ellipseBlob(ctx, cx, cy, rx, ry, 0, 255, 255, 255, 0.42, W, H),
   );
 
   return new THREE.CanvasTexture(cv);
@@ -390,7 +500,9 @@ export default function SpacePage() {
   const targetZoomRef = useRef(95);
   const currentZoomRef = useRef(220); // starts far for entry animation
   const handsActiveRef = useRef(false);
-  const [camState, setCamState] = useState<"loading" | "ready" | "denied" | "error">("loading");
+  const [camState, setCamState] = useState<
+    "loading" | "ready" | "denied" | "error"
+  >("loading");
 
   // ── Dark mode guard — redirect to /profile if accessed in light mode ─────────
   // Only checked at mount; "dark" is hardcoded in layout so this is purely defensive.
@@ -421,7 +533,8 @@ export default function SpacePage() {
     };
 
     audio.play().catch((err: unknown) => {
-      if (!(err instanceof DOMException && err.name === "NotAllowedError")) return;
+      if (!(err instanceof DOMException && err.name === "NotAllowedError"))
+        return;
       document.addEventListener("click", unlock);
       document.addEventListener("keydown", unlock);
       document.addEventListener("touchstart", unlock);
@@ -441,13 +554,20 @@ export default function SpacePage() {
     if (!canvas) return;
 
     // Device tier — drives all quality decisions below
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-      || window.innerWidth < 768;
+    const isMobile =
+      /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+      window.innerWidth < 768;
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: !isMobile, alpha: false });
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: !isMobile,
+      alpha: false,
+    });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+    renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2),
+    );
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
 
@@ -457,7 +577,12 @@ export default function SpacePage() {
     scene.fog = new THREE.FogExp2(0x00000a, 0.0012);
 
     // Camera
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1200);
+    const camera = new THREE.PerspectiveCamera(
+      55,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1200,
+    );
     camera.position.set(0, isMobile ? 40 : 55, isMobile ? 160 : 220); // entry start position
     camera.lookAt(0, 0, 0);
 
@@ -481,13 +606,16 @@ export default function SpacePage() {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
       const r = 280 + Math.random() * 120;
-      starPositions[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+      starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
       starPositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
       starPositions[i * 3 + 2] = r * Math.cos(phi);
       starSizes[i] = 0.4 + Math.random() * 1.6;
     }
     const starGeo = new THREE.BufferGeometry();
-    starGeo.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+    starGeo.setAttribute(
+      "position",
+      new THREE.BufferAttribute(starPositions, 3),
+    );
     starGeo.setAttribute("size", new THREE.BufferAttribute(starSizes, 1));
     const starMat = new THREE.PointsMaterial({
       color: 0xeef4ff,
@@ -502,7 +630,7 @@ export default function SpacePage() {
     const sunSeg = isMobile ? 24 : 48;
     const sunCore = new THREE.Mesh(
       new THREE.SphereGeometry(3.0, sunSeg, sunSeg),
-      new THREE.MeshBasicMaterial({ color: 0xfff4a0 })
+      new THREE.MeshBasicMaterial({ color: 0xfff4a0 }),
     );
     scene.add(sunCore);
 
@@ -514,7 +642,7 @@ export default function SpacePage() {
         ]
       : [
           { r: 3.6, opacity: 0.18, color: 0xffcc44 },
-          { r: 4.5, opacity: 0.10, color: 0xff8800 },
+          { r: 4.5, opacity: 0.1, color: 0xff8800 },
           { r: 6.2, opacity: 0.05, color: 0xff4400 },
           { r: 9.0, opacity: 0.02, color: 0xff2200 },
         ];
@@ -528,7 +656,7 @@ export default function SpacePage() {
           side: THREE.BackSide,
           depthWrite: false,
           blending: THREE.AdditiveBlending,
-        })
+        }),
       );
       scene.add(mesh);
     });
@@ -558,10 +686,13 @@ export default function SpacePage() {
 
       // Procedural surface texture for key planets
       const surfaceTexture =
-        p.name === "Jupiter" ? buildJupiterTexture() :
-        p.name === "Saturn"  ? buildSaturnTexture()  :
-        p.name === "Earth"   ? buildEarthTexture()   :
-        null;
+        p.name === "Jupiter"
+          ? buildJupiterTexture()
+          : p.name === "Saturn"
+            ? buildSaturnTexture()
+            : p.name === "Earth"
+              ? buildEarthTexture()
+              : null;
       // When a texture supplies the colour, use white so it isn't tinted
       const matColor = surfaceTexture ? new THREE.Color(0xffffff) : p.color;
 
@@ -607,14 +738,21 @@ export default function SpacePage() {
       if ("hasRings" in p && p.hasRings && "ringColor" in p) {
         const inner = "ringInner" in p ? (p.ringInner as number) : 1.55;
         const outer = "ringOuter" in p ? (p.ringOuter as number) : 2.6;
-        const tilt  = "ringTilt"  in p ? (p.ringTilt  as number) : Math.PI / 2.5;
-        planetMesh.add(buildPlanetRings(p.ringColor as THREE.Color, inner, outer, tilt));
+        const tilt = "ringTilt" in p ? (p.ringTilt as number) : Math.PI / 2.5;
+        planetMesh.add(
+          buildPlanetRings(p.ringColor as THREE.Color, inner, outer, tilt),
+        );
       }
 
       pivot.add(tiltGroup);
       pivot.rotation.y = Math.random() * Math.PI * 2;
 
-      planetPivots.push({ pivot, mesh: planetMesh, speed: p.speed, spinRate: p.spinRate });
+      planetPivots.push({
+        pivot,
+        mesh: planetMesh,
+        speed: p.speed,
+        spinRate: p.spinRate,
+      });
     });
 
     // ── Comets ─────────────────────────────────────────────────────────────
@@ -629,7 +767,7 @@ export default function SpacePage() {
 
     const spawnComet = (c: CometObj) => {
       // Random entry point on perimeter of the scene
-      const angle  = Math.random() * Math.PI * 2;
+      const angle = Math.random() * Math.PI * 2;
       const startR = 110 + Math.random() * 20;
       const sx = Math.cos(angle) * startR;
       const sy = (Math.random() - 0.5) * 22;
@@ -641,13 +779,14 @@ export default function SpacePage() {
       const tx = (Math.random() - 0.5) * 30;
       const ty = (Math.random() - 0.5) * 8;
       const tz = (Math.random() - 0.5) * 30;
-      c.vel.set(tx - sx, ty - sy, tz - sz)
-            .normalize()
-            .multiplyScalar(13 + Math.random() * 9);
+      c.vel
+        .set(tx - sx, ty - sy, tz - sz)
+        .normalize()
+        .multiplyScalar(13 + Math.random() * 9);
 
       // Collapse tail to spawn point so it doesn't streak across the scene
       for (let i = 0; i < TAIL_LEN * 3; i += 3) {
-        c.tailPos[i]     = sx;
+        c.tailPos[i] = sx;
         c.tailPos[i + 1] = sy;
         c.tailPos[i + 2] = sz;
       }
@@ -662,40 +801,52 @@ export default function SpacePage() {
           color: 0xffffff,
           blending: THREE.AdditiveBlending,
           depthWrite: false,
-        })
+        }),
       );
       scene.add(head);
 
       // Head glow halo
-      head.add(new THREE.Mesh(
-        new THREE.SphereGeometry(0.62, 12, 12),
-        new THREE.MeshBasicMaterial({
-          color: 0x99ccff,
-          transparent: true,
-          opacity: 0.20,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-          side: THREE.BackSide,
-        })
-      ));
+      head.add(
+        new THREE.Mesh(
+          new THREE.SphereGeometry(0.62, 12, 12),
+          new THREE.MeshBasicMaterial({
+            color: 0x99ccff,
+            transparent: true,
+            opacity: 0.2,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            side: THREE.BackSide,
+          }),
+        ),
+      );
 
       // Tail geometry — positions updated each frame, colors are pre-baked
-      const tailPos    = new Float32Array(TAIL_LEN * 3);
+      const tailPos = new Float32Array(TAIL_LEN * 3);
       const tailColors = new Float32Array(TAIL_LEN * 3);
       for (let i = 0; i < TAIL_LEN; i++) {
         const t = i / (TAIL_LEN - 1); // 0 = tail end, 1 = head
-        const b = t * t;              // quadratic falloff
-        tailColors[i * 3]     = b;
+        const b = t * t; // quadratic falloff
+        tailColors[i * 3] = b;
         tailColors[i * 3 + 1] = b * 0.88;
         tailColors[i * 3 + 2] = b * 0.75; // warm blue-white
       }
 
       const tailGeo = new THREE.BufferGeometry();
       tailGeo.setAttribute("position", new THREE.BufferAttribute(tailPos, 3));
-      tailGeo.setAttribute("color",    new THREE.BufferAttribute(tailColors, 3));
-      scene.add(new THREE.Line(tailGeo, new THREE.LineBasicMaterial({ vertexColors: true })));
+      tailGeo.setAttribute("color", new THREE.BufferAttribute(tailColors, 3));
+      scene.add(
+        new THREE.Line(
+          tailGeo,
+          new THREE.LineBasicMaterial({ vertexColors: true }),
+        ),
+      );
 
-      const comet: CometObj = { head, tailGeo, tailPos, vel: new THREE.Vector3() };
+      const comet: CometObj = {
+        head,
+        tailGeo,
+        tailPos,
+        vel: new THREE.Vector3(),
+      };
       spawnComet(comet);
 
       // Fast-forward a staggered comet so it's mid-flight on load
@@ -707,7 +858,10 @@ export default function SpacePage() {
           comet.tailPos[TAIL_LEN * 3 - 3] = comet.head.position.x;
           comet.tailPos[TAIL_LEN * 3 - 2] = comet.head.position.y;
           comet.tailPos[TAIL_LEN * 3 - 1] = comet.head.position.z;
-          if (comet.head.position.length() > 130) { spawnComet(comet); break; }
+          if (comet.head.position.length() > 130) {
+            spawnComet(comet);
+            break;
+          }
         }
         comet.tailGeo.attributes.position.needsUpdate = true;
       }
@@ -724,8 +878,10 @@ export default function SpacePage() {
 
     // Entry animation constants — mobile starts closer so the scene is immediately visible
     const ENTRY_DURATION = isMobile ? 2.5 : 3.8;
-    const ENTRY_Z0 = isMobile ? 160 : 220, ENTRY_Z1 = 95;
-    const ENTRY_Y0 = isMobile ? 40  : 55,  ENTRY_Y1 = 20;
+    const ENTRY_Z0 = isMobile ? 160 : 220,
+      ENTRY_Z1 = 95;
+    const ENTRY_Y0 = isMobile ? 40 : 55,
+      ENTRY_Y1 = 20;
     let entryActive = true;
 
     const animate = () => {
@@ -750,7 +906,8 @@ export default function SpacePage() {
         }
       } else {
         // Normal gesture-driven lerp
-        currentZoomRef.current += (targetZoomRef.current - currentZoomRef.current) * 0.06;
+        currentZoomRef.current +=
+          (targetZoomRef.current - currentZoomRef.current) * 0.06;
         camera.position.set(0, 20, currentZoomRef.current);
       }
       camera.lookAt(0, 0, 0);
@@ -759,7 +916,7 @@ export default function SpacePage() {
       // Base spin: 0.004 rad/frame × spinRate multiplier
       planetPivots.forEach(({ pivot, mesh, speed, spinRate }) => {
         pivot.rotation.y += 0.0012 * speed;
-        mesh.rotation.y  += 0.004  * spinRate;
+        mesh.rotation.y += 0.004 * spinRate;
       });
 
       // Comets — advance head, shift tail ring-buffer, respawn when off-screen
@@ -810,19 +967,20 @@ export default function SpacePage() {
       const dist = pinchDist(e);
       const delta = lastPinchDist - dist; // positive = fingers closing = zoom in
       lastPinchDist = dist;
-      targetZoomRef.current = Math.max(25, Math.min(130,
-        targetZoomRef.current + delta * 0.35
-      ));
+      targetZoomRef.current = Math.max(
+        25,
+        Math.min(130, targetZoomRef.current + delta * 0.35),
+      );
     };
 
     canvas.addEventListener("touchstart", onTouchStart, { passive: true });
-    canvas.addEventListener("touchmove",  onTouchMove,  { passive: false });
+    canvas.addEventListener("touchmove", onTouchMove, { passive: false });
 
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", onResize);
       canvas.removeEventListener("touchstart", onTouchStart);
-      canvas.removeEventListener("touchmove",  onTouchMove);
+      canvas.removeEventListener("touchmove", onTouchMove);
       renderer.dispose();
       scene.clear();
     };
@@ -837,12 +995,18 @@ export default function SpacePage() {
         case "+":
         case "=":
           e.preventDefault();
-          targetZoomRef.current = Math.max(25, targetZoomRef.current - ZOOM_STEP);
+          targetZoomRef.current = Math.max(
+            25,
+            targetZoomRef.current - ZOOM_STEP,
+          );
           break;
         case "ArrowDown":
         case "-":
           e.preventDefault();
-          targetZoomRef.current = Math.min(130, targetZoomRef.current + ZOOM_STEP);
+          targetZoomRef.current = Math.min(
+            130,
+            targetZoomRef.current + ZOOM_STEP,
+          );
           break;
         case "Escape":
           router.push("/profile");
@@ -862,8 +1026,9 @@ export default function SpacePage() {
     let cameraUtils: { start: () => void; stop: () => void } | null = null;
     let stopped = false;
 
-    const isMobileHands = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-      || window.innerWidth < 768;
+    const isMobileHands =
+      /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
+      window.innerWidth < 768;
 
     const setup = async () => {
       // Pre-check camera permission before loading heavy MediaPipe bundles
@@ -872,12 +1037,18 @@ export default function SpacePage() {
         ? { facingMode: "user" }
         : { facingMode: { ideal: "user" } };
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: videoConstraints,
+        });
         stream.getTracks().forEach((t) => t.stop()); // release immediately
       } catch (err: unknown) {
         if (stopped) return;
         const name = err instanceof Error ? err.name : "";
-        setCamState(name === "NotAllowedError" || name === "PermissionDeniedError" ? "denied" : "error");
+        setCamState(
+          name === "NotAllowedError" || name === "PermissionDeniedError"
+            ? "denied"
+            : "error",
+        );
         return;
       }
 
@@ -911,17 +1082,37 @@ export default function SpacePage() {
         if (!ctx) return;
         ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
 
-        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+        if (
+          results.multiHandLandmarks &&
+          results.multiHandLandmarks.length > 0
+        ) {
           const landmarks = results.multiHandLandmarks[0];
 
           // Draw connections
           const connections: [number, number][] = [
-            [0,1],[1,2],[2,3],[3,4],
-            [0,5],[5,6],[6,7],[7,8],
-            [0,9],[9,10],[10,11],[11,12],
-            [0,13],[13,14],[14,15],[15,16],
-            [0,17],[17,18],[18,19],[19,20],
-            [5,9],[9,13],[13,17],
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 4],
+            [0, 5],
+            [5, 6],
+            [6, 7],
+            [7, 8],
+            [0, 9],
+            [9, 10],
+            [10, 11],
+            [11, 12],
+            [0, 13],
+            [13, 14],
+            [14, 15],
+            [15, 16],
+            [0, 17],
+            [17, 18],
+            [18, 19],
+            [19, 20],
+            [5, 9],
+            [9, 13],
+            [13, 17],
           ];
           ctx.strokeStyle = "rgba(120,180,255,0.55)";
           ctx.lineWidth = 1.5;
@@ -930,8 +1121,14 @@ export default function SpacePage() {
             const lB = landmarks[b];
             // Mirror X for selfie view
             ctx.beginPath();
-            ctx.moveTo((1 - lA.x) * overlayCanvas.width, lA.y * overlayCanvas.height);
-            ctx.lineTo((1 - lB.x) * overlayCanvas.width, lB.y * overlayCanvas.height);
+            ctx.moveTo(
+              (1 - lA.x) * overlayCanvas.width,
+              lA.y * overlayCanvas.height,
+            );
+            ctx.lineTo(
+              (1 - lB.x) * overlayCanvas.width,
+              lB.y * overlayCanvas.height,
+            );
             ctx.stroke();
           });
 
@@ -946,8 +1143,8 @@ export default function SpacePage() {
             ctx.fillStyle = isThumb
               ? "rgba(255,160,60,0.95)"
               : isIndex
-              ? "rgba(80,220,180,0.95)"
-              : "rgba(140,180,255,0.75)";
+                ? "rgba(80,220,180,0.95)"
+                : "rgba(140,180,255,0.75)";
             ctx.fill();
           });
 
@@ -958,12 +1155,16 @@ export default function SpacePage() {
 
           // Draw pinch line
           ctx.beginPath();
-          ctx.moveTo((1 - thumb.x) * overlayCanvas.width, thumb.y * overlayCanvas.height);
-          ctx.lineTo((1 - index.x) * overlayCanvas.width, index.y * overlayCanvas.height);
+          ctx.moveTo(
+            (1 - thumb.x) * overlayCanvas.width,
+            thumb.y * overlayCanvas.height,
+          );
+          ctx.lineTo(
+            (1 - index.x) * overlayCanvas.width,
+            index.y * overlayCanvas.height,
+          );
           ctx.strokeStyle =
-            pinchDist < 0.06
-              ? "rgba(255,120,80,0.9)"
-              : "rgba(100,255,180,0.7)";
+            pinchDist < 0.06 ? "rgba(255,120,80,0.9)" : "rgba(100,255,180,0.7)";
           ctx.lineWidth = 2;
           ctx.stroke();
 
@@ -972,7 +1173,10 @@ export default function SpacePage() {
           // pinchDist ≈ 0.28 (fully spread)  → zoom 130 (full system view)
           const minDist = 0.02;
           const maxDist = 0.28;
-          const t = Math.max(0, Math.min(1, (pinchDist - minDist) / (maxDist - minDist)));
+          const t = Math.max(
+            0,
+            Math.min(1, (pinchDist - minDist) / (maxDist - minDist)),
+          );
           targetZoomRef.current = 25 + t * 105;
         }
       });
@@ -992,7 +1196,11 @@ export default function SpacePage() {
     setup().catch((err: unknown) => {
       if (stopped) return;
       const name = err instanceof Error ? err.name : "";
-      setCamState(name === "NotAllowedError" || name === "PermissionDeniedError" ? "denied" : "error");
+      setCamState(
+        name === "NotAllowedError" || name === "PermissionDeniedError"
+          ? "denied"
+          : "error",
+      );
     });
 
     return () => {
@@ -1037,20 +1245,26 @@ export default function SpacePage() {
         transition={{ duration: 1, delay: 4.0 }}
       >
         <div className="hidden sm:block">
-          <span className="text-orange-400/60">●</span> thumb tip
-          &nbsp;&nbsp;
+          <span className="text-orange-400/60">●</span> thumb tip &nbsp;&nbsp;
           <span className="text-emerald-400/60">●</span> index tip
         </div>
-        <div className="mt-1 text-white/20">Pinch to zoom in · Spread to zoom out</div>
-        <div className="mt-0.5 text-white/15 hidden sm:block">↑ ↓ arrow keys or +/− to zoom · Esc to exit</div>
-        <div className="mt-0.5 text-white/15 sm:hidden">Two fingers on screen to zoom</div>
+        <div className="mt-1 text-white/20">
+          Pinch to zoom in · Spread to zoom out
+        </div>
+        <div className="mt-0.5 text-white/15 hidden sm:block">
+          ↑ ↓ arrow keys or +/− to zoom · Esc to exit
+        </div>
+        <div className="mt-0.5 text-white/15 sm:hidden">
+          Two fingers on screen to zoom
+        </div>
       </motion.div>
 
       {/* ── Webcam preview ───────────────────────────────────────────────── */}
       <motion.div
         className="absolute bottom-4 left-4 rounded-2xl overflow-hidden border border-white/10"
         style={{
-          boxShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.6)",
+          boxShadow:
+            "0 0 0 1px rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.6)",
           background: "rgba(0,0,0,0.55)",
         }}
         initial={{ opacity: 0, y: 20 }}
@@ -1064,8 +1278,8 @@ export default function SpacePage() {
               camState === "ready"
                 ? "bg-red-500/70 animate-pulse"
                 : camState === "loading"
-                ? "bg-yellow-400/60 animate-pulse"
-                : "bg-white/20"
+                  ? "bg-yellow-400/60 animate-pulse"
+                  : "bg-white/20"
             }`}
           />
           Cam
@@ -1073,17 +1287,33 @@ export default function SpacePage() {
 
         {/* Fixed-size content area — all states fill 200×150 (160×120 on mobile) */}
         <div className="relative w-[160px] h-[120px] sm:w-[200px] sm:h-[150px]">
-
           {/* ── Loading ── */}
           {camState === "loading" && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
               {/* Spinning ring */}
-              <svg className="w-7 h-7 animate-spin" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
-                <path d="M12 2 a10 10 0 0 1 10 10" stroke="rgba(120,180,255,0.7)" strokeWidth="2" strokeLinecap="round" />
+              <svg
+                className="w-7 h-7 animate-spin"
+                viewBox="0 0 24 24"
+                fill="none"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="rgba(255,255,255,0.12)"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M12 2 a10 10 0 0 1 10 10"
+                  stroke="rgba(120,180,255,0.7)"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
               <span className="text-white/40 text-[10px] tracking-widest text-center leading-4">
-                Initializing<br />camera…
+                Initializing
+                <br />
+                camera…
               </span>
             </div>
           )}

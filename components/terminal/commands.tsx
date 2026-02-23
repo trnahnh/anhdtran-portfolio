@@ -2,7 +2,12 @@ import { projects } from "@/lib/data/projects";
 import { experiences } from "@/lib/data/experiences";
 import { contacts } from "@/lib/data/contacts";
 
-export type OutputLineType = "command" | "response" | "error" | "system" | "accent";
+export type OutputLineType =
+  | "command"
+  | "response"
+  | "error"
+  | "system"
+  | "accent";
 
 export interface OutputLine {
   type: OutputLineType;
@@ -50,7 +55,10 @@ const COMMANDS: Record<string, CommandDef> = {
   whoami: {
     description: "Who am I?",
     execute: () => [
-      { type: "response", text: `Anh Tran, ${getAge()} \u2014 Full-stack Developer & Powerlifting Enthusiast` },
+      {
+        type: "response",
+        text: `Anh Tran, ${getAge()} \u2014 Full-stack Developer & Powerlifting Enthusiast`,
+      },
     ],
   },
 
@@ -58,10 +66,22 @@ const COMMANDS: Record<string, CommandDef> = {
     description: "About me",
     execute: () => [
       { type: "accent", text: "" },
-      { type: "response", text: "Hey! I'm Anh Tran, a full-stack developer from Vietnam based in Cincinnati." },
-      { type: "response", text: `${getAge()} years old, currently studying and building software.` },
-      { type: "response", text: "I love crafting polished user experiences and working on AI-powered tools." },
-      { type: "response", text: "When I'm not coding, you'll find me powerlifting or deep-diving into anatomy." },
+      {
+        type: "response",
+        text: "Hey! I'm Anh Tran, a full-stack developer from Vietnam based in Cincinnati.",
+      },
+      {
+        type: "response",
+        text: `${getAge()} years old, currently studying and building software.`,
+      },
+      {
+        type: "response",
+        text: "I love crafting polished user experiences and working on AI-powered tools.",
+      },
+      {
+        type: "response",
+        text: "When I'm not coding, you'll find me powerlifting or deep-diving into anatomy.",
+      },
       { type: "accent", text: "" },
     ],
   },
@@ -91,7 +111,10 @@ const COMMANDS: Record<string, CommandDef> = {
       const lines: OutputLine[] = [{ type: "accent", text: "" }];
       experiences.forEach((e) => {
         const badge = e.status === "current" ? "  \u25CF current" : "";
-        lines.push({ type: "accent", text: `${e.title} @ ${e.company}${badge}` });
+        lines.push({
+          type: "accent",
+          text: `${e.title} @ ${e.company}${badge}`,
+        });
         if (e.description) {
           lines.push({ type: "response", text: e.description });
         }
@@ -148,12 +171,9 @@ const COMMANDS: Record<string, CommandDef> = {
       setTimeout(() => {
         document.documentElement.classList.remove("theme-transitioning");
       }, 300);
-      return [
-        { type: "system", text: `Switched to ${newTheme} mode.` },
-      ];
+      return [{ type: "system", text: `Switched to ${newTheme} mode.` }];
     },
   },
-
 };
 
 export const COMMAND_NAMES = Object.keys(COMMANDS);

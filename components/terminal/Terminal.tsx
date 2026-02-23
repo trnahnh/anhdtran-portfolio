@@ -45,13 +45,8 @@ interface TerminalProps {
 }
 
 export default function Terminal({ onExit }: TerminalProps) {
-  const {
-    history,
-    handleSubmit,
-    handleKeyDown,
-    inputRef,
-    outputRef,
-  } = useTerminal(onExit);
+  const { history, handleSubmit, handleKeyDown, inputRef, outputRef } =
+    useTerminal(onExit);
 
   return (
     <div
@@ -62,17 +57,22 @@ export default function Terminal({ onExit }: TerminalProps) {
       <CincinnatiClock />
 
       {/* macOS terminal window */}
-      <div className="w-full max-w-3xl h-[75vh] sm:h-[min(75vh,600px)] flex flex-col rounded-xl overflow-hidden shadow-2xl shadow-black/40 dark:shadow-black/60 border border-black/[0.08] dark:border-white/[0.08] transition-colors duration-300">
+      <div className="w-full max-w-3xl h-[75vh] sm:h-[min(75vh,600px)] flex flex-col rounded-xl overflow-hidden shadow-2xl shadow-black/40 dark:shadow-black/60 border border-black/8 dark:border-white/8 transition-colors duration-300">
         {/* Title bar */}
         <div className="flex items-center px-4 h-11 bg-[#e0e0e0] dark:bg-[#2a2a2c] shrink-0 select-none transition-colors duration-300">
           {/* Traffic lights */}
           <div className="flex items-center gap-2">
             <button
-              onClick={(e) => { e.stopPropagation(); onExit(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onExit();
+              }}
               className="group w-3 h-3 rounded-full bg-[#ff5f57] hover:brightness-110 transition-all cursor-pointer flex items-center justify-center"
               aria-label="Close"
             >
-              <span className="hidden group-hover:block text-black/80 text-[8px] font-bold leading-none">&#x2715;</span>
+              <span className="hidden group-hover:block text-black/80 text-[8px] font-bold leading-none">
+                &#x2715;
+              </span>
             </button>
             <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
             <span className="w-3 h-3 rounded-full bg-[#28c840]" />

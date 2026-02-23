@@ -35,7 +35,7 @@ export default function ThemeToggle() {
   const theme = useSyncExternalStore(
     subscribeTheme,
     getThemeSnapshot,
-    getThemeServerSnapshot
+    getThemeServerSnapshot,
   );
   const mounted = useMounted();
 
