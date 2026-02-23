@@ -38,7 +38,7 @@ export default function PagePeel() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Theme detection (same pattern as ContactSection)
+  // Theme detection
   useEffect(() => {
     const check = () =>
       setIsDark(document.documentElement.classList.contains("dark"));
@@ -67,6 +67,9 @@ export default function PagePeel() {
   const triggerThreshold = base * 0.2;
   const hoverExtra = base * 0.025;
 
+  // Bounding box for paint containment — only repaint this corner, not the full screen
+  const boxSize = Math.ceil(maxDrag * 1.5);
+
   // Apply peel size to DOM directly (no setState)
   const applyPeelSize = useCallback(
     (s: number) => {
@@ -75,7 +78,8 @@ export default function PagePeel() {
       const shadowOp = 0.15 + progress * 0.15;
 
       if (shadowRef.current) {
-        shadowRef.current.style.clipPath = `polygon(${sh}px 100%, ${sh}px calc(100% - ${sh}px), 0 calc(100% - ${sh}px))`;
+        // Shadow anchored to bottom-left corner (the "hole" left behind)
+        shadowRef.current.style.clipPath = `polygon(0 100%, ${sh}px 100%, 0 calc(100% - ${sh}px))`;
         shadowRef.current.style.background = `linear-gradient(135deg, rgba(0,0,0,${shadowOp}) 0%, rgba(0,0,0,${shadowOp * 0.3}) 50%, transparent 100%)`;
       }
       if (curlRef.current) {
@@ -83,10 +87,11 @@ export default function PagePeel() {
         curlRef.current.style.filter = `drop-shadow(2px -2px ${3 + progress * 4}px rgba(0,0,0,${0.2 + progress * 0.15})) drop-shadow(4px -4px ${8 + progress * 8}px rgba(0,0,0,${0.08 + progress * 0.08}))`;
       }
       if (lineRef.current) {
+        // Coordinates relative to bounding box, not full screen
         lineRef.current.setAttribute("x1", String(s));
-        lineRef.current.setAttribute("y1", String(viewportSize.h));
+        lineRef.current.setAttribute("y1", String(boxSize));
         lineRef.current.setAttribute("x2", String(0));
-        lineRef.current.setAttribute("y2", String(viewportSize.h - s));
+        lineRef.current.setAttribute("y2", String(boxSize - s));
         lineRef.current.setAttribute("stroke-width", String(1 + progress * 0.5));
       }
       if (promptRef.current) {
@@ -102,7 +107,7 @@ export default function PagePeel() {
         hitRef.current.style.height = `${hit}px`;
       }
     },
-    [triggerThreshold, viewportSize.h]
+    [triggerThreshold, boxSize]
   );
 
   const triggerExpand = useCallback(() => {
@@ -123,7 +128,6 @@ export default function PagePeel() {
       draggingRef.current = true;
       dragDistRef.current = 0;
 
-      // Disable transitions for instant response during drag
       shadowRef.current?.style.setProperty("transition", "none");
       curlRef.current?.style.setProperty("transition", "none");
       lineRef.current?.style.setProperty("transition", "none");
@@ -160,7 +164,6 @@ export default function PagePeel() {
     } else {
       draggingRef.current = false;
       dragDistRef.current = 0;
-      // Re-enable transitions for smooth snap-back
       const dur = "300ms";
       shadowRef.current?.style.setProperty(
         "transition",
@@ -204,7 +207,6 @@ export default function PagePeel() {
     };
   }, []);
 
-  // Apply initial size on mount/theme/viewport change
   useEffect(() => {
     if (!mounted || expanding) return;
     applyPeelSize(hovered ? idleSize + hoverExtra : idleSize);
@@ -216,8 +218,6 @@ export default function PagePeel() {
   const s = hovered ? idleSize + hoverExtra : idleSize;
   const sh = s * 1.15;
 
-  // Theme-aware colors
-  // Dark mode: dark prompt on light underside | Light mode: light prompt on dark underside
   const curlGradient = isDark
     ? `linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 50%, #bbb 100%)`
     : `linear-gradient(135deg, #2a2a2a 0%, #222 50%, #1a1a1a 100%)`;
@@ -226,13 +226,15 @@ export default function PagePeel() {
 
   return (
     <>
-      {/* Layer 1: Fold shadow */}
+      {/* Layer 1: Fold shadow — anchored to bottom-left corner */}
       {!expanding && (
         <div
           ref={shadowRef}
-          className="fixed inset-0 z-[49] pointer-events-none"
+          className="fixed bottom-0 left-0 z-[49] pointer-events-none"
           style={{
-            clipPath: `polygon(${sh}px 100%, ${sh}px calc(100% - ${sh}px), 0 calc(100% - ${sh}px))`,
+            width: boxSize,
+            height: boxSize,
+            clipPath: `polygon(0 100%, ${sh}px 100%, 0 calc(100% - ${sh}px))`,
             background: `linear-gradient(135deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.045) 50%, transparent 100%)`,
             filter: "blur(8px)",
             transition: "clip-path 300ms ease-out, background 300ms ease-out",
@@ -240,12 +242,14 @@ export default function PagePeel() {
         />
       )}
 
-      {/* Layer 2: Paper curl — flap pointing up-right (folded corner) */}
+      {/* Layer 2: Paper curl — flap pointing up-right */}
       {!expanding && (
         <div
           ref={curlRef}
-          className="fixed inset-0 z-[50] pointer-events-none"
+          className="fixed bottom-0 left-0 z-[50] pointer-events-none"
           style={{
+            width: boxSize,
+            height: boxSize,
             clipPath: `polygon(${s}px 100%, ${s}px calc(100% - ${s}px), 0 calc(100% - ${s}px))`,
             background: curlGradient,
             transition: "clip-path 300ms ease-out, filter 300ms ease-out",
@@ -273,18 +277,16 @@ export default function PagePeel() {
       {/* Layer 3: Fold edge highlight */}
       {!expanding && (
         <svg
-          className="fixed inset-0 z-[50] pointer-events-none"
-          style={{ width: "100%", height: "100%" }}
+          className="fixed bottom-0 left-0 z-[50] pointer-events-none"
+          style={{ width: boxSize, height: boxSize }}
         >
           <line
             ref={lineRef}
             x1={s}
-            y1={viewportSize.h}
+            y1={boxSize}
             x2={0}
-            y2={viewportSize.h - s}
-            stroke={
-              isDark ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.15)"
-            }
+            y2={boxSize - s}
+            stroke={isDark ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.15)"}
             strokeWidth={1}
             style={{ transition: "all 300ms ease-out" }}
           />

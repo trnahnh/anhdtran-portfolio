@@ -35,14 +35,14 @@ export default function ProfileSection() {
         </h2>
 
         <div className="grid grid-cols-2 gap-3">
-          {photos.map(({ src, alt, caption }) => (
-            <div key={src} className="relative group rounded-xl overflow-hidden">
+          {photos.map(({ src, alt, caption }, i) => (
+            <div key={src} className="relative group rounded-xl overflow-hidden" style={{ aspectRatio: "1/1" }}>
               <Image
                 src={src}
                 alt={alt}
                 width={4000}
                 height={4000}
-                loading="lazy"
+                loading={i < 2 ? "eager" : "lazy"}
                 className="w-full h-auto transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 640px) 50vw, 320px"
               />

@@ -841,8 +841,37 @@ function SplashCursor({
     let lastUpdateTime = Date.now();
     let colorUpdateTimer = 0.0;
 
+    // Idle throttle: reduce work when no pointer activity
+    let lastInputTime = Date.now();
+    let frameCount = 0;
+    const IDLE_AFTER_MS = 2000; // throttle after 2s of no input
+    const IDLE_SKIP = 5;        // render every 6th frame when idle
+
+    // Pause when tab hidden
+    let tabHidden = false;
+    function handleVisChange() {
+      tabHidden = document.hidden;
+      if (!tabHidden && isAnimating) {
+        lastUpdateTime = Date.now(); // avoid dt spike on resume
+        animationId = requestAnimationFrame(updateFrame);
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisChange);
+
+    function markInput() {
+      lastInputTime = Date.now();
+    }
+
     function updateFrame() {
+      if (tabHidden) return; // stop loop while hidden
       const dt = calcDeltaTime();
+      frameCount++;
+      const idle = Date.now() - lastInputTime > IDLE_AFTER_MS;
+      if (idle && frameCount % IDLE_SKIP !== 0) {
+        // Skip heavy work, just schedule next frame
+        if (isAnimating) animationId = requestAnimationFrame(updateFrame);
+        return;
+      }
       if (resizeCanvas()) initFramebuffers();
       updateColors(dt);
       applyInputs();
@@ -1205,6 +1234,7 @@ function SplashCursor({
     }
 
     const handleMouseDown = (e: MouseEvent) => {
+      markInput();
       const pointer = pointers[0];
       const posX = scaleByPixelRatio(e.clientX);
       const posY = scaleByPixelRatio(e.clientY);
@@ -1213,6 +1243,7 @@ function SplashCursor({
     };
 
     const handleMouseMove = (e: MouseEvent) => {
+      markInput();
       const pointer = pointers[0];
       const posX = scaleByPixelRatio(e.clientX);
       const posY = scaleByPixelRatio(e.clientY);
@@ -1221,6 +1252,7 @@ function SplashCursor({
     };
 
     const handleTouchStart = (e: TouchEvent) => {
+      markInput();
       const touches = e.targetTouches;
       const pointer = pointers[0];
       for (let i = 0; i < touches.length; i++) {
@@ -1231,6 +1263,7 @@ function SplashCursor({
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      markInput();
       const touches = e.targetTouches;
       const pointer = pointers[0];
       for (let i = 0; i < touches.length; i++) {
@@ -1278,6 +1311,7 @@ function SplashCursor({
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
       window.removeEventListener("touchcancel", handleTouchEnd);
+      document.removeEventListener("visibilitychange", handleVisChange);
     };
   }, [
     SIM_RESOLUTION,
