@@ -1,29 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
+import { useMounted } from "@/hooks/useMounted";
 
+// ── Theme external store ──────────────────────────────────────────────────────
+let themeListeners: (() => void)[] = [];
+
+function subscribeTheme(callback: () => void) {
+  themeListeners.push(callback);
+  return () => {
+    themeListeners = themeListeners.filter((l) => l !== callback);
+  };
+}
+
+function notifyThemeChange() {
+  themeListeners.forEach((l) => l());
+}
+
+function getThemeSnapshot(): "light" | "dark" {
+  const saved = localStorage.getItem("theme");
+  if (saved === "light" || saved === "dark") return saved;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function getThemeServerSnapshot(): "light" | "dark" {
+  return "dark";
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
-  const [mounted, setMounted] = useState(false);
+  const theme = useSyncExternalStore(
+    subscribeTheme,
+    getThemeSnapshot,
+    getThemeServerSnapshot
+  );
+  const mounted = useMounted();
 
+  // Sync theme class to <html> on changes
   useEffect(() => {
-    setMounted(true);
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.classList.toggle("dark", savedTheme === "dark");
-    } else if (prefersDark) {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
   const toggleTheme = () => {
     const newTheme = theme === "dark" ? "light" : "dark";
-    setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
 
     // Add transition class for smooth theme change
@@ -34,6 +56,8 @@ export default function ThemeToggle() {
     setTimeout(() => {
       document.documentElement.classList.remove("theme-transitioning");
     }, 300);
+
+    notifyThemeChange();
   };
 
   if (!mounted) {

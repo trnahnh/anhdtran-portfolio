@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useMounted } from "@/hooks/useMounted";
 
 const HIDDEN_ROUTES = ["/terminal", "/space"];
 
@@ -9,11 +10,12 @@ export default function PagePeel() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [expanding, setExpanding] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [viewportSize, setViewportSize] = useState({ w: 1920, h: 1080 });
   const [isDark, setIsDark] = useState(true);
+  const [prevPathname, setPrevPathname] = useState(pathname);
 
   // Drag state kept in refs to avoid re-renders on every pointer move
   const draggingRef = useRef(false);
@@ -30,7 +32,6 @@ export default function PagePeel() {
   const promptRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    setMounted(true);
     const update = () =>
       setViewportSize({ w: window.innerWidth, h: window.innerHeight });
     update();
@@ -51,13 +52,18 @@ export default function PagePeel() {
     return () => observer.disconnect();
   }, []);
 
-  // Reset state on route change
+  // Reset state on route change (render-phase pattern for state)
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
+    setExpanding(false);
+    setHovered(false);
+  }
+
+  // Reset refs on route change (must be in effect, not render)
   useEffect(() => {
     expandedRef.current = false;
     draggingRef.current = false;
     dragDistRef.current = 0;
-    setExpanding(false);
-    setHovered(false);
   }, [pathname]);
 
   // Responsive sizing
@@ -230,7 +236,7 @@ export default function PagePeel() {
       {!expanding && (
         <div
           ref={shadowRef}
-          className="fixed bottom-0 left-0 z-[49] pointer-events-none"
+          className="fixed bottom-0 left-0 z-49 pointer-events-none"
           style={{
             width: boxSize,
             height: boxSize,
@@ -246,7 +252,7 @@ export default function PagePeel() {
       {!expanding && (
         <div
           ref={curlRef}
-          className="fixed bottom-0 left-0 z-[50] pointer-events-none"
+          className="fixed bottom-0 left-0 z-50 pointer-events-none"
           style={{
             width: boxSize,
             height: boxSize,
@@ -277,7 +283,7 @@ export default function PagePeel() {
       {/* Layer 3: Fold edge highlight */}
       {!expanding && (
         <svg
-          className="fixed bottom-0 left-0 z-[50] pointer-events-none"
+          className="fixed bottom-0 left-0 z-50 pointer-events-none"
           style={{ width: boxSize, height: boxSize }}
         >
           <line
@@ -306,7 +312,7 @@ export default function PagePeel() {
         aria-label="Drag to open terminal"
         role="button"
         tabIndex={0}
-        className="fixed bottom-0 left-0 z-[51] touch-none select-none"
+        className="fixed bottom-0 left-0 z-51 touch-none select-none"
         style={{
           width: Math.max(s + 30, 90),
           height: Math.max(s + 30, 90),
@@ -317,7 +323,7 @@ export default function PagePeel() {
       {/* Full-screen expand overlay */}
       {expanding && (
         <div
-          className="peel-expand-overlay fixed inset-0 z-[60]"
+          className="peel-expand-overlay fixed inset-0 z-60"
           style={{ background: expandBg }}
         />
       )}

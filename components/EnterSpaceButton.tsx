@@ -36,7 +36,7 @@ export default function EnterSpaceButton() {
         >
           <motion.button
             onClick={() => router.push("/space")}
-            className="group relative px-6 py-2.5 sm:px-8 sm:py-3 text-xs sm:text-sm font-light tracking-widest text-white/50 uppercase transition-all duration-500 rounded-full border border-white/10 bg-white/[0.03] hover:text-white hover:border-white/20 hover:bg-white/[0.06] cursor-pointer w-full max-w-[280px] sm:w-auto"
+            className="group relative px-6 py-2.5 sm:px-8 sm:py-3 text-xs sm:text-sm font-light tracking-widest text-white/50 uppercase transition-all duration-500 rounded-full border border-white/10 bg-white/3 hover:text-white hover:border-white/20 hover:bg-white/6 cursor-pointer w-full max-w-[280px] sm:w-auto"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >

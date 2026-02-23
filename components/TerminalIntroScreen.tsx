@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useMounted } from "@/hooks/useMounted";
 
 const BOOT_LINES = [
   { text: "BIOS v2.4.1 ... OK", delay: 120 },
@@ -18,7 +19,7 @@ interface Props {
 }
 
 export default function TerminalIntroScreen({ onComplete }: Props) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const [show, setShow] = useState(true);
   const [fading, setFading] = useState(false);
   const [visibleLines, setVisibleLines] = useState(0);
@@ -52,8 +53,6 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
   }, [onComplete]);
 
   useEffect(() => {
-    setMounted(true);
-
     const audio = new Audio("/sfx/keyboard-typing.mp3");
     audioRef.current = audio;
 
@@ -111,7 +110,7 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col bg-[#e8e8ec] dark:bg-[#0a0a0b] transition-opacity duration-500 cursor-pointer select-none ${
+      className={`fixed inset-0 z-100 flex flex-col bg-[#e8e8ec] dark:bg-[#0a0a0b] transition-opacity duration-500 cursor-pointer select-none ${
         fading ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
       onClick={finish}

@@ -104,7 +104,7 @@ export default function SpaceIntroScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#00000a] transition-opacity duration-500 cursor-pointer select-none ${
+      className={`fixed inset-0 z-100 flex flex-col items-center justify-center bg-[#00000a] transition-opacity duration-500 cursor-pointer select-none ${
         fading ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
       onClick={skip}

@@ -146,7 +146,7 @@ export default function ProfileIntroScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-[100] flex flex-col items-center justify-center bg-zinc-950 transition-opacity duration-500 cursor-pointer ${
+      className={`fixed inset-0 z-100 flex flex-col items-center justify-center bg-zinc-950 transition-opacity duration-500 cursor-pointer ${
         fading ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
       onClick={skip}

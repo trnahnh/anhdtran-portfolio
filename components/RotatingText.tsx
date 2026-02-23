@@ -31,7 +31,7 @@ export default function RotatingText({ texts, interval = 3000 }: RotatingTextPro
     <span className="rotating-text-container">
       <span
         className={`rotating-text inline-block transition-all duration-300 ${
-          isAnimating ? "translate-y-[-100%] opacity-0" : "translate-y-0 opacity-100"
+          isAnimating ? "-translate-y-full opacity-0" : "translate-y-0 opacity-100"
         }`}
       >
         {texts[currentIndex]}

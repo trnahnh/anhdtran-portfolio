@@ -1,6 +1,6 @@
 import UnderlineLink from "./UnderlineLink";
 import ProjectCard from "./ProjectCard";
-import { currentProjects, pastProjects, type Project } from "@/lib/data/projects";
+import { currentProjects, pastProjects } from "@/lib/data/projects";
 
 function AnimatedDots() {
   return (

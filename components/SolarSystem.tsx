@@ -113,7 +113,7 @@ export default function SolarSystem() {
 
   return (
     <div
-      className="fixed inset-0 z-[1] pointer-events-none overflow-hidden transition-opacity duration-300"
+      className="fixed inset-0 z-1 pointer-events-none overflow-hidden transition-opacity duration-300"
       style={{ opacity: isDark ? 1 : 0 }}
       aria-hidden="true"
     >

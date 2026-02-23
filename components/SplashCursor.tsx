@@ -1,6 +1,78 @@
 "use client";
 import React, { useEffect, useRef } from "react";
 
+type GL = WebGLRenderingContext | WebGL2RenderingContext;
+
+interface FluidGLApi {
+  gl: GL;
+  compileShader: (type: number, source: string, keywords?: string[]) => WebGLShader;
+  createProgram: (vertexShader: WebGLShader, fragmentShader: WebGLShader) => WebGLProgram;
+  getUniforms: (program: WebGLProgram) => { [key: string]: WebGLUniformLocation | null };
+}
+
+function hashCode(s: string) {
+  if (s.length === 0) return 0;
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    hash = (hash << 5) - hash + s.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash;
+}
+
+class Material {
+  private api: FluidGLApi;
+  vertexShader: WebGLShader;
+  fragmentShaderSource: string;
+  programs: { [key: number]: WebGLProgram } = {};
+  activeProgram: WebGLProgram | null = null;
+  uniforms: { [key: string]: WebGLUniformLocation | null } = {};
+
+  constructor(api: FluidGLApi, vertexShader: WebGLShader, fragmentShaderSource: string) {
+    this.api = api;
+    this.vertexShader = vertexShader;
+    this.fragmentShaderSource = fragmentShaderSource;
+  }
+  setKeywords(keywords: string[]) {
+    let hash = 0;
+    for (let i = 0; i < keywords.length; i++) hash += hashCode(keywords[i]);
+    let program = this.programs[hash];
+    if (program == null) {
+      const fragmentShader = this.api.compileShader(
+        this.api.gl.FRAGMENT_SHADER,
+        this.fragmentShaderSource,
+        keywords
+      );
+      if (!fragmentShader) {
+        throw new Error('Failed to compile fragment shader');
+      }
+      program = this.api.createProgram(this.vertexShader, fragmentShader);
+      this.programs[hash] = program;
+    }
+    if (program === this.activeProgram) return;
+    this.uniforms = this.api.getUniforms(program);
+    this.activeProgram = program;
+  }
+  bind() {
+    this.api.gl.useProgram(this.activeProgram);
+  }
+}
+
+class Program {
+  private gl: GL;
+  uniforms: { [key: string]: WebGLUniformLocation | null } = {};
+  program: WebGLProgram;
+
+  constructor(api: FluidGLApi, vertexShader: WebGLShader, fragmentShader: WebGLShader) {
+    this.gl = api.gl;
+    this.program = api.createProgram(vertexShader, fragmentShader);
+    this.uniforms = api.getUniforms(this.program);
+  }
+  bind() {
+    this.gl.useProgram(this.program);
+  }
+}
+
 function SplashCursor({
   SIM_RESOLUTION = 128,
   DYE_RESOLUTION = 1440,
@@ -178,55 +250,6 @@ function SplashCursor({
       );
       const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
       return status === gl.FRAMEBUFFER_COMPLETE;
-    }
-
-    class Material {
-      vertexShader: WebGLShader;
-      fragmentShaderSource: string;
-      programs: { [key: number]: WebGLProgram } = {};
-      activeProgram: WebGLProgram | null = null;
-      uniforms: { [key: string]: WebGLUniformLocation | null } = {};
-
-      constructor(vertexShader: WebGLShader, fragmentShaderSource: string) {
-        this.vertexShader = vertexShader;
-        this.fragmentShaderSource = fragmentShaderSource;
-      }
-      setKeywords(keywords: string[]) {
-        let hash = 0;
-        for (let i = 0; i < keywords.length; i++) hash += hashCode(keywords[i]);
-        let program = this.programs[hash];
-        if (program == null) {
-          const fragmentShader = compileShader(
-            gl.FRAGMENT_SHADER,
-            this.fragmentShaderSource,
-            keywords
-          );
-          if (!fragmentShader) {
-            throw new Error('Failed to compile fragment shader');
-          }
-          program = createProgram(this.vertexShader, fragmentShader);
-          this.programs[hash] = program;
-        }
-        if (program === this.activeProgram) return;
-        this.uniforms = getUniforms(program);
-        this.activeProgram = program;
-      }
-      bind() {
-        gl.useProgram(this.activeProgram);
-      }
-    }
-
-    class Program {
-      uniforms: { [key: string]: WebGLUniformLocation | null } = {};
-      program: WebGLProgram;
-
-      constructor(vertexShader: WebGLShader, fragmentShader: WebGLShader) {
-        this.program = createProgram(vertexShader, fragmentShader);
-        this.uniforms = getUniforms(this.program);
-      }
-      bind() {
-        gl.useProgram(this.program);
-      }
     }
 
     function createProgram(vertexShader: WebGLShader, fragmentShader: WebGLShader) {
@@ -623,19 +646,22 @@ function SplashCursor({
     let curl: FBO;
     let pressure: DoubleFBO;
 
-    const copyProgram = new Program(baseVertexShader!, copyShader!);
-    const clearProgram = new Program(baseVertexShader!, clearShader!);
-    const splatProgram = new Program(baseVertexShader!, splatShader!);
-    const advectionProgram = new Program(baseVertexShader!, advectionShader!);
-    const divergenceProgram = new Program(baseVertexShader!, divergenceShader!);
-    const curlProgram = new Program(baseVertexShader!, curlShader!);
-    const vorticityProgram = new Program(baseVertexShader!, vorticityShader!);
-    const pressureProgram = new Program(baseVertexShader!, pressureShader!);
+    const api: FluidGLApi = { gl, compileShader, createProgram, getUniforms };
+
+    const copyProgram = new Program(api, baseVertexShader!, copyShader!);
+    const clearProgram = new Program(api, baseVertexShader!, clearShader!);
+    const splatProgram = new Program(api, baseVertexShader!, splatShader!);
+    const advectionProgram = new Program(api, baseVertexShader!, advectionShader!);
+    const divergenceProgram = new Program(api, baseVertexShader!, divergenceShader!);
+    const curlProgram = new Program(api, baseVertexShader!, curlShader!);
+    const vorticityProgram = new Program(api, baseVertexShader!, vorticityShader!);
+    const pressureProgram = new Program(api, baseVertexShader!, pressureShader!);
     const gradienSubtractProgram = new Program(
+      api,
       baseVertexShader!,
       gradientSubtractShader!
     );
-    const displayMaterial = new Material(baseVertexShader!, displayShaderSource);
+    const displayMaterial = new Material(api, baseVertexShader!, displayShaderSource);
 
     function initFramebuffers() {
       const simRes = getResolution(config.SIM_RESOLUTION);
@@ -1194,15 +1220,7 @@ function SplashCursor({
       return Math.floor(input * pixelRatio);
     }
 
-    function hashCode(s: string) {
-      if (s.length === 0) return 0;
-      let hash = 0;
-      for (let i = 0; i < s.length; i++) {
-        hash = (hash << 5) - hash + s.charCodeAt(i);
-        hash |= 0;
-      }
-      return hash;
-    }
+
 
     const handleMouseDown = (e: MouseEvent) => {
       const pointer = pointers[0];
@@ -1297,7 +1315,7 @@ function SplashCursor({
   ]);
 
   return (
-    <div className="fixed inset-0 z-[200] pointer-events-none">
+    <div className="fixed inset-0 z-200 pointer-events-none">
       <canvas ref={canvasRef} className="w-full h-full" style={{ willChange: 'contents' }} />
     </div>
   );
