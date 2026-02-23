@@ -13,7 +13,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="text-muted-foreground">
+    <div className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3">
       <div className="flex items-start gap-2">
         <span className="mt-0.5" aria-hidden="true">
           &#8627;
@@ -63,7 +63,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                   {project.techStack.map((tech) => (
                     <span
                       key={tech}
-                      className="px-2.5 py-1 text-xs rounded-full bg-muted text-muted-foreground border border-border"
+                      className="px-2.5 py-1 text-xs rounded-full bg-muted text-muted-foreground border border-border shadow-sm"
                     >
                       {tech}
                     </span>

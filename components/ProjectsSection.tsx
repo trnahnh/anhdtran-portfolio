@@ -65,7 +65,10 @@ export default function ProjectsSection({
         // Simple list on landing page
         <div className="space-y-4 pl-6 sm:pl-7">
           {currentProjects.map((project) => (
-            <div key={project.name} className="text-muted-foreground">
+            <div
+              key={project.name}
+              className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3"
+            >
               <span className="mr-2" aria-hidden="true">
                 &#8627;
               </span>

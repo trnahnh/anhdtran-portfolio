@@ -17,7 +17,7 @@ export default function ExperienceSection() {
             {currentExperiences.map((exp) => (
               <div
                 key={`${exp.title}-${exp.company}`}
-                className="text-muted-foreground"
+                className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3"
               >
                 <span className="mr-2" aria-hidden="true">
                   &#8627;
@@ -54,7 +54,7 @@ export default function ExperienceSection() {
             {pastExperiences.map((exp) => (
               <div
                 key={`${exp.title}-${exp.company}`}
-                className="text-muted-foreground"
+                className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3"
               >
                 <span className="mr-2" aria-hidden="true">
                   &#8627;

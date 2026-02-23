@@ -39,7 +39,7 @@ export default function NowPlaying() {
               alt={track.title ?? "Album art"}
               width={40}
               height={40}
-              className="rounded"
+              className="rounded shadow-depth"
             />
             {/* Pulsing playing indicator */}
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full">
