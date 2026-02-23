@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import PageTransition from "@/components/PageTransition";
 import ScrollToTop from "@/components/ScrollToTop";
 import PagePeel from "@/components/PagePeel";
+import TerminalShortcut from "@/components/TerminalShortcut";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -50,6 +51,7 @@ export default function RootLayout({
         <PageTransition>{children}</PageTransition>
         <ScrollToTop />
         <PagePeel />
+        <TerminalShortcut />
         <SpeedInsights />
         <Analytics />
       </body>
