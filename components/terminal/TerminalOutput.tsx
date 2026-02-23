@@ -22,7 +22,7 @@ const TerminalOutput = memo(forwardRef<HTMLDivElement, TerminalOutputProps>(
             ) : line.columns ? (
               <div className="flex font-mono text-xs sm:text-sm">
                 <span className="shrink-0 w-20 sm:w-28 inline-block">{line.columns[0]}</span>
-                <span className="min-w-0 break-words">{line.columns[1]}</span>
+                <span className="min-w-0 wrap-break-word">{line.columns[1]}</span>
               </div>
             ) : (
               <pre className="whitespace-pre-wrap font-mono text-xs sm:text-sm">{line.text}</pre>
