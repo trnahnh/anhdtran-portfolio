@@ -38,7 +38,11 @@ export default function Header() {
             {pathname !== "/profile" && (
               <UnderlineLink href="/profile">Profile</UnderlineLink>
             )}
-            <UnderlineLink href="/resume/Resume_Anh_Tran.pdf" external>
+            <UnderlineLink
+              href="/resume/Resume_Anh_Tran.pdf"
+              external
+              showIcon={false}
+            >
               Resume
             </UnderlineLink>
           </nav>
