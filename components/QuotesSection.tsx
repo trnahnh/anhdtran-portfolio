@@ -41,8 +41,6 @@ export default function QuotesSection() {
         className="flex items-center gap-4"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
-        onFocus={() => setIsPaused(true)}
-        onBlur={() => setIsPaused(false)}
       >
         <button
           onClick={prev}

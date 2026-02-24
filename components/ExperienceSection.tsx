@@ -17,7 +17,7 @@ export default function ExperienceSection() {
           <div className="space-y-3 pl-6 sm:pl-7">
             {currentExperiences.map((exp, i) => (
               <ScrollReveal key={`${exp.title}-${exp.company}`} delay={i * 100}>
-                <div className="border-l-2 border-foreground text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3">
+                <div className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3">
                   <span className="mr-2" aria-hidden="true">
                     &#8627;
                   </span>
