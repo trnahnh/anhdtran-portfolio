@@ -8,10 +8,9 @@ interface ScrollRevealProps {
   className?: string;
 }
 
-function getPrefersReducedMotion() {
-  if (typeof window === "undefined") return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
+const reducedMotionCached =
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 export default function ScrollReveal({
   children,
@@ -19,7 +18,7 @@ export default function ScrollReveal({
   className,
 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const reducedMotion = getPrefersReducedMotion();
+  const reducedMotion = reducedMotionCached;
   const [isVisible, setIsVisible] = useState(reducedMotion);
 
   useEffect(() => {
