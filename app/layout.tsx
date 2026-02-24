@@ -15,7 +15,7 @@ const inter = Inter({ subsets: ["latin"], weight: ["200", "300", "700"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://anhdtrn.com"),
-  title: "Anh Tran | Full-stack Developer",
+  title: "Anh Tran",
   description:
     "Full-stack Developer and Powerlifting Enthusiast. Explore my space now.",
   keywords: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     apple: "/metadata/icon.png",
   },
   openGraph: {
-    title: "Anh Tran | Full-stack Developer",
+    title: "Anh Tran",
     description:
       "Full-stack Developer and Powerlifting Enthusiast. Explore my space now.",
     type: "website",
