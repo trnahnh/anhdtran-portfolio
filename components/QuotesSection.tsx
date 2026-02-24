@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const quotes = [
@@ -18,9 +18,17 @@ const quotes = [
 
 export default function QuotesSection() {
   const [index, setIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const prev = () => setIndex((i) => (i - 1 + quotes.length) % quotes.length);
-  const next = () => setIndex((i) => (i + 1) % quotes.length);
+  const next = useCallback(() => setIndex((i) => (i + 1) % quotes.length), []);
+
+  useEffect(() => {
+    if (isPaused) return;
+
+    const interval = setInterval(next, 5000);
+    return () => clearInterval(interval);
+  }, [isPaused, index, next]);
 
   const { text, author } = quotes[index];
 
@@ -29,7 +37,13 @@ export default function QuotesSection() {
       <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
         Words to Live By
       </h2>
-      <div className="flex items-center gap-4">
+      <div
+        className="flex items-center gap-4"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onFocus={() => setIsPaused(true)}
+        onBlur={() => setIsPaused(false)}
+      >
         <button
           onClick={prev}
           aria-label="Previous quote"
@@ -59,11 +73,16 @@ export default function QuotesSection() {
             aria-label={`Go to quote ${i + 1}`}
             className="p-2 flex items-center justify-center"
           >
-            <span
-              className={`w-1.5 h-1.5 rounded-full transition-colors block ${
-                i === index ? "bg-foreground" : "bg-muted-foreground/30"
-              }`}
-            />
+            <span className="relative flex items-center justify-center w-1.5 h-1.5">
+              {i === index && (
+                <span className="absolute inset-0 rounded-full bg-foreground/30 animate-ping" />
+              )}
+              <span
+                className={`relative w-1.5 h-1.5 rounded-full transition-colors block ${
+                  i === index ? "bg-foreground" : "bg-muted-foreground/30"
+                }`}
+              />
+            </span>
           </button>
         ))}
       </div>

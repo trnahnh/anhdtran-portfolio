@@ -47,7 +47,7 @@ export default function ContactSection() {
           return (
             <div
               key={contact.label}
-              className="text-muted-foreground flex items-center rounded-lg p-2 -mx-2 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3"
+              className="group text-muted-foreground flex items-center rounded-lg p-2 -mx-2 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3"
             >
               <span className="mr-2" aria-hidden="true">
                 &#8627;
@@ -58,7 +58,7 @@ export default function ContactSection() {
                   alt={contact.label}
                   width={18}
                   height={18}
-                  className="mr-2"
+                  className="mr-2 transition-transform duration-300 group-hover:scale-110"
                 />
               )}
               <span className="text-foreground">{contact.label}:</span>

@@ -1,5 +1,6 @@
 import UnderlineLink from "./UnderlineLink";
 import ProjectCard from "./ProjectCard";
+import ScrollReveal from "./ScrollReveal";
 import { currentProjects, pastProjects } from "@/lib/data/projects";
 
 function AnimatedDots() {
@@ -26,8 +27,8 @@ export default function ProjectsSection({
   showAll = false,
 }: ProjectsSectionProps) {
   return (
-    <section className="fade-in-up fade-in-up-delay-2">
-      <h2 className="text-lg font-medium mb-4">
+    <section>
+      <h2 className="fade-in-up fade-in-up-delay-2 text-lg font-medium mb-4">
         <span className="text-muted-foreground mr-2" aria-hidden="true">
           &#9670;
         </span>
@@ -48,43 +49,46 @@ export default function ProjectsSection({
               Currently building
               <AnimatedDots />
             </p>
-            {currentProjects.map((project) => (
-              <ProjectCard key={project.name} project={project} />
+            {currentProjects.map((project, i) => (
+              <ScrollReveal key={project.name} delay={i * 100}>
+                <ProjectCard project={project} />
+              </ScrollReveal>
             ))}
           </div>
           <div className="space-y-4">
             <p className="text-xs uppercase tracking-widest text-muted-foreground">
               Past
             </p>
-            {pastProjects.map((project) => (
-              <ProjectCard key={project.name} project={project} />
+            {pastProjects.map((project, i) => (
+              <ScrollReveal key={project.name} delay={i * 100}>
+                <ProjectCard project={project} />
+              </ScrollReveal>
             ))}
           </div>
         </div>
       ) : (
         // Simple list on landing page
         <div className="space-y-4 pl-6 sm:pl-7">
-          {currentProjects.map((project) => (
-            <div
-              key={project.name}
-              className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3"
-            >
-              <span className="mr-2" aria-hidden="true">
-                &#8627;
-              </span>
-              <UnderlineLink
-                href={project.link}
-                external
-                className="text-foreground font-medium"
-              >
-                {project.name}
-                {project.nameAlt && (
-                  <span className="ml-1 font-normal">{project.nameAlt}</span>
-                )}
-              </UnderlineLink>
-              <span className="mx-2">—</span>
-              <span>{project.description}</span>
-            </div>
+          {currentProjects.map((project, i) => (
+            <ScrollReveal key={project.name} delay={i * 100}>
+              <div className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3">
+                <span className="mr-2" aria-hidden="true">
+                  &#8627;
+                </span>
+                <UnderlineLink
+                  href={project.link}
+                  external
+                  className="text-foreground font-medium"
+                >
+                  {project.name}
+                  {project.nameAlt && (
+                    <span className="ml-1 font-normal">{project.nameAlt}</span>
+                  )}
+                </UnderlineLink>
+                <span className="mx-2">—</span>
+                <span>{project.description}</span>
+              </div>
+            </ScrollReveal>
           ))}
         </div>
       )}
