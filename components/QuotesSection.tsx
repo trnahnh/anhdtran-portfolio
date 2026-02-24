@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const quotes = [
@@ -18,19 +18,35 @@ const quotes = [
 
 export default function QuotesSection() {
   const [index, setIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
   const prev = () => setIndex((i) => (i - 1 + quotes.length) % quotes.length);
   const next = useCallback(() => setIndex((i) => (i + 1) % quotes.length), []);
 
   useEffect(() => {
+    if (!sectionRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1 },
+    );
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!isVisible) return;
     const interval = setInterval(next, 3000);
     return () => clearInterval(interval);
-  }, [index, next]);
+  }, [isVisible, index, next]);
 
   const { text, author } = quotes[index];
 
   return (
-    <section className="fade-in-up fade-in-up-delay-2 space-y-6">
+    <section
+      ref={sectionRef}
+      className="fade-in-up fade-in-up-delay-2 space-y-6"
+    >
       <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
         Words to Live By
       </h2>
