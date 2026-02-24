@@ -15,7 +15,7 @@ export const experiences: Experience[] = [
     status: "current",
   },
   {
-    title: "Full-stack Software Engineer Fellow",
+    title: "Software Engineer Fellow",
     company: "Caphne",
     companyUrl: "https://caphne.co",
     description: "Tinder for Study Buddies",
