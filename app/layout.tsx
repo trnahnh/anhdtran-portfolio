@@ -15,23 +15,33 @@ const inter = Inter({ subsets: ["latin"], weight: ["200", "300", "700"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://anhdtrn.com"),
-  title: "Anh Tran",
+  title: "Anh Tran | Full-stack Developer",
   description:
-    "Full-stack Developer and Powerlifting Enthusiast. Building innovative solutions with AI and modern web technologies.",
+    "Full-stack Developer and Powerlifting Enthusiast. Explore my space now.",
   keywords: [
     "Anh Tran",
     "Full-stack Developer",
     "Software Engineer",
+    "Portfolio",
     "React",
     "Next.js",
     "TypeScript",
   ],
   authors: [{ name: "Anh Tran" }],
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/metadata/icon.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: "/metadata/icon.png",
+  },
   openGraph: {
-    title: "Anh Tran",
+    title: "Anh Tran | Full-stack Developer",
     description:
-      "Full-stack Developer and Powerlifting Enthusiast. Building innovative solutions with AI and modern web technologies.",
+      "Full-stack Developer and Powerlifting Enthusiast. Explore my space now.",
     type: "website",
+    url: "https://anhdtrn.com",
+    siteName: "Anh Tran",
     images: [{ url: "/profile/portrait.png" }],
   },
 };
