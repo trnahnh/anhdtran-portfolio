@@ -26,7 +26,7 @@ export default function QuotesSection() {
   useEffect(() => {
     if (isPaused) return;
 
-    const interval = setInterval(next, 5000);
+    const interval = setInterval(next, 3000);
     return () => clearInterval(interval);
   }, [isPaused, index, next]);
 
