@@ -18,17 +18,14 @@ const quotes = [
 
 export default function QuotesSection() {
   const [index, setIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
 
   const prev = () => setIndex((i) => (i - 1 + quotes.length) % quotes.length);
   const next = useCallback(() => setIndex((i) => (i + 1) % quotes.length), []);
 
   useEffect(() => {
-    if (isPaused) return;
-
     const interval = setInterval(next, 3000);
     return () => clearInterval(interval);
-  }, [isPaused, index, next]);
+  }, [index, next]);
 
   const { text, author } = quotes[index];
 
@@ -37,11 +34,7 @@ export default function QuotesSection() {
       <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
         Words to Live By
       </h2>
-      <div
-        className="flex items-center gap-4"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-      >
+      <div className="flex items-center gap-4">
         <button
           onClick={prev}
           aria-label="Previous quote"
