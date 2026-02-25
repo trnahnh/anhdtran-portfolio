@@ -598,6 +598,10 @@ export default function SpacePage() {
   const targetZoomRef = useRef(95);
   const currentZoomRef = useRef(220); // starts far for entry animation
   const handsActiveRef = useRef(false);
+  const orbitThetaRef = useRef(0);
+  const orbitPhiRef = useRef(0);
+  const orbitVelXRef = useRef(0);
+  const orbitVelYRef = useRef(0);
   const [camState, setCamState] = useState<
     "loading" | "ready" | "denied" | "error"
   >("loading");
@@ -1122,10 +1126,28 @@ export default function SpacePage() {
           entryActive = false;
         }
       } else {
-        // Normal gesture-driven lerp
+        // Orbit inertia + friction
+        orbitThetaRef.current += orbitVelXRef.current;
+        orbitPhiRef.current = Math.max(
+          -0.4,
+          Math.min(0.8, orbitPhiRef.current + orbitVelYRef.current),
+        );
+        orbitVelXRef.current *= 0.95;
+        orbitVelYRef.current *= 0.95;
+
+        // Normal gesture-driven zoom lerp
         currentZoomRef.current +=
           (targetZoomRef.current - currentZoomRef.current) * 0.06;
-        camera.position.set(0, 20, currentZoomRef.current);
+
+        // Spherical camera position
+        const theta = orbitThetaRef.current;
+        const phi = orbitPhiRef.current;
+        const zoom = currentZoomRef.current;
+        camera.position.set(
+          zoom * Math.sin(theta),
+          20 + zoom * 0.3 * phi,
+          zoom * Math.cos(theta),
+        );
       }
       cameraLookAtTarget.multiplyScalar(0.997);
       cameraLookAtCurrent.lerp(cameraLookAtTarget, 0.03);
@@ -1246,39 +1268,7 @@ export default function SpacePage() {
     };
     window.addEventListener("resize", onResize);
 
-    // ── Touch pinch-zoom ────────────────────────────────────────────────────
-    let lastPinchDist = 0;
-
-    const pinchDist = (e: TouchEvent) => {
-      const [a, b] = [e.touches[0], e.touches[1]];
-      return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-    };
-
-    const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 2) lastPinchDist = pinchDist(e);
-    };
-
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length !== 2) return;
-      e.preventDefault(); // stop page scroll during pinch
-      const dist = pinchDist(e);
-      const delta = lastPinchDist - dist; // positive = fingers closing = zoom in
-      lastPinchDist = dist;
-      targetZoomRef.current = Math.max(
-        25,
-        Math.min(130, targetZoomRef.current + delta * 0.35),
-      );
-    };
-
-    canvas.addEventListener("touchstart", onTouchStart, { passive: true });
-    canvas.addEventListener("touchmove", onTouchMove, { passive: false });
-
-    // ── Mouse/touch interaction for planets ─────────────────────────────────
-    const onMouseMove = (e: MouseEvent) => {
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-      mouseDirty = true;
-    };
+    // ── Orbit helpers ─────────────────────────────────────────────────────
     const zoomToPlanet = (idx: number) => {
       const mesh = planetMeshes[idx];
       const worldPos = new THREE.Vector3();
@@ -1286,19 +1276,104 @@ export default function SpacePage() {
       targetZoomRef.current = Math.max(25, PLANET_DATA[idx].orbitR * 0.7);
       cameraLookAtTarget.copy(worldPos).multiplyScalar(0.3);
     };
-    const onCanvasClick = () => {
-      if (hoveredPlanetIdx >= 0) zoomToPlanet(hoveredPlanetIdx);
+
+    // ── Mouse: drag to orbit, move to hover, click to select ────────────
+    let isDragging = false;
+    let wasDragged = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+
+    const onMouseDown = (e: MouseEvent) => {
+      isDragging = true;
+      wasDragged = false;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
     };
+    const onMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        const dx = e.clientX - lastMouseX;
+        const dy = e.clientY - lastMouseY;
+        if (
+          Math.abs(e.clientX - dragStartX) + Math.abs(e.clientY - dragStartY) >
+          5
+        )
+          wasDragged = true;
+        orbitVelXRef.current = dx * 0.003;
+        orbitVelYRef.current = -dy * 0.002;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+      } else {
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        mouseDirty = true;
+      }
+    };
+    const onMouseUp = () => {
+      isDragging = false;
+    };
+    const onCanvasClick = () => {
+      if (!wasDragged && hoveredPlanetIdx >= 0) zoomToPlanet(hoveredPlanetIdx);
+    };
+    canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
     canvas.addEventListener("click", onCanvasClick);
 
-    // Mobile tap for planet interaction
+    // ── Touch: 1-finger drag orbit + tap select, 2-finger pinch zoom ────
+    let lastPinchDist = 0;
+    let touchDragX = 0;
+    let touchDragY = 0;
+    let touchMoved = false;
     let tapStartTime = 0;
-    const onTapStart = (e: TouchEvent) => {
-      if (e.touches.length === 1) tapStartTime = Date.now();
+
+    const pinchDist = (e: TouchEvent) => {
+      const [a, b] = [e.touches[0], e.touches[1]];
+      return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
     };
-    const onTapEnd = (e: TouchEvent) => {
-      if (Date.now() - tapStartTime > 300 || e.changedTouches.length !== 1)
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        lastPinchDist = pinchDist(e);
+      } else if (e.touches.length === 1) {
+        tapStartTime = Date.now();
+        touchDragX = e.touches[0].clientX;
+        touchDragY = e.touches[0].clientY;
+        touchMoved = false;
+      }
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const dist = pinchDist(e);
+        const delta = lastPinchDist - dist;
+        lastPinchDist = dist;
+        targetZoomRef.current = Math.max(
+          25,
+          Math.min(130, targetZoomRef.current + delta * 0.35),
+        );
+      } else if (e.touches.length === 1) {
+        const dx = e.touches[0].clientX - touchDragX;
+        const dy = e.touches[0].clientY - touchDragY;
+        if (Math.abs(dx) + Math.abs(dy) > 5) touchMoved = true;
+        if (touchMoved) {
+          e.preventDefault();
+          orbitVelXRef.current = dx * 0.004;
+          orbitVelYRef.current = -dy * 0.003;
+        }
+        touchDragX = e.touches[0].clientX;
+        touchDragY = e.touches[0].clientY;
+      }
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      if (
+        touchMoved ||
+        Date.now() - tapStartTime > 300 ||
+        e.changedTouches.length !== 1
+      )
         return;
       const touch = e.changedTouches[0];
       mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
@@ -1310,18 +1385,20 @@ export default function SpacePage() {
         if (idx >= 0) zoomToPlanet(idx);
       }
     };
-    canvas.addEventListener("touchstart", onTapStart, { passive: true });
-    canvas.addEventListener("touchend", onTapEnd, { passive: true });
+    canvas.addEventListener("touchstart", onTouchStart, { passive: true });
+    canvas.addEventListener("touchmove", onTouchMove, { passive: false });
+    canvas.addEventListener("touchend", onTouchEnd, { passive: true });
 
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", onResize);
+      canvas.removeEventListener("mousedown", onMouseDown);
+      canvas.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      canvas.removeEventListener("click", onCanvasClick);
       canvas.removeEventListener("touchstart", onTouchStart);
       canvas.removeEventListener("touchmove", onTouchMove);
-      canvas.removeEventListener("mousemove", onMouseMove);
-      canvas.removeEventListener("click", onCanvasClick);
-      canvas.removeEventListener("touchstart", onTapStart);
-      canvas.removeEventListener("touchend", onTapEnd);
+      canvas.removeEventListener("touchend", onTouchEnd);
       shootingStarPool.forEach((s) => {
         s.line.geometry.dispose();
         s.mat.dispose();
@@ -1335,6 +1412,7 @@ export default function SpacePage() {
   // ── Keyboard controls ──────────────────────────────────────────────────────
   useEffect(() => {
     const ZOOM_STEP = 6;
+    const ORBIT_STEP = 0.012;
     const onKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
         case "ArrowUp":
@@ -1353,6 +1431,24 @@ export default function SpacePage() {
             130,
             targetZoomRef.current + ZOOM_STEP,
           );
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          orbitVelXRef.current -= ORBIT_STEP;
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          orbitVelXRef.current += ORBIT_STEP;
+          break;
+        case "w":
+        case "W":
+          e.preventDefault();
+          orbitVelYRef.current += ORBIT_STEP * 0.6;
+          break;
+        case "s":
+        case "S":
+          e.preventDefault();
+          orbitVelYRef.current -= ORBIT_STEP * 0.6;
           break;
         case "Escape":
           router.push("/profile");
@@ -1418,6 +1514,9 @@ export default function SpacePage() {
         minDetectionConfidence: 0.72,
         minTrackingConfidence: 0.55,
       });
+
+      let prevPalmX: number | null = null;
+      let prevPalmY: number | null = null;
 
       hands.onResults((results) => {
         if (stopped) return;
@@ -1494,12 +1593,12 @@ export default function SpacePage() {
             ctx.fill();
           });
 
-          // Pinch detection
+          // Pinch detection + palm tracking — both run simultaneously
           const thumb = landmarks[4];
           const index = landmarks[8];
           const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
 
-          // Draw pinch line
+          // Draw pinch indicator line
           ctx.beginPath();
           ctx.moveTo(
             (1 - thumb.x) * overlayCanvas.width,
@@ -1514,9 +1613,7 @@ export default function SpacePage() {
           ctx.lineWidth = 2;
           ctx.stroke();
 
-          // Map pinch distance → camera zoom
-          // pinchDist ≈ 0.02 (fully pinched) → zoom 25 (close-up)
-          // pinchDist ≈ 0.28 (fully spread)  → zoom 130 (full system view)
+          // ── Zoom — always mapped from pinch distance ──
           const minDist = 0.02;
           const maxDist = 0.28;
           const t = Math.max(
@@ -1524,6 +1621,19 @@ export default function SpacePage() {
             Math.min(1, (pinchDist - minDist) / (maxDist - minDist)),
           );
           targetZoomRef.current = 25 + t * 105;
+
+          // ── Orbit — always tracked from palm movement ──
+          const palm = landmarks[9]; // middle finger MCP — stable palm center
+          if (prevPalmX !== null && prevPalmY !== null) {
+            const dx = palm.x - prevPalmX;
+            const dy = palm.y - prevPalmY;
+            if (Math.abs(dx) > 0.005 || Math.abs(dy) > 0.005) {
+              orbitVelXRef.current = -dx * 4;
+              orbitVelYRef.current = -dy * 3;
+            }
+          }
+          prevPalmX = palm.x;
+          prevPalmY = palm.y;
         }
       });
 
@@ -1616,13 +1726,13 @@ export default function SpacePage() {
           <span className="text-emerald-400/60">●</span> index tip
         </div>
         <div className="mt-1 text-white/20">
-          Pinch to zoom in · Spread to zoom out
+          Pinch to zoom · Open hand swipe to orbit
         </div>
         <div className="mt-0.5 text-white/15 hidden sm:block">
-          ↑ ↓ arrow keys or +/− to zoom · Esc to exit
+          Drag to orbit · ← → orbit · ↑ ↓ zoom · W/S tilt · Esc exit
         </div>
         <div className="mt-0.5 text-white/15 sm:hidden">
-          Two fingers on screen to zoom
+          Drag to orbit · Two fingers to zoom
         </div>
       </motion.div>
 
