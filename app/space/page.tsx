@@ -759,21 +759,17 @@ export default function SpacePage() {
     sunLayer.rotation.y = Math.PI; // offset so granules don't align
     scene.add(sunLayer);
 
-    // Corona layers — desktop: 4 layers, mobile: 2 (innermost only)
-    const coronaLayers = isMobile
-      ? [
-          { r: 3.6, opacity: 0.18, color: 0xffcc44 },
-          { r: 5.0, opacity: 0.08, color: 0xff8800 },
-        ]
-      : [
-          { r: 3.6, opacity: 0.18, color: 0xffcc44 },
-          { r: 4.5, opacity: 0.1, color: 0xff8800 },
-          { r: 6.2, opacity: 0.05, color: 0xff4400 },
-          { r: 9.0, opacity: 0.02, color: 0xff2200 },
-        ];
+    // Corona layers — all 4 on both, reduced segments on mobile
+    const coronaSeg = isMobile ? 16 : 32;
+    const coronaLayers = [
+      { r: 3.6, opacity: 0.18, color: 0xffcc44 },
+      { r: 4.5, opacity: 0.1, color: 0xff8800 },
+      { r: 6.2, opacity: 0.05, color: 0xff4400 },
+      { r: 9.0, opacity: 0.02, color: 0xff2200 },
+    ];
     coronaLayers.forEach(({ r, opacity, color }) => {
       const mesh = new THREE.Mesh(
-        new THREE.SphereGeometry(r, 32, 32),
+        new THREE.SphereGeometry(r, coronaSeg, coronaSeg),
         new THREE.MeshBasicMaterial({
           color,
           transparent: true,
@@ -821,30 +817,21 @@ export default function SpacePage() {
       // When a texture supplies the colour, use white so it isn't tinted
       const matColor = surfaceTexture ? new THREE.Color(0xffffff) : p.color;
 
-      const mat = isMobile
-        ? new THREE.MeshStandardMaterial({
-            color: matColor,
-            emissive: p.emissive,
-            emissiveIntensity: 0.5,
-            metalness: p.metalness,
-            roughness: p.roughness,
-            ...(surfaceTexture ? { map: surfaceTexture } : {}),
-          })
-        : new THREE.MeshPhysicalMaterial({
-            color: matColor,
-            emissive: p.emissive,
-            emissiveIntensity: 0.6,
-            metalness: p.metalness,
-            roughness: p.roughness,
-            transmission: surfaceTexture ? 0 : 0.08, // no transmission on textured planets
-            thickness: p.size * 1.2,
-            ior: 1.38,
-            clearcoat: 0.6,
-            clearcoatRoughness: 0.25,
-            transparent: !surfaceTexture,
-            opacity: surfaceTexture ? 1 : 0.97,
-            ...(surfaceTexture ? { map: surfaceTexture } : {}),
-          });
+      const mat = new THREE.MeshPhysicalMaterial({
+        color: matColor,
+        emissive: p.emissive,
+        emissiveIntensity: isMobile ? 0.5 : 0.6,
+        metalness: p.metalness,
+        roughness: p.roughness,
+        transmission: surfaceTexture ? 0 : isMobile ? 0.04 : 0.08,
+        thickness: p.size * 1.2,
+        ior: 1.38,
+        clearcoat: isMobile ? 0.3 : 0.6,
+        clearcoatRoughness: isMobile ? 0.4 : 0.25,
+        transparent: !surfaceTexture,
+        opacity: surfaceTexture ? 1 : 0.97,
+        ...(surfaceTexture ? { map: surfaceTexture } : {}),
+      });
       const planetMesh = new THREE.Mesh(geo, mat);
 
       // Tilt group: rotates the spin axis to the planet's axial tilt,
