@@ -201,9 +201,9 @@ function buildOrbitRing(radius: number) {
   return new THREE.LineLoop(geo, mat);
 }
 
-function buildNebula(): THREE.Mesh {
-  const W = 2048,
-    H = 1024;
+function buildNebula(mobile = false): THREE.Mesh {
+  const W = mobile ? 512 : 2048,
+    H = mobile ? 256 : 1024;
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
@@ -261,7 +261,7 @@ function buildNebula(): THREE.Mesh {
   });
 
   const tex = new THREE.CanvasTexture(canvas);
-  const geo = new THREE.SphereGeometry(560, 48, 48);
+  const geo = new THREE.SphereGeometry(560, mobile ? 24 : 48, mobile ? 24 : 48);
   const mat = new THREE.MeshBasicMaterial({
     map: tex,
     side: THREE.BackSide,
@@ -684,20 +684,17 @@ export default function SpacePage() {
     camera.position.set(0, isMobile ? 40 : 55, isMobile ? 160 : 220); // entry start position
     camera.lookAt(0, 0, 0);
 
-    // ── Bloom post-processing (skip on mobile) ─────────────────────────────
-    let composer: EffectComposer | null = null;
-    if (!isMobile) {
-      composer = new EffectComposer(renderer);
-      composer.addPass(new RenderPass(scene, camera));
-      const bloomPass = new UnrealBloomPass(
-        new THREE.Vector2(window.innerWidth, window.innerHeight),
-        0.8,
-        0.4,
-        0.15,
-      );
-      composer.addPass(bloomPass);
-      composer.addPass(new OutputPass());
-    }
+    // ── Bloom post-processing (reduced on mobile) ─────────────────────────
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloomPass = new UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth, window.innerHeight),
+      isMobile ? 0.5 : 0.8,
+      isMobile ? 0.3 : 0.4,
+      isMobile ? 0.25 : 0.15,
+    );
+    composer.addPass(bloomPass);
+    composer.addPass(new OutputPass());
 
     // ── Lighting ───────────────────────────────────────────────────────────
     const ambient = new THREE.AmbientLight(0x111133, 0.9);
@@ -789,8 +786,8 @@ export default function SpacePage() {
       scene.add(mesh);
     });
 
-    // ── Nebula background — skip on mobile (canvas texture upload is costly) ──
-    if (!isMobile) scene.add(buildNebula());
+    // ── Nebula background (smaller texture on mobile) ──
+    scene.add(buildNebula(isMobile));
 
     // ── Planets ────────────────────────────────────────────────────────────
     const planetPivots: {
@@ -1249,11 +1246,7 @@ export default function SpacePage() {
         }
       }
 
-      if (composer) {
-        composer.render();
-      } else {
-        renderer.render(scene, camera);
-      }
+      composer.render();
     };
     animate();
 
@@ -1262,7 +1255,7 @@ export default function SpacePage() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener("resize", onResize);
 
@@ -1346,7 +1339,7 @@ export default function SpacePage() {
         s.line.geometry.dispose();
         s.mat.dispose();
       });
-      composer?.dispose();
+      composer.dispose();
       renderer.dispose();
       scene.clear();
     };
