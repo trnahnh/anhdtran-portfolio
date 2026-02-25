@@ -4,6 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import SpaceIntroScreen from "@/components/SpaceIntroScreen";
 
 // ── Planet data — all 8 ──────────────────────────────────────────────────────
@@ -21,6 +25,7 @@ const PLANET_DATA = [
     atmoColor: new THREE.Color(0x7090b0),
     metalness: 0.45,
     roughness: 0.68,
+    fact: "Smallest planet in the solar system",
   },
   {
     name: "Venus",
@@ -34,6 +39,7 @@ const PLANET_DATA = [
     atmoColor: new THREE.Color(0xe8c060),
     metalness: 0.08,
     roughness: 0.82,
+    fact: "Hottest planet in the solar system",
   },
   {
     name: "Earth",
@@ -47,6 +53,7 @@ const PLANET_DATA = [
     atmoColor: new THREE.Color(0x55aaee),
     metalness: 0.12,
     roughness: 0.52,
+    fact: "The only known planet with life",
   },
   {
     name: "Mars",
@@ -60,6 +67,7 @@ const PLANET_DATA = [
     atmoColor: new THREE.Color(0xdd7755),
     metalness: 0.18,
     roughness: 0.75,
+    fact: "Home to the tallest volcano — Olympus Mons",
   },
   {
     name: "Jupiter",
@@ -73,6 +81,7 @@ const PLANET_DATA = [
     atmoColor: new THREE.Color(0xddbb88),
     metalness: 0.05,
     roughness: 0.9,
+    fact: "Largest planet — fits 1,300 Earths inside",
   },
   {
     name: "Saturn",
@@ -91,6 +100,7 @@ const PLANET_DATA = [
     ringInner: 2.1,
     ringOuter: 3.8,
     ringTilt: 0.46,
+    fact: "Its rings could span from Earth to the Moon",
   },
   {
     name: "Uranus",
@@ -109,6 +119,7 @@ const PLANET_DATA = [
     ringInner: 1.5,
     ringOuter: 2.2,
     ringTilt: 1.5,
+    fact: "Rotates on its side at 98°",
   },
   {
     name: "Neptune",
@@ -122,6 +133,7 @@ const PLANET_DATA = [
     atmoColor: new THREE.Color(0x4466ee),
     metalness: 0.12,
     roughness: 0.58,
+    fact: "Winds reach 1,200 mph — fastest in the solar system",
   },
 ];
 
@@ -491,12 +503,98 @@ function buildEarthTexture(): THREE.CanvasTexture {
   return new THREE.CanvasTexture(cv);
 }
 
+function buildSunTexture(): THREE.CanvasTexture {
+  const W = 512,
+    H = 256;
+  const cv = document.createElement("canvas");
+  cv.width = W;
+  cv.height = H;
+  const ctx = cv.getContext("2d")!;
+
+  // Warm base gradient
+  const base = ctx.createLinearGradient(0, 0, 0, H);
+  base.addColorStop(0, "#ffcc44");
+  base.addColorStop(0.3, "#ffaa22");
+  base.addColorStop(0.5, "#ffbb33");
+  base.addColorStop(0.7, "#ff9911");
+  base.addColorStop(1, "#ffcc44");
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, W, H);
+
+  // Solar granulation — many small bright cells
+  for (let i = 0; i < 260; i++) {
+    const cx = Math.random() * W;
+    const cy = Math.random() * H;
+    const r = 4 + Math.random() * 12;
+    const bright = Math.random();
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    if (bright > 0.7) {
+      // Bright granule
+      grad.addColorStop(0, `rgba(255,240,160,${0.3 + bright * 0.3})`);
+      grad.addColorStop(0.6, `rgba(255,200,80,${0.15 + bright * 0.1})`);
+      grad.addColorStop(1, "rgba(255,180,60,0)");
+    } else {
+      // Darker intergranular lane
+      grad.addColorStop(0, `rgba(200,100,10,${0.2 + bright * 0.15})`);
+      grad.addColorStop(0.5, `rgba(180,80,5,${0.1 + bright * 0.05})`);
+      grad.addColorStop(1, "rgba(160,70,0,0)");
+    }
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Sunspots — a few dark regions
+  const spots: [number, number, number][] = [
+    [0.3, 0.45, 0.035],
+    [0.65, 0.55, 0.025],
+    [0.5, 0.35, 0.02],
+    [0.8, 0.4, 0.018],
+  ];
+  spots.forEach(([sx, sy, sr]) => {
+    const px = sx * W,
+      py = sy * H,
+      pr = sr * W;
+    // Dark umbra
+    ellipseBlob(ctx, sx, sy, sr * 0.5, sr * 0.5, 0, 60, 20, 0, 0.85, W, H);
+    // Penumbra
+    const pen = ctx.createRadialGradient(px, py, pr * 0.3, px, py, pr);
+    pen.addColorStop(0, "rgba(100,40,5,0.6)");
+    pen.addColorStop(0.5, "rgba(160,70,10,0.3)");
+    pen.addColorStop(1, "rgba(200,100,20,0)");
+    ctx.fillStyle = pen;
+    ctx.beginPath();
+    ctx.arc(px, py, pr, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Bright faculae near sunspots
+  ellipseBlob(ctx, 0.25, 0.42, 0.06, 0.03, 0.3, 255, 230, 140, 0.35, W, H);
+  ellipseBlob(ctx, 0.7, 0.58, 0.05, 0.025, -0.2, 255, 235, 150, 0.3, W, H);
+
+  // Limb darkening (edges of the equirectangular map → poles of the sphere)
+  const northDark = ctx.createLinearGradient(0, 0, 0, H * 0.12);
+  northDark.addColorStop(0, "rgba(120,50,0,0.5)");
+  northDark.addColorStop(1, "rgba(120,50,0,0)");
+  ctx.fillStyle = northDark;
+  ctx.fillRect(0, 0, W, H * 0.12);
+  const southDark = ctx.createLinearGradient(0, H * 0.88, 0, H);
+  southDark.addColorStop(0, "rgba(120,50,0,0)");
+  southDark.addColorStop(1, "rgba(120,50,0,0.5)");
+  ctx.fillStyle = southDark;
+  ctx.fillRect(0, H * 0.88, W, H * 0.12);
+
+  return new THREE.CanvasTexture(cv);
+}
+
 // ── Component ────────────────────────────────────────────────────────────────
 export default function SpacePage() {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
+  const planetLabelRef = useRef<HTMLDivElement>(null);
   const targetZoomRef = useRef(95);
   const currentZoomRef = useRef(220); // starts far for entry animation
   const handsActiveRef = useRef(false);
@@ -586,6 +684,21 @@ export default function SpacePage() {
     camera.position.set(0, isMobile ? 40 : 55, isMobile ? 160 : 220); // entry start position
     camera.lookAt(0, 0, 0);
 
+    // ── Bloom post-processing (skip on mobile) ─────────────────────────────
+    let composer: EffectComposer | null = null;
+    if (!isMobile) {
+      composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      const bloomPass = new UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        0.8,
+        0.4,
+        0.15,
+      );
+      composer.addPass(bloomPass);
+      composer.addPass(new OutputPass());
+    }
+
     // ── Lighting ───────────────────────────────────────────────────────────
     const ambient = new THREE.AmbientLight(0x111133, 0.9);
     scene.add(ambient);
@@ -628,11 +741,26 @@ export default function SpacePage() {
 
     // ── Sun ────────────────────────────────────────────────────────────────
     const sunSeg = isMobile ? 24 : 48;
+    const sunTex = buildSunTexture();
     const sunCore = new THREE.Mesh(
       new THREE.SphereGeometry(3.0, sunSeg, sunSeg),
-      new THREE.MeshBasicMaterial({ color: 0xfff4a0 }),
+      new THREE.MeshBasicMaterial({ map: sunTex }),
     );
     scene.add(sunCore);
+
+    // Inner plasma layer — slightly larger, rotates independently for depth
+    const sunLayer = new THREE.Mesh(
+      new THREE.SphereGeometry(3.12, sunSeg, sunSeg),
+      new THREE.MeshBasicMaterial({
+        map: sunTex,
+        transparent: true,
+        opacity: 0.35,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      }),
+    );
+    sunLayer.rotation.y = Math.PI; // offset so granules don't align
+    scene.add(sunLayer);
 
     // Corona layers — desktop: 4 layers, mobile: 2 (innermost only)
     const coronaLayers = isMobile
@@ -754,6 +882,115 @@ export default function SpacePage() {
         spinRate: p.spinRate,
       });
     });
+
+    // ── Planet meshes for raycasting ────────────────────────────────────────
+    const planetMeshes = planetPivots.map((pp) => pp.mesh);
+
+    // ── Raycaster for planet hover/click ────────────────────────────────────
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2(-999, -999);
+    let hoveredPlanetIdx = -1;
+    let prevHoveredIdx = -1;
+    let mouseDirty = false;
+    const cameraLookAtTarget = new THREE.Vector3(0, 0, 0);
+    const cameraLookAtCurrent = new THREE.Vector3(0, 0, 0);
+    const _hoverScaleVec = new THREE.Vector3();
+    const _worldPos = new THREE.Vector3();
+    const _ssHead = new THREE.Vector3();
+    const _ssTail = new THREE.Vector3();
+
+    // ── Asteroid Belt (between Mars & Jupiter) ─────────────────────────────
+    const asteroidCount = isMobile ? 100 : 300;
+    const asteroidGeo = new THREE.IcosahedronGeometry(0.08, 0);
+    const asteroidMat = new THREE.MeshStandardMaterial({
+      color: 0x666655,
+      roughness: 0.9,
+      metalness: 0.1,
+    });
+    const asteroidMesh = new THREE.InstancedMesh(
+      asteroidGeo,
+      asteroidMat,
+      asteroidCount,
+    );
+    const dummy = new THREE.Object3D();
+    for (let i = 0; i < asteroidCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const r = 29 + Math.random() * 7;
+      const y = (Math.random() - 0.5) * 3;
+      const scale = 0.5 + Math.random();
+      dummy.position.set(Math.cos(angle) * r, y, Math.sin(angle) * r);
+      dummy.scale.setScalar(scale);
+      dummy.rotation.set(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        0,
+      );
+      dummy.updateMatrix();
+      asteroidMesh.setMatrixAt(i, dummy.matrix);
+    }
+    const asteroidGroup = new THREE.Group();
+    asteroidGroup.add(asteroidMesh);
+    scene.add(asteroidGroup);
+
+    // ── Shooting Stars (pooled — no alloc in animation loop) ──────────────
+    const SS_POOL_SIZE = 8;
+    type ShootingStar = {
+      line: THREE.Line;
+      mat: THREE.LineBasicMaterial;
+      positions: Float32Array;
+      direction: THREE.Vector3;
+      origin: THREE.Vector3;
+      startTime: number;
+      duration: number;
+      active: boolean;
+    };
+    const shootingStarPool: ShootingStar[] = [];
+    for (let i = 0; i < SS_POOL_SIZE; i++) {
+      const positions = new Float32Array(6);
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      const mat = new THREE.LineBasicMaterial({
+        color: 0xccddff,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const line = new THREE.Line(geo, mat);
+      line.visible = false;
+      scene.add(line);
+      shootingStarPool.push({
+        line,
+        mat,
+        positions,
+        direction: new THREE.Vector3(),
+        origin: new THREE.Vector3(),
+        startTime: 0,
+        duration: 0.6,
+        active: false,
+      });
+    }
+    let nextShootTime = 2 + Math.random() * 4;
+    const spawnShootingStar = (time: number) => {
+      const s = shootingStarPool.find((p) => !p.active);
+      if (!s) return; // pool exhausted, skip
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      const r = 250;
+      s.origin.set(
+        r * Math.sin(phi) * Math.cos(theta),
+        r * Math.sin(phi) * Math.sin(theta),
+        r * Math.cos(phi),
+      );
+      s.direction
+        .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+        .normalize()
+        .multiplyScalar(10 + Math.random() * 5);
+      s.startTime = time;
+      s.active = true;
+      s.line.visible = true;
+      s.mat.opacity = 0;
+    };
 
     // ── Comets ─────────────────────────────────────────────────────────────
     const TAIL_LEN = isMobile ? 40 : 80;
@@ -910,7 +1147,9 @@ export default function SpacePage() {
           (targetZoomRef.current - currentZoomRef.current) * 0.06;
         camera.position.set(0, 20, currentZoomRef.current);
       }
-      camera.lookAt(0, 0, 0);
+      cameraLookAtTarget.multiplyScalar(0.997);
+      cameraLookAtCurrent.lerp(cameraLookAtTarget, 0.03);
+      camera.lookAt(cameraLookAtCurrent);
 
       // Planet orbits + axis self-rotation
       // Base spin: 0.004 rad/frame × spinRate multiplier
@@ -933,11 +1172,92 @@ export default function SpacePage() {
         if (c.head.position.length() > 135) spawnComet(c);
       });
 
-      // Sun pulse
+      // Sun pulse + rotation
       const pulse = 1 + Math.sin(elapsed * 1.4) * 0.025;
       sunCore.scale.setScalar(pulse);
+      sunCore.rotation.y += 0.001;
+      sunLayer.scale.setScalar(pulse * 1.01);
+      sunLayer.rotation.y -= 0.0007;
+      sunLayer.rotation.x += 0.0003;
 
-      renderer.render(scene, camera);
+      // ── Asteroid belt rotation ──
+      asteroidGroup.rotation.y += 0.0003;
+
+      // ── Shooting stars (pooled) ──
+      if (elapsed >= nextShootTime) {
+        const count = 3 + Math.floor(Math.random() * 2);
+        for (let i = 0; i < count; i++) spawnShootingStar(elapsed);
+        nextShootTime = elapsed + 4 + Math.random() * 4;
+      }
+      for (let i = 0; i < shootingStarPool.length; i++) {
+        const s = shootingStarPool[i];
+        if (!s.active) continue;
+        const t = (elapsed - s.startTime) / s.duration;
+        if (t >= 1) {
+          s.active = false;
+          s.line.visible = false;
+          continue;
+        }
+        const fade = t < 0.3 ? t / 0.3 : t > 0.7 ? (1 - t) / 0.3 : 1;
+        s.mat.opacity = fade * 0.9;
+        _ssHead.copy(s.origin).addScaledVector(s.direction, t);
+        _ssTail
+          .copy(s.origin)
+          .addScaledVector(s.direction, Math.max(0, t - 0.35));
+        s.positions[0] = _ssTail.x;
+        s.positions[1] = _ssTail.y;
+        s.positions[2] = _ssTail.z;
+        s.positions[3] = _ssHead.x;
+        s.positions[4] = _ssHead.y;
+        s.positions[5] = _ssHead.z;
+        s.line.geometry.attributes.position.needsUpdate = true;
+      }
+
+      // ── Planet hover — raycast only when mouse moved ──
+      if (mouseDirty) {
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(planetMeshes);
+        hoveredPlanetIdx =
+          intersects.length > 0
+            ? planetMeshes.indexOf(intersects[0].object as THREE.Mesh)
+            : -1;
+        mouseDirty = false;
+      }
+      planetMeshes.forEach((m, i) => {
+        _hoverScaleVec.setScalar(i === hoveredPlanetIdx ? 1.15 : 1);
+        m.scale.lerp(_hoverScaleVec, 0.1);
+      });
+      // DOM writes only on hover state change (avoid per-frame reflow)
+      if (hoveredPlanetIdx !== prevHoveredIdx) {
+        canvas.style.cursor = hoveredPlanetIdx >= 0 ? "pointer" : "default";
+        const labelEl = planetLabelRef.current;
+        if (labelEl) {
+          if (hoveredPlanetIdx >= 0) {
+            const planet = PLANET_DATA[hoveredPlanetIdx];
+            labelEl.style.display = "block";
+            labelEl.innerHTML = `<div style="font-weight:600;font-size:13px">${planet.name}</div><div style="opacity:0.7;font-size:10px;margin-top:2px">${planet.fact}</div>`;
+          } else {
+            labelEl.style.display = "none";
+          }
+        }
+        prevHoveredIdx = hoveredPlanetIdx;
+      }
+      // Label position tracks orbiting planet (lightweight: 2 style writes)
+      if (hoveredPlanetIdx >= 0) {
+        const labelEl = planetLabelRef.current;
+        if (labelEl) {
+          planetMeshes[hoveredPlanetIdx].getWorldPosition(_worldPos);
+          _worldPos.project(camera);
+          labelEl.style.left = `${(_worldPos.x * 0.5 + 0.5) * window.innerWidth}px`;
+          labelEl.style.top = `${(-_worldPos.y * 0.5 + 0.5) * window.innerHeight - 30}px`;
+        }
+      }
+
+      if (composer) {
+        composer.render();
+      } else {
+        renderer.render(scene, camera);
+      }
     };
     animate();
 
@@ -946,6 +1266,7 @@ export default function SpacePage() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener("resize", onResize);
 
@@ -976,11 +1297,60 @@ export default function SpacePage() {
     canvas.addEventListener("touchstart", onTouchStart, { passive: true });
     canvas.addEventListener("touchmove", onTouchMove, { passive: false });
 
+    // ── Mouse/touch interaction for planets ─────────────────────────────────
+    const onMouseMove = (e: MouseEvent) => {
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      mouseDirty = true;
+    };
+    const zoomToPlanet = (idx: number) => {
+      const mesh = planetMeshes[idx];
+      const worldPos = new THREE.Vector3();
+      mesh.getWorldPosition(worldPos);
+      targetZoomRef.current = Math.max(25, PLANET_DATA[idx].orbitR * 0.7);
+      cameraLookAtTarget.copy(worldPos).multiplyScalar(0.3);
+    };
+    const onCanvasClick = () => {
+      if (hoveredPlanetIdx >= 0) zoomToPlanet(hoveredPlanetIdx);
+    };
+    canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("click", onCanvasClick);
+
+    // Mobile tap for planet interaction
+    let tapStartTime = 0;
+    const onTapStart = (e: TouchEvent) => {
+      if (e.touches.length === 1) tapStartTime = Date.now();
+    };
+    const onTapEnd = (e: TouchEvent) => {
+      if (Date.now() - tapStartTime > 300 || e.changedTouches.length !== 1)
+        return;
+      const touch = e.changedTouches[0];
+      mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      const hits = raycaster.intersectObjects(planetMeshes);
+      if (hits.length > 0) {
+        const idx = planetMeshes.indexOf(hits[0].object as THREE.Mesh);
+        if (idx >= 0) zoomToPlanet(idx);
+      }
+    };
+    canvas.addEventListener("touchstart", onTapStart, { passive: true });
+    canvas.addEventListener("touchend", onTapEnd, { passive: true });
+
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener("resize", onResize);
       canvas.removeEventListener("touchstart", onTouchStart);
       canvas.removeEventListener("touchmove", onTouchMove);
+      canvas.removeEventListener("mousemove", onMouseMove);
+      canvas.removeEventListener("click", onCanvasClick);
+      canvas.removeEventListener("touchstart", onTapStart);
+      canvas.removeEventListener("touchend", onTapEnd);
+      shootingStarPool.forEach((s) => {
+        s.line.geometry.dispose();
+        s.mat.dispose();
+      });
+      composer?.dispose();
       renderer.dispose();
       scene.clear();
     };
@@ -1215,6 +1585,27 @@ export default function SpacePage() {
 
       {/* Three.js canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
+
+      {/* Screen vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%)",
+        }}
+      />
+
+      {/* Planet hover label */}
+      <div
+        ref={planetLabelRef}
+        className="absolute pointer-events-none text-white text-center text-xs tracking-wide"
+        style={{
+          display: "none",
+          transform: "translate(-50%, -100%)",
+          textShadow: "0 2px 8px rgba(0,0,0,0.9)",
+          whiteSpace: "nowrap",
+        }}
+      />
 
       {/* ── Top bar ─────────────────────────────────────────────────────── */}
       <motion.div
