@@ -920,11 +920,7 @@ export default function SpacePage() {
       const scale = 0.5 + Math.random();
       dummy.position.set(Math.cos(angle) * r, y, Math.sin(angle) * r);
       dummy.scale.setScalar(scale);
-      dummy.rotation.set(
-        Math.random() * Math.PI,
-        Math.random() * Math.PI,
-        0,
-      );
+      dummy.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
       dummy.updateMatrix();
       asteroidMesh.setMatrixAt(i, dummy.matrix);
     }
