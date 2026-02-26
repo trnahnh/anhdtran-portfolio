@@ -7,7 +7,7 @@ const MS_PER_YEAR = 365.2425 * 24 * 60 * 60 * 1000;
 
 function getPreciseAge(): string {
   const age = (Date.now() - DOB) / MS_PER_YEAR;
-  return age.toFixed(12);
+  return age.toFixed(15);
 }
 
 export default function Footer() {
