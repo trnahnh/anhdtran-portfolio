@@ -18,6 +18,7 @@ personal portfolio built with Next.js. nothing crazy, just a solar system, real-
 - **Three.js** + **postprocessing** — 3D solar system with bloom, procedural textures, asteroid belt, shooting stars
 - **MediaPipe Hands** — webcam hand tracking, pinch-to-zoom + open-hand swipe orbit control
 - **Framer Motion** — page transitions + animations
+- **Lenis** — smooth scroll with lerp-based interpolation
 - **Tailwind CSS v4**
 - **Spotify API** — now playing, because why not
 
@@ -32,6 +33,10 @@ personal portfolio built with Next.js. nothing crazy, just a solar system, real-
 **`/terminal`** — macOS-style interactive terminal. browse the portfolio via CLI commands (`help`, `whoami`, `about`, `projects`, `experience`, `contact`, `skills`, `theme`, `clear`). boot sequence intro with typing SFX, arrow key history, tab completion, live Cincinnati timezone clock. light/dark mode adaptive. press Esc to exit.
 
 **cursor** — fluid WebGL simulation that follows your mouse around. feels good.
+
+**smooth scroll** — lerp-based smooth scrolling via Lenis. adaptive touch/desktop tuning, disabled on immersive routes.
+
+**footer** — live-ticking precise age counter with 12 decimal places. because why display a static number when you can watch yourself age in real time.
 
 ---
 

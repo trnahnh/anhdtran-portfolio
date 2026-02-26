@@ -8,6 +8,7 @@ import PageTransition from "@/components/PageTransition";
 import ScrollToTop from "@/components/ScrollToTop";
 import PagePeel from "@/components/PagePeel";
 import TerminalShortcut from "@/components/TerminalShortcut";
+import SmoothScroll from "@/components/SmoothScroll";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 
@@ -57,6 +58,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <ConditionalSplashCursor />
         </ErrorBoundary>
+        <SmoothScroll />
         <GradientBlobs />
         <PageTransition>{children}</PageTransition>
         <ScrollToTop />
