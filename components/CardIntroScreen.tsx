@@ -174,6 +174,7 @@ export default function CardIntroScreen() {
               className="absolute inset-0 rounded-2xl"
               style={{
                 backfaceVisibility: "hidden",
+                willChange: "transform",
               }}
             >
               <div
@@ -399,6 +400,7 @@ export default function CardIntroScreen() {
               style={{
                 backfaceVisibility: "hidden",
                 transform: "rotateY(180deg)",
+                willChange: "transform",
               }}
             >
               <div
