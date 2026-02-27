@@ -246,8 +246,8 @@ export default function CardIntroScreen() {
                       <Image
                         src="/profile/portrait.png"
                         alt="Anh Tran"
-                        width={96}
-                        height={96}
+                        width={90}
+                        height={90}
                         priority
                         sizes="(min-width: 640px) 96px, 48px"
                         className="object-cover w-full h-full"
@@ -259,17 +259,31 @@ export default function CardIntroScreen() {
                     className="flex flex-col"
                     style={{ gap: "clamp(0.25rem, 1.5vw, 1rem)" }}
                   >
-                    <div
-                      className="rounded-md"
-                      style={{
-                        width: "clamp(2rem, 5.5vw, 3.25rem)",
-                        height: "clamp(1.375rem, 3.8vw, 2.25rem)",
-                        background:
-                          "linear-gradient(135deg, #c9a84c 0%, #f0d478 40%, #c9a84c 60%, #a07c30 100%)",
-                        boxShadow:
-                          "inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.2)",
-                      }}
-                    />
+                    <div className="flex items-center justify-between">
+                      <div
+                        className="rounded-md"
+                        style={{
+                          width: "clamp(2rem, 5.5vw, 3.25rem)",
+                          height: "clamp(1.375rem, 3.8vw, 2.25rem)",
+                          background:
+                            "linear-gradient(135deg, #c9a84c 0%, #f0d478 40%, #c9a84c 60%, #a07c30 100%)",
+                          boxShadow:
+                            "inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.2)",
+                        }}
+                      />
+                      <Image
+                        src="/finance/contactless.png"
+                        alt="Contactless"
+                        width={60}
+                        height={60}
+                        className="opacity-70"
+                        style={{
+                          width: "clamp(1rem, 3.5vw, 1.75rem)",
+                          height: "clamp(1rem, 3.5vw, 1.75rem)",
+                          filter: "brightness(0) invert(1)",
+                        }}
+                      />
+                    </div>
                     <p
                       className="font-mono tracking-[0.22em] text-zinc-400"
                       style={{
