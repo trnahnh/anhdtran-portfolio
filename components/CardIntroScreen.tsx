@@ -165,7 +165,10 @@ export default function CardIntroScreen() {
           style={{ transformStyle: "preserve-3d" }}
           onAnimationEnd={handleSpinEnd}
         >
-          <div className="relative w-[92vw] max-w-[580px] aspect-856/540">
+          <div
+            className="relative w-[92vw] max-w-[580px] aspect-856/540"
+            style={{ transformStyle: "preserve-3d" }}
+          >
             {/* ===== FRONT FACE ===== */}
             <div
               className="absolute inset-0 rounded-2xl"
@@ -412,7 +415,7 @@ export default function CardIntroScreen() {
               />
 
               <div
-                className="absolute inset-0 rounded-2xl overflow-hidden"
+                className="absolute inset-0 rounded-2xl overflow-hidden flex items-center justify-center"
                 style={{
                   background:
                     "linear-gradient(145deg, #1a1a1a, #0d0d0d, #1a1a1a)",
@@ -420,8 +423,50 @@ export default function CardIntroScreen() {
                     "0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
                 }}
               >
-                <div className="mt-8 w-full h-10 sm:h-12 bg-zinc-800" />
-                <div className="mx-6 mt-4 h-6 sm:h-8 rounded-sm bg-zinc-200/10" />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.04) 48%, rgba(255,255,255,0.02) 52%, transparent 70%)",
+                  }}
+                />
+                <div
+                  className="absolute w-[200%] h-[200%] rounded-full opacity-[0.06] animate-blob pointer-events-none"
+                  style={{
+                    background:
+                      "radial-gradient(circle, #818cf8 0%, transparent 60%)",
+                    top: "-60%",
+                    left: "-40%",
+                  }}
+                />
+                <div
+                  className="absolute w-[180%] h-[180%] rounded-full opacity-[0.05] animate-blob animate-blob-delay-2 pointer-events-none"
+                  style={{
+                    background:
+                      "radial-gradient(circle, #a78bfa 0%, transparent 60%)",
+                    bottom: "-70%",
+                    right: "-30%",
+                  }}
+                />
+                <div
+                  className="absolute w-[150%] h-[150%] rounded-full opacity-[0.04] animate-blob animate-blob-delay-4 pointer-events-none"
+                  style={{
+                    background:
+                      "radial-gradient(circle, #f472b6 0%, transparent 60%)",
+                    top: "20%",
+                    right: "-50%",
+                  }}
+                />
+                <p
+                  className="relative font-bold tracking-[0.3em] text-zinc-300 text-center select-none"
+                  style={{
+                    fontSize: "clamp(0.6rem, 2.2vw, 1rem)",
+                    textShadow:
+                      "0 -1px 0 rgba(255,255,255,0.08), 0 1px 2px rgba(0,0,0,0.6)",
+                  }}
+                >
+                  UNIVERSITY OF CINCINNATI
+                </p>
               </div>
             </div>
           </div>
