@@ -236,10 +236,19 @@ export default function CardIntroScreen() {
                 />
 
                 {/* Card content — Sapphire-style single flow */}
-                <div className="relative h-full p-4 sm:p-8 flex flex-col justify-between">
+                <div
+                  className="relative h-full flex flex-col justify-between"
+                  style={{ padding: "clamp(0.875rem, 3.5vw, 2rem)" }}
+                >
                   {/* Top row: portrait (brand mark) right-aligned */}
                   <div className="flex justify-end">
-                    <div className="w-12 h-12 sm:w-24 sm:h-24 rounded-full overflow-hidden border border-zinc-700/40">
+                    <div
+                      className="rounded-full overflow-hidden border border-zinc-700/40"
+                      style={{
+                        width: "clamp(2.5rem, 10vw, 6rem)",
+                        height: "clamp(2.5rem, 10vw, 6rem)",
+                      }}
+                    >
                       <Image
                         src="/profile/portrait.png"
                         alt="Anh Tran"
@@ -253,11 +262,16 @@ export default function CardIntroScreen() {
                   </div>
 
                   {/* Middle: chip + card number */}
-                  <div className="space-y-1.5 sm:space-y-4">
+                  <div
+                    className="flex flex-col"
+                    style={{ gap: "clamp(0.25rem, 1.5vw, 1rem)" }}
+                  >
                     {/* EMV chip */}
                     <div
-                      className="w-9 h-6 sm:w-13 sm:h-9 rounded-md"
+                      className="rounded-md"
                       style={{
+                        width: "clamp(2rem, 5.5vw, 3.25rem)",
+                        height: "clamp(1.375rem, 3.8vw, 2.25rem)",
                         background:
                           "linear-gradient(135deg, #c9a84c 0%, #f0d478 40%, #c9a84c 60%, #a07c30 100%)",
                         boxShadow:
@@ -266,8 +280,9 @@ export default function CardIntroScreen() {
                     />
                     {/* Card number */}
                     <p
-                      className="font-mono text-[11px] sm:text-base tracking-[0.22em] text-zinc-400"
+                      className="font-mono tracking-[0.22em] text-zinc-400"
                       style={{
+                        fontSize: "clamp(0.65rem, 2.2vw, 1rem)",
                         textShadow:
                           "0 -1px 0 rgba(255,255,255,0.06), 0 1px 2px rgba(0,0,0,0.5)",
                       }}
@@ -275,8 +290,9 @@ export default function CardIntroScreen() {
                       xxxx 0511 2006 xxxx
                     </p>
                     <p
-                      className="text-[8px] sm:text-xs tracking-[0.15em] text-zinc-500 mt-0.5 sm:mt-1"
+                      className="tracking-[0.15em] text-zinc-500"
                       style={{
+                        fontSize: "clamp(0.45rem, 1.5vw, 0.75rem)",
                         textShadow:
                           "0 -1px 0 rgba(255,255,255,0.04), 0 1px 1px rgba(0,0,0,0.4)",
                       }}
@@ -289,8 +305,9 @@ export default function CardIntroScreen() {
                   <div className="flex items-end justify-between">
                     <div>
                       <p
-                        className="text-sm sm:text-xl font-bold tracking-[0.25em] text-zinc-200"
+                        className="font-bold tracking-[0.25em] text-zinc-200"
                         style={{
+                          fontSize: "clamp(0.8rem, 2.8vw, 1.25rem)",
                           textShadow:
                             "0 -1px 0 rgba(255,255,255,0.08), 0 1px 2px rgba(0,0,0,0.6)",
                         }}
@@ -298,8 +315,9 @@ export default function CardIntroScreen() {
                         DUY ANH TRAN
                       </p>
                       <p
-                        className="text-[8px] sm:text-xs font-light tracking-[0.2em] text-zinc-500 mt-0.5"
+                        className="font-light tracking-[0.2em] text-zinc-500 mt-0.5"
                         style={{
+                          fontSize: "clamp(0.45rem, 1.5vw, 0.75rem)",
                           textShadow:
                             "0 -1px 0 rgba(255,255,255,0.04), 0 1px 1px rgba(0,0,0,0.4)",
                         }}
@@ -308,8 +326,9 @@ export default function CardIntroScreen() {
                       </p>
                     </div>
                     <p
-                      className="text-[10px] sm:text-xs tracking-[0.15em] text-zinc-500"
+                      className="tracking-[0.15em] text-zinc-500"
                       style={{
+                        fontSize: "clamp(0.45rem, 1.5vw, 0.75rem)",
                         textShadow:
                           "0 -1px 0 rgba(255,255,255,0.04), 0 1px 1px rgba(0,0,0,0.4)",
                       }}
