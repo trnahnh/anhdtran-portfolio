@@ -261,7 +261,7 @@ export default function CardIntroScreen() {
                   >
                     <div className="flex items-center justify-between">
                       <div
-                        className="rounded-md"
+                        className="rounded-md relative overflow-hidden"
                         style={{
                           width: "clamp(2rem, 5.5vw, 3.25rem)",
                           height: "clamp(1.375rem, 3.8vw, 2.25rem)",
@@ -270,7 +270,53 @@ export default function CardIntroScreen() {
                           boxShadow:
                             "inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.2)",
                         }}
-                      />
+                      >
+                        {/* ISO 7816 contact pad grooves */}
+                        {/* Vertical groove ~35% from left */}
+                        <div
+                          className="absolute inset-y-0"
+                          style={{
+                            left: "35%",
+                            width: "1px",
+                            background: "rgba(0,0,0,0.2)",
+                            boxShadow: "1px 0 0 rgba(255,255,255,0.3)",
+                          }}
+                        />
+                        {/* Left: top horizontal groove */}
+                        <div
+                          className="absolute left-0"
+                          style={{
+                            top: "28%",
+                            width: "35%",
+                            height: "1px",
+                            background: "rgba(0,0,0,0.2)",
+                            boxShadow: "0 1px 0 rgba(255,255,255,0.3)",
+                          }}
+                        />
+                        {/* Left: bottom horizontal groove */}
+                        <div
+                          className="absolute left-0"
+                          style={{
+                            top: "72%",
+                            width: "35%",
+                            height: "1px",
+                            background: "rgba(0,0,0,0.2)",
+                            boxShadow: "0 1px 0 rgba(255,255,255,0.3)",
+                          }}
+                        />
+                        {/* Right: center horizontal groove */}
+                        <div
+                          className="absolute"
+                          style={{
+                            left: "35%",
+                            top: "50%",
+                            width: "65%",
+                            height: "1px",
+                            background: "rgba(0,0,0,0.2)",
+                            boxShadow: "0 1px 0 rgba(255,255,255,0.3)",
+                          }}
+                        />
+                      </div>
                       <Image
                         src="/finance/contactless.png"
                         alt="Contactless"
