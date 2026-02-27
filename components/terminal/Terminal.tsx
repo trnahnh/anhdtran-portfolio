@@ -53,14 +53,10 @@ export default function Terminal({ onExit }: TerminalProps) {
       className="fixed inset-0 flex flex-col items-center justify-center p-4 sm:p-8"
       onClick={() => inputRef.current?.focus()}
     >
-      {/* Timezone subtitle */}
       <CincinnatiClock />
 
-      {/* macOS terminal window */}
       <div className="w-full max-w-3xl h-[75vh] sm:h-[min(75vh,600px)] flex flex-col rounded-xl overflow-hidden shadow-2xl shadow-black/40 dark:shadow-black/60 border border-black/8 dark:border-white/8 transition-colors duration-300">
-        {/* Title bar */}
         <div className="flex items-center px-4 h-11 bg-[#e0e0e0] dark:bg-[#2a2a2c] shrink-0 select-none transition-colors duration-300">
-          {/* Traffic lights */}
           <div className="flex items-center gap-2">
             <button
               onClick={(e) => {
@@ -77,7 +73,6 @@ export default function Terminal({ onExit }: TerminalProps) {
             <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
             <span className="w-3 h-3 rounded-full bg-[#28c840]" />
           </div>
-          {/* Title */}
           <span className="flex-1 text-center text-black/40 dark:text-white/40 text-xs tracking-wide transition-colors duration-300">
             visitor@anhdtran — zsh
           </span>
@@ -85,7 +80,6 @@ export default function Terminal({ onExit }: TerminalProps) {
           <div className="w-[52px]" />
         </div>
 
-        {/* Terminal body */}
         <div className="flex-1 flex flex-col bg-white dark:bg-[#1a1a1d] font-mono text-sm text-gray-900 dark:text-white min-h-0 transition-colors duration-300">
           <TerminalOutput ref={outputRef} history={history} />
           <TerminalInput
@@ -96,7 +90,6 @@ export default function Terminal({ onExit }: TerminalProps) {
         </div>
       </div>
 
-      {/* Footer */}
       <p className="mt-4 text-[10px] sm:text-xs text-black/40 dark:text-white/30 font-mono select-none transition-colors duration-300">
         &copy; 2026 Anh Tran. All rights reserved.
       </p>

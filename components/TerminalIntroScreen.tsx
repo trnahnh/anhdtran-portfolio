@@ -52,6 +52,15 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
     timersRef.current.push(t);
   }, [onComplete]);
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === "Escape" || e.key === " ") {
+        finish();
+      }
+    },
+    [finish],
+  );
+
   useEffect(() => {
     const audio = new Audio("/sfx/keyboard-typing.mp3");
     audioRef.current = audio;
@@ -111,7 +120,10 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
 
   return (
     <div
-      className={`fixed inset-0 z-100 flex flex-col bg-[#e8e8ec] dark:bg-[#0a0a0b] transition-opacity duration-500 cursor-pointer select-none ${
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      className={`fixed inset-0 z-100 outline-none flex flex-col bg-[#e8e8ec] dark:bg-[#0a0a0b] transition-opacity duration-500 cursor-pointer select-none ${
         fading ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
       onClick={finish}
@@ -135,7 +147,6 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
         </div>
       </div>
 
-      {/* Progress bar */}
       <div className="px-6 sm:px-12 pb-8">
         <div className="h-1 w-full max-w-2xl mx-auto bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
           <div

@@ -8,7 +8,6 @@ export default function EnterSpaceButton() {
   const router = useRouter();
   const [isDark, setIsDark] = useState(false);
 
-  // Mirror the same dark-mode detection used in SolarSystem
   useEffect(() => {
     const check = () =>
       setIsDark(document.documentElement.classList.contains("dark"));
@@ -40,7 +39,6 @@ export default function EnterSpaceButton() {
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
-            {/* Aurora glow */}
             <span
               className="pointer-events-none absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"
               style={{
@@ -48,7 +46,6 @@ export default function EnterSpaceButton() {
                   "0 0 24px 4px rgba(120,80,255,0.18), 0 0 48px 8px rgba(60,160,255,0.12), 0 0 80px 16px rgba(0,220,200,0.07)",
               }}
             />
-            {/* Inner shimmer */}
             <span
               className="pointer-events-none absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
               style={{

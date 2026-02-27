@@ -41,7 +41,6 @@ export default function NowPlaying() {
               height={40}
               className="rounded shadow-depth"
             />
-            {/* Pulsing playing indicator */}
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full">
               <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75" />
             </span>

@@ -10,8 +10,6 @@ import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPa
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import SpaceIntroScreen from "@/components/SpaceIntroScreen";
 
-// ── Planet data — all 8 ──────────────────────────────────────────────────────
-// axialTilt: radians (realistic)  spinRate: multiplier vs Earth baseline
 const PLANET_DATA = [
   {
     name: "Mercury",
@@ -137,7 +135,6 @@ const PLANET_DATA = [
   },
 ];
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 function buildAtmosphere(radius: number, color: THREE.Color, segs = 32) {
   const geo = new THREE.SphereGeometry(radius * 1.28, segs, segs);
   const mat = new THREE.MeshBasicMaterial({
@@ -209,10 +206,8 @@ function buildNebula(mobile = false): THREE.Mesh {
   canvas.height = H;
   const ctx = canvas.getContext("2d")!;
 
-  // Transparent base — the scene background shows through
   ctx.clearRect(0, 0, W, H);
 
-  // Each entry: [cx%, cy%, radiusX%, radiusY%, rotAngle, r, g, b, maxOpacity]
   const blobs: [
     number,
     number,
@@ -272,8 +267,6 @@ function buildNebula(mobile = false): THREE.Mesh {
   return new THREE.Mesh(geo, mat);
 }
 
-// ── Procedural planet textures ───────────────────────────────────────────────
-// Shared helper: draw a soft elliptical blob on a canvas 2d context
 function ellipseBlob(
   ctx: CanvasRenderingContext2D,
   cx: number,
@@ -311,11 +304,9 @@ function buildJupiterTexture(): THREE.CanvasTexture {
   cv.height = H;
   const ctx = cv.getContext("2d")!;
 
-  // Warm tan base
   ctx.fillStyle = "#c8a060";
   ctx.fillRect(0, 0, W, H);
 
-  // Horizontal cloud bands [y, height, r, g, b, alpha]
   const bands: [number, number, number, number, number, number][] = [
     [0.0, 0.055, 50, 30, 12, 0.8],
     [0.06, 0.045, 220, 165, 85, 0.55],
@@ -335,7 +326,6 @@ function buildJupiterTexture(): THREE.CanvasTexture {
   ];
 
   bands.forEach(([y, h, r, g, b, a]) => {
-    // Soft edge: gradient fades in/out so bands blend
     const grad = ctx.createLinearGradient(0, y * H, 0, (y + h) * H);
     grad.addColorStop(0, `rgba(${r},${g},${b},0)`);
     grad.addColorStop(0.2, `rgba(${r},${g},${b},${a})`);
@@ -345,12 +335,10 @@ function buildJupiterTexture(): THREE.CanvasTexture {
     ctx.fillRect(0, y * H - 2, W, h * H + 4);
   });
 
-  // Great Red Spot — oval storm, southern hemisphere
   const grsX = 0.55,
     grsY = 0.61,
     grsRx = 0.068,
     grsRy = 0.095;
-  // Outer glow
   ellipseBlob(
     ctx,
     grsX,
@@ -365,9 +353,7 @@ function buildJupiterTexture(): THREE.CanvasTexture {
     W,
     H,
   );
-  // Core
   ellipseBlob(ctx, grsX, grsY, grsRx, grsRy, 0, 195, 55, 18, 0.9, W, H);
-  // Inner bright centre
   ellipseBlob(
     ctx,
     grsX,
@@ -397,7 +383,6 @@ function buildSaturnTexture(): THREE.CanvasTexture {
   ctx.fillStyle = "#d8c880";
   ctx.fillRect(0, 0, W, H);
 
-  // Subtler, paler bands than Jupiter
   const bands: [number, number, number, number, number, number][] = [
     [0.0, 0.06, 140, 110, 45, 0.38],
     [0.08, 0.07, 170, 148, 80, 0.3],
@@ -422,7 +407,6 @@ function buildSaturnTexture(): THREE.CanvasTexture {
     ctx.fillRect(0, y * H - 2, W, h * H + 4);
   });
 
-  // Polar darkening
   const northGrad = ctx.createLinearGradient(0, 0, 0, H * 0.14);
   northGrad.addColorStop(0, "rgba(90,65,18,0.40)");
   northGrad.addColorStop(1, "rgba(90,65,18,0)");
@@ -440,39 +424,28 @@ function buildEarthTexture(): THREE.CanvasTexture {
   cv.height = H;
   const ctx = cv.getContext("2d")!;
 
-  // Deep ocean base
   ctx.fillStyle = "#1a4a88";
   ctx.fillRect(0, 0, W, H);
 
-  // Shallow water (near coasts)
   ctx.fillStyle = "#245a9a";
   ctx.fillRect(0, 0, W, H);
 
-  // Continents — approximate equirectangular positions
-  // North America
   ellipseBlob(ctx, 0.12, 0.31, 0.095, 0.17, -0.2, 55, 100, 35, 0.9, W, H);
   ellipseBlob(ctx, 0.17, 0.21, 0.055, 0.1, 0.1, 60, 110, 40, 0.85, W, H);
   ellipseBlob(ctx, 0.09, 0.4, 0.04, 0.08, -0.1, 65, 105, 38, 0.8, W, H);
-  // South America
   ellipseBlob(ctx, 0.22, 0.62, 0.052, 0.17, 0.15, 48, 92, 28, 0.9, W, H);
   ellipseBlob(ctx, 0.24, 0.5, 0.03, 0.06, 0.0, 52, 100, 32, 0.8, W, H);
-  // Europe
   ellipseBlob(ctx, 0.49, 0.24, 0.038, 0.09, 0.1, 62, 108, 42, 0.85, W, H);
   ellipseBlob(ctx, 0.47, 0.18, 0.02, 0.05, -0.2, 58, 102, 38, 0.78, W, H);
-  // Africa
   ellipseBlob(ctx, 0.52, 0.52, 0.068, 0.2, 0.05, 78, 108, 44, 0.92, W, H);
   ellipseBlob(ctx, 0.5, 0.36, 0.048, 0.09, -0.1, 72, 98, 38, 0.82, W, H);
-  // Asia — multiple overlapping blobs
   ellipseBlob(ctx, 0.68, 0.26, 0.135, 0.18, 0.1, 58, 98, 36, 0.9, W, H);
   ellipseBlob(ctx, 0.81, 0.2, 0.075, 0.12, -0.2, 54, 92, 34, 0.85, W, H);
   ellipseBlob(ctx, 0.62, 0.37, 0.058, 0.09, 0.2, 62, 104, 40, 0.8, W, H);
   ellipseBlob(ctx, 0.75, 0.35, 0.045, 0.08, 0.1, 56, 96, 35, 0.78, W, H);
-  // Australia — warm arid tones
   ellipseBlob(ctx, 0.84, 0.67, 0.052, 0.1, 0.1, 148, 118, 52, 0.88, W, H);
-  // Greenland
   ellipseBlob(ctx, 0.27, 0.11, 0.038, 0.08, -0.3, 205, 228, 242, 0.78, W, H);
 
-  // Polar ice caps
   const northIce = ctx.createLinearGradient(0, 0, 0, H * 0.15);
   northIce.addColorStop(0, "rgba(225,242,255,0.96)");
   northIce.addColorStop(1, "rgba(210,235,255,0)");
@@ -485,7 +458,6 @@ function buildEarthTexture(): THREE.CanvasTexture {
   ctx.fillStyle = southIce;
   ctx.fillRect(0, H * 0.85, W, H * 0.15);
 
-  // Cloud patches (soft white blobs)
   const clouds: [number, number, number, number][] = [
     [0.08, 0.3, 0.11, 0.055],
     [0.36, 0.44, 0.1, 0.05],
@@ -511,7 +483,6 @@ function buildSunTexture(): THREE.CanvasTexture {
   cv.height = H;
   const ctx = cv.getContext("2d")!;
 
-  // Warm base gradient
   const base = ctx.createLinearGradient(0, 0, 0, H);
   base.addColorStop(0, "#ffcc44");
   base.addColorStop(0.3, "#ffaa22");
@@ -521,7 +492,6 @@ function buildSunTexture(): THREE.CanvasTexture {
   ctx.fillStyle = base;
   ctx.fillRect(0, 0, W, H);
 
-  // Solar granulation — many small bright cells
   for (let i = 0; i < 260; i++) {
     const cx = Math.random() * W;
     const cy = Math.random() * H;
@@ -529,12 +499,10 @@ function buildSunTexture(): THREE.CanvasTexture {
     const bright = Math.random();
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
     if (bright > 0.7) {
-      // Bright granule
       grad.addColorStop(0, `rgba(255,240,160,${0.3 + bright * 0.3})`);
       grad.addColorStop(0.6, `rgba(255,200,80,${0.15 + bright * 0.1})`);
       grad.addColorStop(1, "rgba(255,180,60,0)");
     } else {
-      // Darker intergranular lane
       grad.addColorStop(0, `rgba(200,100,10,${0.2 + bright * 0.15})`);
       grad.addColorStop(0.5, `rgba(180,80,5,${0.1 + bright * 0.05})`);
       grad.addColorStop(1, "rgba(160,70,0,0)");
@@ -545,7 +513,6 @@ function buildSunTexture(): THREE.CanvasTexture {
     ctx.fill();
   }
 
-  // Sunspots — a few dark regions
   const spots: [number, number, number][] = [
     [0.3, 0.45, 0.035],
     [0.65, 0.55, 0.025],
@@ -556,9 +523,7 @@ function buildSunTexture(): THREE.CanvasTexture {
     const px = sx * W,
       py = sy * H,
       pr = sr * W;
-    // Dark umbra
     ellipseBlob(ctx, sx, sy, sr * 0.5, sr * 0.5, 0, 60, 20, 0, 0.85, W, H);
-    // Penumbra
     const pen = ctx.createRadialGradient(px, py, pr * 0.3, px, py, pr);
     pen.addColorStop(0, "rgba(100,40,5,0.6)");
     pen.addColorStop(0.5, "rgba(160,70,10,0.3)");
@@ -569,11 +534,9 @@ function buildSunTexture(): THREE.CanvasTexture {
     ctx.fill();
   });
 
-  // Bright faculae near sunspots
   ellipseBlob(ctx, 0.25, 0.42, 0.06, 0.03, 0.3, 255, 230, 140, 0.35, W, H);
   ellipseBlob(ctx, 0.7, 0.58, 0.05, 0.025, -0.2, 255, 235, 150, 0.3, W, H);
 
-  // Limb darkening (edges of the equirectangular map → poles of the sphere)
   const northDark = ctx.createLinearGradient(0, 0, 0, H * 0.12);
   northDark.addColorStop(0, "rgba(120,50,0,0.5)");
   northDark.addColorStop(1, "rgba(120,50,0,0)");
@@ -588,7 +551,6 @@ function buildSunTexture(): THREE.CanvasTexture {
   return new THREE.CanvasTexture(cv);
 }
 
-// ── Component ────────────────────────────────────────────────────────────────
 export default function SpacePage() {
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -606,15 +568,12 @@ export default function SpacePage() {
     "loading" | "ready" | "denied" | "error"
   >("loading");
 
-  // ── Dark mode guard — redirect to /profile if accessed in light mode ─────────
-  // Only checked at mount; "dark" is hardcoded in layout so this is purely defensive.
   useEffect(() => {
     if (!document.documentElement.classList.contains("dark")) {
       router.replace("/profile");
     }
   }, [router]);
 
-  // ── Space background audio ─────────────────────────────────────────────────
   useEffect(() => {
     const audio = new Audio("/sfx/space-background.mp3");
     audio.loop = true;
@@ -650,17 +609,14 @@ export default function SpacePage() {
     };
   }, []);
 
-  // ── Three.js scene ─────────────────────────────────────────────────────────
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Device tier — drives all quality decisions below
     const isMobile =
       /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
       window.innerWidth < 768;
 
-    // Renderer
     const renderer = new THREE.WebGLRenderer({
       canvas,
       antialias: !isMobile,
@@ -673,12 +629,10 @@ export default function SpacePage() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.1;
 
-    // Scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x00000a);
     scene.fog = new THREE.FogExp2(0x00000a, 0.0012);
 
-    // Camera
     const camera = new THREE.PerspectiveCamera(
       55,
       window.innerWidth / window.innerHeight,
@@ -688,7 +642,6 @@ export default function SpacePage() {
     camera.position.set(0, isMobile ? 40 : 55, isMobile ? 160 : 220); // entry start position
     camera.lookAt(0, 0, 0);
 
-    // ── Bloom post-processing (reduced on mobile) ─────────────────────────
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
     const bloomPass = new UnrealBloomPass(
@@ -700,7 +653,6 @@ export default function SpacePage() {
     composer.addPass(bloomPass);
     composer.addPass(new OutputPass());
 
-    // ── Lighting ───────────────────────────────────────────────────────────
     const ambient = new THREE.AmbientLight(0x111133, 0.9);
     scene.add(ambient);
 
@@ -711,12 +663,10 @@ export default function SpacePage() {
     fillLight.position.set(-50, 30, -40);
     scene.add(fillLight);
 
-    // ── Stars ──────────────────────────────────────────────────────────────
     const starCount = isMobile ? 1200 : 4000;
     const starPositions = new Float32Array(starCount * 3);
     const starSizes = new Float32Array(starCount);
     for (let i = 0; i < starCount; i++) {
-      // Distribute on sphere surface for even coverage
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(2 * Math.random() - 1);
       const r = 280 + Math.random() * 120;
@@ -740,7 +690,6 @@ export default function SpacePage() {
     });
     scene.add(new THREE.Points(starGeo, starMat));
 
-    // ── Sun ────────────────────────────────────────────────────────────────
     const sunSeg = isMobile ? 24 : 48;
     const sunTex = buildSunTexture();
     const sunCore = new THREE.Mesh(
@@ -749,7 +698,6 @@ export default function SpacePage() {
     );
     scene.add(sunCore);
 
-    // Inner plasma layer — slightly larger, rotates independently for depth
     const sunLayer = new THREE.Mesh(
       new THREE.SphereGeometry(3.12, sunSeg, sunSeg),
       new THREE.MeshBasicMaterial({
@@ -763,7 +711,6 @@ export default function SpacePage() {
     sunLayer.rotation.y = Math.PI; // offset so granules don't align
     scene.add(sunLayer);
 
-    // Corona layers — all 4 on both, reduced segments on mobile
     const coronaSeg = isMobile ? 16 : 32;
     const coronaLayers = [
       { r: 3.6, opacity: 0.18, color: 0xffcc44 },
@@ -786,10 +733,8 @@ export default function SpacePage() {
       scene.add(mesh);
     });
 
-    // ── Nebula background (smaller texture on mobile) ──
     scene.add(buildNebula(isMobile));
 
-    // ── Planets ────────────────────────────────────────────────────────────
     const planetPivots: {
       pivot: THREE.Object3D;
       mesh: THREE.Mesh;
@@ -798,18 +743,14 @@ export default function SpacePage() {
     }[] = [];
 
     PLANET_DATA.forEach((p) => {
-      // Orbit ring
       scene.add(buildOrbitRing(p.orbitR));
 
-      // Pivot carries the planet around its orbit
       const pivot = new THREE.Object3D();
       scene.add(pivot);
 
-      // Planet sphere — full PBR on desktop, lightweight on mobile
       const pSeg = isMobile ? 20 : 48;
       const geo = new THREE.SphereGeometry(p.size, pSeg, pSeg);
 
-      // Procedural surface texture for key planets
       const surfaceTexture =
         p.name === "Jupiter"
           ? buildJupiterTexture()
@@ -818,7 +759,6 @@ export default function SpacePage() {
             : p.name === "Earth"
               ? buildEarthTexture()
               : null;
-      // When a texture supplies the colour, use white so it isn't tinted
       const matColor = surfaceTexture ? new THREE.Color(0xffffff) : p.color;
 
       const mat = new THREE.MeshPhysicalMaterial({
@@ -838,19 +778,15 @@ export default function SpacePage() {
       });
       const planetMesh = new THREE.Mesh(geo, mat);
 
-      // Tilt group: rotates the spin axis to the planet's axial tilt,
-      // then the mesh itself spins around its local Y inside that group.
       const tiltGroup = new THREE.Group();
       tiltGroup.rotation.z = p.axialTilt;
       tiltGroup.position.x = p.orbitR;
       tiltGroup.add(planetMesh);
 
-      // Atmosphere + rim glow — fewer segments on mobile
       const glowSeg = isMobile ? 14 : 32;
       planetMesh.add(buildAtmosphere(p.size, p.atmoColor, glowSeg));
       planetMesh.add(buildRimGlow(p.size, p.atmoColor, glowSeg));
 
-      // Rings (Saturn, Uranus) — attached to mesh so they tilt with it
       if ("hasRings" in p && p.hasRings && "ringColor" in p) {
         const inner = "ringInner" in p ? (p.ringInner as number) : 1.55;
         const outer = "ringOuter" in p ? (p.ringOuter as number) : 2.6;
@@ -871,10 +807,8 @@ export default function SpacePage() {
       });
     });
 
-    // ── Planet meshes for raycasting ────────────────────────────────────────
     const planetMeshes = planetPivots.map((pp) => pp.mesh);
 
-    // ── Raycaster for planet hover/click ────────────────────────────────────
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2(-999, -999);
     let hoveredPlanetIdx = -1;
@@ -887,7 +821,6 @@ export default function SpacePage() {
     const _ssHead = new THREE.Vector3();
     const _ssTail = new THREE.Vector3();
 
-    // ── Asteroid Belt (between Mars & Jupiter) ─────────────────────────────
     const asteroidCount = isMobile ? 100 : 300;
     const asteroidGeo = new THREE.IcosahedronGeometry(0.08, 0);
     const asteroidMat = new THREE.MeshStandardMaterial({
@@ -916,7 +849,6 @@ export default function SpacePage() {
     asteroidGroup.add(asteroidMesh);
     scene.add(asteroidGroup);
 
-    // ── Shooting Stars (pooled — no alloc in animation loop) ──────────────
     const SS_POOL_SIZE = 8;
     type ShootingStar = {
       line: THREE.Line;
@@ -976,7 +908,6 @@ export default function SpacePage() {
       s.mat.opacity = 0;
     };
 
-    // ── Comets ─────────────────────────────────────────────────────────────
     const TAIL_LEN = isMobile ? 40 : 80;
 
     type CometObj = {
@@ -987,7 +918,6 @@ export default function SpacePage() {
     };
 
     const spawnComet = (c: CometObj) => {
-      // Random entry point on perimeter of the scene
       const angle = Math.random() * Math.PI * 2;
       const startR = 110 + Math.random() * 20;
       const sx = Math.cos(angle) * startR;
@@ -996,7 +926,6 @@ export default function SpacePage() {
 
       c.head.position.set(sx, sy, sz);
 
-      // Aim toward a random point near the solar system
       const tx = (Math.random() - 0.5) * 30;
       const ty = (Math.random() - 0.5) * 8;
       const tz = (Math.random() - 0.5) * 30;
@@ -1005,7 +934,6 @@ export default function SpacePage() {
         .normalize()
         .multiplyScalar(13 + Math.random() * 9);
 
-      // Collapse tail to spawn point so it doesn't streak across the scene
       for (let i = 0; i < TAIL_LEN * 3; i += 3) {
         c.tailPos[i] = sx;
         c.tailPos[i + 1] = sy;
@@ -1015,7 +943,6 @@ export default function SpacePage() {
     };
 
     const makeComet = (staggerProgress = 0): CometObj => {
-      // Head sphere
       const head = new THREE.Mesh(
         new THREE.SphereGeometry(0.22, 12, 12),
         new THREE.MeshBasicMaterial({
@@ -1026,7 +953,6 @@ export default function SpacePage() {
       );
       scene.add(head);
 
-      // Head glow halo
       head.add(
         new THREE.Mesh(
           new THREE.SphereGeometry(0.62, 12, 12),
@@ -1041,7 +967,6 @@ export default function SpacePage() {
         ),
       );
 
-      // Tail geometry — positions updated each frame, colors are pre-baked
       const tailPos = new Float32Array(TAIL_LEN * 3);
       const tailColors = new Float32Array(TAIL_LEN * 3);
       for (let i = 0; i < TAIL_LEN; i++) {
@@ -1070,7 +995,6 @@ export default function SpacePage() {
       };
       spawnComet(comet);
 
-      // Fast-forward a staggered comet so it's mid-flight on load
       if (staggerProgress > 0) {
         const steps = Math.floor(staggerProgress * 300);
         for (let s = 0; s < steps; s++) {
@@ -1090,14 +1014,11 @@ export default function SpacePage() {
       return comet;
     };
 
-    // Two comets — second one fast-forwarded to appear mid-flight immediately
     const comets = [makeComet(0), makeComet(0.55)];
 
-    // ── Animation loop ─────────────────────────────────────────────────────
     let animId: number;
     const timer = new THREE.Timer();
 
-    // Entry animation constants — mobile starts closer so the scene is immediately visible
     const ENTRY_DURATION = isMobile ? 2.5 : 3.8;
     const ENTRY_Z0 = isMobile ? 160 : 220,
       ENTRY_Z1 = 95;
@@ -1110,23 +1031,18 @@ export default function SpacePage() {
       timer.update();
       const elapsed = timer.getElapsed();
 
-      // ── Camera ────────────────────────────────────────────────────────
       if (entryActive) {
-        // Cubic ease-out: start far/high, settle into orbit view
         const t = Math.min(elapsed / ENTRY_DURATION, 1);
         const e = 1 - Math.pow(1 - t, 3);
         const z = ENTRY_Z0 + (ENTRY_Z1 - ENTRY_Z0) * e;
         const y = ENTRY_Y0 + (ENTRY_Y1 - ENTRY_Y0) * e;
         camera.position.set(0, y, z);
         currentZoomRef.current = z;
-        // Sync targetZoom only once at the end so gesture/keyboard
-        // controls can take over immediately from the final position
         if (t >= 1) {
           targetZoomRef.current = z;
           entryActive = false;
         }
       } else {
-        // Orbit inertia + friction
         orbitThetaRef.current += orbitVelXRef.current;
         orbitPhiRef.current = Math.max(
           -0.4,
@@ -1135,11 +1051,9 @@ export default function SpacePage() {
         orbitVelXRef.current *= 0.95;
         orbitVelYRef.current *= 0.95;
 
-        // Normal gesture-driven zoom lerp
         currentZoomRef.current +=
           (targetZoomRef.current - currentZoomRef.current) * 0.06;
 
-        // Spherical camera position
         const theta = orbitThetaRef.current;
         const phi = orbitPhiRef.current;
         const zoom = currentZoomRef.current;
@@ -1153,28 +1067,21 @@ export default function SpacePage() {
       cameraLookAtCurrent.lerp(cameraLookAtTarget, 0.03);
       camera.lookAt(cameraLookAtCurrent);
 
-      // Planet orbits + axis self-rotation
-      // Base spin: 0.004 rad/frame × spinRate multiplier
       planetPivots.forEach(({ pivot, mesh, speed, spinRate }) => {
         pivot.rotation.y += 0.0012 * speed;
         mesh.rotation.y += 0.004 * spinRate;
       });
 
-      // Comets — advance head, shift tail ring-buffer, respawn when off-screen
       comets.forEach((c) => {
         c.head.position.addScaledVector(c.vel, 0.016);
-        // Shift all tail positions one slot toward index-0 (oldest end)
         c.tailPos.copyWithin(0, 3);
-        // Write current head position into the newest slot
         c.tailPos[TAIL_LEN * 3 - 3] = c.head.position.x;
         c.tailPos[TAIL_LEN * 3 - 2] = c.head.position.y;
         c.tailPos[TAIL_LEN * 3 - 1] = c.head.position.z;
         c.tailGeo.attributes.position.needsUpdate = true;
-        // Respawn once comet exits the scene
         if (c.head.position.length() > 135) spawnComet(c);
       });
 
-      // Sun pulse + rotation
       const pulse = 1 + Math.sin(elapsed * 1.4) * 0.025;
       sunCore.scale.setScalar(pulse);
       sunCore.rotation.y += 0.001;
@@ -1182,10 +1089,8 @@ export default function SpacePage() {
       sunLayer.rotation.y -= 0.0007;
       sunLayer.rotation.x += 0.0003;
 
-      // ── Asteroid belt rotation ──
       asteroidGroup.rotation.y += 0.0003;
 
-      // ── Shooting stars (pooled) ──
       if (elapsed >= nextShootTime) {
         const count = 3 + Math.floor(Math.random() * 2);
         for (let i = 0; i < count; i++) spawnShootingStar(elapsed);
@@ -1215,7 +1120,6 @@ export default function SpacePage() {
         s.line.geometry.attributes.position.needsUpdate = true;
       }
 
-      // ── Planet hover — raycast only when mouse moved ──
       if (mouseDirty) {
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(planetMeshes);
@@ -1229,7 +1133,6 @@ export default function SpacePage() {
         _hoverScaleVec.setScalar(i === hoveredPlanetIdx ? 1.15 : 1);
         m.scale.lerp(_hoverScaleVec, 0.1);
       });
-      // DOM writes only on hover state change (avoid per-frame reflow)
       if (hoveredPlanetIdx !== prevHoveredIdx) {
         canvas.style.cursor = hoveredPlanetIdx >= 0 ? "pointer" : "default";
         const labelEl = planetLabelRef.current;
@@ -1244,7 +1147,6 @@ export default function SpacePage() {
         }
         prevHoveredIdx = hoveredPlanetIdx;
       }
-      // Label position tracks orbiting planet (lightweight: 2 style writes)
       if (hoveredPlanetIdx >= 0) {
         const labelEl = planetLabelRef.current;
         if (labelEl) {
@@ -1259,7 +1161,6 @@ export default function SpacePage() {
     };
     animate();
 
-    // ── Resize ─────────────────────────────────────────────────────────────
     const onResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -1268,7 +1169,6 @@ export default function SpacePage() {
     };
     window.addEventListener("resize", onResize);
 
-    // ── Orbit helpers ─────────────────────────────────────────────────────
     const zoomToPlanet = (idx: number) => {
       const mesh = planetMeshes[idx];
       const worldPos = new THREE.Vector3();
@@ -1277,7 +1177,6 @@ export default function SpacePage() {
       cameraLookAtTarget.copy(worldPos).multiplyScalar(0.3);
     };
 
-    // ── Mouse: drag to orbit, move to hover, click to select ────────────
     let isDragging = false;
     let wasDragged = false;
     let dragStartX = 0;
@@ -1323,7 +1222,6 @@ export default function SpacePage() {
     window.addEventListener("mouseup", onMouseUp);
     canvas.addEventListener("click", onCanvasClick);
 
-    // ── Touch: 1-finger drag orbit + tap select, 2-finger pinch zoom ────
     let lastPinchDist = 0;
     let touchDragX = 0;
     let touchDragY = 0;
@@ -1409,7 +1307,6 @@ export default function SpacePage() {
     };
   }, []);
 
-  // ── Keyboard controls ──────────────────────────────────────────────────────
   useEffect(() => {
     const ZOOM_STEP = 6;
     const ORBIT_STEP = 0.012;
@@ -1459,7 +1356,6 @@ export default function SpacePage() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [router]);
 
-  // ── MediaPipe Hands ────────────────────────────────────────────────────────
   useEffect(() => {
     const video = videoRef.current;
     const overlayCanvas = overlayCanvasRef.current;
@@ -1473,8 +1369,6 @@ export default function SpacePage() {
       window.innerWidth < 768;
 
     const setup = async () => {
-      // Pre-check camera permission before loading heavy MediaPipe bundles
-      // Use front (selfie) camera — correct orientation for hand tracking
       const videoConstraints: MediaTrackConstraints = isMobileHands
         ? { facingMode: "user" }
         : { facingMode: { ideal: "user" } };
@@ -1522,7 +1416,6 @@ export default function SpacePage() {
         if (stopped) return;
         handsActiveRef.current = true;
 
-        // Draw mirrored landmarks on overlay canvas
         const ctx = overlayCanvas.getContext("2d");
         if (!ctx) return;
         ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
@@ -1533,7 +1426,6 @@ export default function SpacePage() {
         ) {
           const landmarks = results.multiHandLandmarks[0];
 
-          // Draw connections
           const connections: [number, number][] = [
             [0, 1],
             [1, 2],
@@ -1564,7 +1456,6 @@ export default function SpacePage() {
           connections.forEach(([a, b]) => {
             const lA = landmarks[a];
             const lB = landmarks[b];
-            // Mirror X for selfie view
             ctx.beginPath();
             ctx.moveTo(
               (1 - lA.x) * overlayCanvas.width,
@@ -1577,7 +1468,6 @@ export default function SpacePage() {
             ctx.stroke();
           });
 
-          // Draw keypoints
           landmarks.forEach((lm, i) => {
             const isThumb = i === 4;
             const isIndex = i === 8;
@@ -1593,12 +1483,10 @@ export default function SpacePage() {
             ctx.fill();
           });
 
-          // Pinch detection + palm tracking — both run simultaneously
           const thumb = landmarks[4];
           const index = landmarks[8];
           const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
 
-          // Draw pinch indicator line
           ctx.beginPath();
           ctx.moveTo(
             (1 - thumb.x) * overlayCanvas.width,
@@ -1613,7 +1501,6 @@ export default function SpacePage() {
           ctx.lineWidth = 2;
           ctx.stroke();
 
-          // ── Zoom — always mapped from pinch distance ──
           const minDist = 0.02;
           const maxDist = 0.28;
           const t = Math.max(
@@ -1622,7 +1509,6 @@ export default function SpacePage() {
           );
           targetZoomRef.current = 25 + t * 105;
 
-          // ── Orbit — always tracked from palm movement ──
           const palm = landmarks[9]; // middle finger MCP — stable palm center
           if (prevPalmX !== null && prevPalmY !== null) {
             const dx = palm.x - prevPalmX;
@@ -1669,10 +1555,8 @@ export default function SpacePage() {
     <div className="fixed inset-0 overflow-hidden bg-[#00000a]">
       <SpaceIntroScreen />
 
-      {/* Three.js canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
 
-      {/* Screen vignette */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -1681,7 +1565,6 @@ export default function SpacePage() {
         }}
       />
 
-      {/* Planet hover label */}
       <div
         ref={planetLabelRef}
         className="absolute pointer-events-none text-white text-center text-xs tracking-wide"
@@ -1693,7 +1576,6 @@ export default function SpacePage() {
         }}
       />
 
-      {/* ── Top bar ─────────────────────────────────────────────────────── */}
       <motion.div
         className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 pointer-events-none"
         initial={{ opacity: 0, y: -16 }}
@@ -1714,7 +1596,6 @@ export default function SpacePage() {
         </button>
       </motion.div>
 
-      {/* ── Instructions ────────────────────────────────────────────────── */}
       <motion.div
         className="absolute bottom-4 right-4 text-right text-white/25 text-xs tracking-wide leading-6 select-none"
         initial={{ opacity: 0 }}
@@ -1736,7 +1617,6 @@ export default function SpacePage() {
         </div>
       </motion.div>
 
-      {/* ── Webcam preview ───────────────────────────────────────────────── */}
       <motion.div
         className="absolute bottom-4 left-4 rounded-2xl overflow-hidden border border-white/10"
         style={{
@@ -1748,7 +1628,6 @@ export default function SpacePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 3.2 }}
       >
-        {/* Card header */}
         <div className="absolute top-2 left-3 z-10 text-white/30 text-[10px] tracking-widest uppercase flex items-center gap-1.5">
           <span
             className={`w-1 h-1 rounded-full ${
@@ -1762,12 +1641,9 @@ export default function SpacePage() {
           Cam
         </div>
 
-        {/* Fixed-size content area — all states fill 200×150 (160×120 on mobile) */}
         <div className="relative w-[160px] h-[120px] sm:w-[200px] sm:h-[150px]">
-          {/* ── Loading ── */}
           {camState === "loading" && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-              {/* Spinning ring */}
               <svg
                 className="w-7 h-7 animate-spin"
                 viewBox="0 0 24 24"
@@ -1795,7 +1671,6 @@ export default function SpacePage() {
             </div>
           )}
 
-          {/* ── Denied ── */}
           {camState === "denied" && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4">
               <span className="text-2xl leading-none">🚫</span>
@@ -1808,7 +1683,6 @@ export default function SpacePage() {
             </div>
           )}
 
-          {/* ── Error ── */}
           {camState === "error" && (
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4">
               <span className="text-2xl leading-none">⚠️</span>
@@ -1821,7 +1695,6 @@ export default function SpacePage() {
             </div>
           )}
 
-          {/* ── Ready — video + landmark overlay ── */}
           <video
             ref={videoRef}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${

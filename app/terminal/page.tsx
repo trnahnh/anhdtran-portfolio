@@ -34,7 +34,6 @@ export default function TerminalPage() {
 
   const handleBootComplete = useCallback(() => setBooted(true), []);
 
-  // ESC during boot sequence
   useEffect(() => {
     if (booted) return;
     const onKey = (e: KeyboardEvent) => {

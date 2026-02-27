@@ -159,15 +159,12 @@ export default function CardIntroScreen() {
       }`}
       onClick={skip}
     >
-      {/* Perspective container */}
       <div style={{ perspective: "1200px" }}>
-        {/* Spinning wrapper */}
         <div
           className={reducedMotion ? "" : "card-spin"}
           style={{ transformStyle: "preserve-3d" }}
           onAnimationEnd={handleSpinEnd}
         >
-          {/* Card shell — both faces share this sizing */}
           <div className="relative w-[92vw] max-w-[580px] aspect-856/540">
             {/* ===== FRONT FACE ===== */}
             <div
@@ -176,7 +173,6 @@ export default function CardIntroScreen() {
                 backfaceVisibility: "hidden",
               }}
             >
-              {/* Metallic edge borders */}
               <div
                 className="absolute inset-0 rounded-2xl"
                 style={{
@@ -190,7 +186,6 @@ export default function CardIntroScreen() {
                 }}
               />
 
-              {/* Card surface */}
               <div
                 className="absolute inset-0 rounded-2xl overflow-hidden"
                 style={{
@@ -200,7 +195,6 @@ export default function CardIntroScreen() {
                     "0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
                 }}
               >
-                {/* Subtle diagonal sheen */}
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -209,7 +203,6 @@ export default function CardIntroScreen() {
                   }}
                 />
 
-                {/* Light gradient blobs on card */}
                 <div
                   className="absolute w-[200%] h-[200%] rounded-full opacity-[0.06] animate-blob pointer-events-none"
                   style={{
@@ -238,12 +231,10 @@ export default function CardIntroScreen() {
                   }}
                 />
 
-                {/* Card content — Sapphire-style single flow */}
                 <div
                   className="relative h-full flex flex-col justify-between"
                   style={{ padding: "clamp(0.875rem, 3.5vw, 2rem)" }}
                 >
-                  {/* Top row: portrait (brand mark) right-aligned */}
                   <div className="flex justify-end">
                     <div
                       className="rounded-full overflow-hidden border border-zinc-700/40"
@@ -264,12 +255,10 @@ export default function CardIntroScreen() {
                     </div>
                   </div>
 
-                  {/* Middle: chip + card number */}
                   <div
                     className="flex flex-col"
                     style={{ gap: "clamp(0.25rem, 1.5vw, 1rem)" }}
                   >
-                    {/* EMV chip */}
                     <div
                       className="rounded-md"
                       style={{
@@ -281,7 +270,6 @@ export default function CardIntroScreen() {
                           "inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.2)",
                       }}
                     />
-                    {/* Card number */}
                     <p
                       className="font-mono tracking-[0.22em] text-zinc-400"
                       style={{
@@ -304,7 +292,6 @@ export default function CardIntroScreen() {
                     </p>
                   </div>
 
-                  {/* Bottom row: name + title left, issuer right */}
                   <div className="flex items-end justify-between">
                     <div>
                       <p
@@ -351,7 +338,6 @@ export default function CardIntroScreen() {
                 transform: "rotateY(180deg)",
               }}
             >
-              {/* Metallic edge borders */}
               <div
                 className="absolute inset-0 rounded-2xl"
                 style={{
@@ -365,7 +351,6 @@ export default function CardIntroScreen() {
                 }}
               />
 
-              {/* Card surface */}
               <div
                 className="absolute inset-0 rounded-2xl overflow-hidden"
                 style={{
@@ -375,9 +360,7 @@ export default function CardIntroScreen() {
                     "0 8px 32px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)",
                 }}
               >
-                {/* Magnetic stripe */}
                 <div className="mt-8 w-full h-10 sm:h-12 bg-zinc-800" />
-                {/* Signature strip */}
                 <div className="mx-6 mt-4 h-6 sm:h-8 rounded-sm bg-zinc-200/10" />
               </div>
             </div>
@@ -385,7 +368,6 @@ export default function CardIntroScreen() {
         </div>
       </div>
 
-      {/* Skip hint */}
       <p className="mt-5 text-sm select-none text-zinc-600">
         Tap anywhere to skip.
       </p>

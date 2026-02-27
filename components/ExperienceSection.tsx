@@ -6,7 +6,6 @@ export default function ExperienceSection() {
   return (
     <section>
       <div className="space-y-8">
-        {/* Current Experience */}
         <div>
           <h2 className="fade-in-up fade-in-up-delay-1 text-lg font-medium mb-4">
             <span className="text-muted-foreground mr-2" aria-hidden="true">
@@ -42,7 +41,6 @@ export default function ExperienceSection() {
           </div>
         </div>
 
-        {/* Past Experience */}
         <div>
           <h2 className="fade-in-up fade-in-up-delay-1 text-lg font-medium mb-4">
             <span className="text-muted-foreground mr-2" aria-hidden="true">

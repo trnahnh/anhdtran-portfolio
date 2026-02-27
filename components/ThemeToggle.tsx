@@ -4,7 +4,6 @@ import { useEffect, useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useMounted } from "@/hooks/useMounted";
 
-// ── Theme external store ──────────────────────────────────────────────────────
 let themeListeners: (() => void)[] = [];
 
 function subscribeTheme(callback: () => void) {
@@ -30,7 +29,6 @@ function getThemeServerSnapshot(): "light" | "dark" {
   return "dark";
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
 export default function ThemeToggle() {
   const theme = useSyncExternalStore(
     subscribeTheme,
@@ -39,7 +37,6 @@ export default function ThemeToggle() {
   );
   const mounted = useMounted();
 
-  // Sync theme class to <html> on changes
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
@@ -48,11 +45,9 @@ export default function ThemeToggle() {
     const newTheme = theme === "dark" ? "light" : "dark";
     localStorage.setItem("theme", newTheme);
 
-    // Add transition class for smooth theme change
     document.documentElement.classList.add("theme-transitioning");
     document.documentElement.classList.toggle("dark", newTheme === "dark");
 
-    // Remove transition class after animation completes
     setTimeout(() => {
       document.documentElement.classList.remove("theme-transitioning");
     }, 300);

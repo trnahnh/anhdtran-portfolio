@@ -50,6 +50,15 @@ export default function SpaceIntroScreen() {
     setTimeout(() => setShow(false), 500);
   }, []);
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === "Escape" || e.key === " ") {
+        skip();
+      }
+    },
+    [skip],
+  );
+
   useEffect(() => {
     const audio = new Audio("/sfx/keyboard-typing.mp3");
     audioRef.current = audio;
@@ -78,7 +87,6 @@ export default function SpaceIntroScreen() {
       };
     });
 
-    // ── Phase 1: type LINE_1 ────────────────────────────────────────────────
     let idx1 = 0;
     timerRef.current = setInterval(() => {
       idx1++;
@@ -88,7 +96,6 @@ export default function SpaceIntroScreen() {
         clearInterval(timerRef.current!);
         timerRef.current = null;
 
-        // ── Pause, then start LINE_2 ────────────────────────────────────────
         t1Ref.current = setTimeout(() => {
           setLine2(0);
           let idx2 = 0;
@@ -137,13 +144,15 @@ export default function SpaceIntroScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-100 flex flex-col items-center justify-center bg-[#00000a] transition-opacity duration-500 cursor-pointer select-none ${
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      className={`fixed inset-0 z-100 outline-none flex flex-col items-center justify-center bg-[#00000a] transition-opacity duration-500 cursor-pointer select-none ${
         fading ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
       onClick={skip}
     >
       <div className="flex flex-col items-center gap-5 sm:gap-7 text-center">
-        {/* Line 1 — large, thin */}
         <p className="font-thin text-6xl sm:text-8xl lg:text-9xl tracking-[0.15em] text-white/90">
           {LINE_1.slice(0, line1)}
           <span
@@ -153,7 +162,6 @@ export default function SpaceIntroScreen() {
           />
         </p>
 
-        {/* Line 2 — smaller, wide tracking, uppercase */}
         {line2 !== null && (
           <p className="font-extralight text-sm sm:text-base lg:text-lg tracking-[0.4em] uppercase text-white/35">
             {LINE_2.slice(0, line2)}

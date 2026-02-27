@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 function withOpacity(rgba: string, opacity: number) {
   return rgba.replace(/,\s*[\d.]+\)$/, `, ${opacity})`);
 }
 
-// ── Static data (deterministic – no hydration mismatch) ────────────────────
 const STARS = Array.from({ length: 80 }, (_, i) => ({
   id: i,
   cx: ((i * 47.3 + 11) % 100).toFixed(2),
@@ -89,7 +87,6 @@ const BG_FLOATERS = [
   },
 ];
 
-// ── SVG atoms ──────────────────────────────────────────────────────────────
 function SunSVG() {
   return (
     <svg width="48" height="48" viewBox="0 0 48 48">
@@ -163,7 +160,6 @@ function PlanetSVG({
   );
 }
 
-// ── Main component ─────────────────────────────────────────────────────────
 export default function SolarSystem() {
   const [scale, setScale] = useState(1);
   const [isDark, setIsDark] = useState(true);
@@ -188,7 +184,6 @@ export default function SolarSystem() {
 
     window.addEventListener("resize", updateScale, { passive: true });
 
-    // Watch for theme class changes on <html>
     const observer = new MutationObserver(() =>
       requestAnimationFrame(updateTheme),
     );
@@ -209,7 +204,6 @@ export default function SolarSystem() {
       style={{ opacity: isDark ? 1 : 0 }}
       aria-hidden="true"
     >
-      {/* Stars */}
       <motion.svg
         className="absolute inset-0 w-full h-full"
         style={{ y: starsY, color: "var(--foreground)" }}
@@ -229,7 +223,6 @@ export default function SolarSystem() {
         ))}
       </motion.svg>
 
-      {/* Background floaters */}
       <motion.div className="absolute inset-0" style={{ y: floatersY }}>
         {BG_FLOATERS.map((p) => (
           <motion.div
@@ -248,7 +241,6 @@ export default function SolarSystem() {
         ))}
       </motion.div>
 
-      {/* Solar system */}
       <motion.div
         className="absolute"
         style={{ left: "50%", top: "42%", y: solarY }}
@@ -261,7 +253,6 @@ export default function SolarSystem() {
             transformOrigin: "center center",
           }}
         >
-          {/* Sun */}
           <div
             style={{
               position: "absolute",
@@ -279,7 +270,6 @@ export default function SolarSystem() {
                 transform: "translate(-50%, -50%)",
               }}
             >
-              {/* Orbit ring */}
               <svg
                 style={{
                   position: "absolute",

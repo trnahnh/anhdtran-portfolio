@@ -39,7 +39,6 @@ export default function PagePeel() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Theme detection
   useEffect(() => {
     const check = () =>
       setIsDark(document.documentElement.classList.contains("dark"));
@@ -66,7 +65,6 @@ export default function PagePeel() {
     dragDistRef.current = 0;
   }, [pathname]);
 
-  // Responsive sizing
   const base = Math.min(viewportSize.w, viewportSize.h);
   const idleSize = Math.max(base * 0.045, 36);
   const maxDrag = base * 0.35;
@@ -76,7 +74,6 @@ export default function PagePeel() {
   // Bounding box for paint containment — only repaint this corner, not the full screen
   const boxSize = Math.ceil(maxDrag * 1.5);
 
-  // Apply peel size to DOM directly (no setState)
   const applyPeelSize = useCallback(
     (s: number) => {
       const sh = s * 1.15;
@@ -249,7 +246,6 @@ export default function PagePeel() {
 
   return (
     <>
-      {/* Layer 1: Fold shadow — anchored to bottom-left corner */}
       {!expanding && (
         <div
           ref={shadowRef}
@@ -265,7 +261,6 @@ export default function PagePeel() {
         />
       )}
 
-      {/* Layer 2: Paper curl — flap pointing up-right */}
       {!expanding && (
         <div
           ref={curlRef}
@@ -297,7 +292,6 @@ export default function PagePeel() {
         </div>
       )}
 
-      {/* Layer 3: Fold edge highlight */}
       {!expanding && (
         <svg
           className="fixed bottom-0 left-0 z-50 pointer-events-none"
@@ -318,7 +312,6 @@ export default function PagePeel() {
         </svg>
       )}
 
-      {/* Drag interaction area */}
       <div
         ref={hitRef}
         onPointerDown={handlePointerDown}
@@ -339,7 +332,6 @@ export default function PagePeel() {
         }}
       />
 
-      {/* Full-screen expand overlay */}
       {expanding && (
         <div
           className="peel-expand-overlay fixed inset-0 z-60"

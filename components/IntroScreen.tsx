@@ -78,6 +78,15 @@ export default function IntroScreen() {
     setTimeout(() => setShow(false), 500);
   }, [stopAudio]);
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === "Escape" || e.key === " ") {
+        skip();
+      }
+    },
+    [skip],
+  );
+
   useEffect(() => {
     const audio = new Audio("/sfx/keyboard-typing.mp3");
     audioRef.current = audio;
@@ -132,18 +141,19 @@ export default function IntroScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-100 flex flex-col items-center justify-center transition-opacity duration-500 cursor-pointer ${
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      className={`fixed inset-0 z-100 outline-none flex flex-col items-center justify-center transition-opacity duration-500 cursor-pointer ${
         isDark ? "bg-zinc-950" : "bg-white"
       } ${fading ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       onClick={skip}
     >
-      {/* IDE Window */}
       <div
         className={`w-[85%] max-w-xl rounded-xl overflow-hidden shadow-2xl border ${
           isDark ? "border-zinc-800" : "border-zinc-200"
         }`}
       >
-        {/* Title bar */}
         <div
           className={`px-4 py-3 flex items-center gap-2 ${
             isDark ? "bg-zinc-900" : "bg-zinc-100"
@@ -161,7 +171,6 @@ export default function IntroScreen() {
           </span>
         </div>
 
-        {/* Code area */}
         <div
           className={`px-4 sm:px-6 py-6 sm:py-10 font-mono text-base sm:text-xl lg:text-2xl flex items-start gap-3 sm:gap-5 ${
             isDark ? "bg-zinc-950" : "bg-white"
@@ -185,7 +194,6 @@ export default function IntroScreen() {
         </div>
       </div>
 
-      {/* Skip hint */}
       <p
         className={`mt-5 text-sm select-none ${
           isDark ? "text-zinc-600" : "text-zinc-400"

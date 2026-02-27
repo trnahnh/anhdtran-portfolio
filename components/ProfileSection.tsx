@@ -46,7 +46,6 @@ function PhotoCard({
 
   return (
     <TiltCard className="relative group rounded-xl overflow-hidden">
-      {/* Skeleton */}
       {!loaded && (
         <div className="absolute inset-0 bg-muted animate-pulse rounded-xl" />
       )}
