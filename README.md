@@ -36,7 +36,7 @@ personal portfolio built with Next.js. nothing crazy, just a solar system, real-
 
 **smooth scroll** — lerp-based smooth scrolling via Lenis. adaptive touch/desktop tuning, disabled on immersive routes.
 
-**footer** — live-ticking precise age counter with 12 decimal places. because why display a static number when you can watch yourself age in real time.
+**footer** — live-ticking precise age counter with 15 decimal places. because why display a static number when you can watch yourself age in real time.
 
 ---
 
