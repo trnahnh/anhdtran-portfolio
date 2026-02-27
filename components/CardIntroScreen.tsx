@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
+let introPlayedThisSession = false;
+
 export default function CardIntroScreen() {
   const [show, setShow] = useState(false);
   const [fading, setFading] = useState(false);
@@ -70,9 +72,7 @@ export default function CardIntroScreen() {
     setFading(false);
     setShow(true);
 
-    // For reduced motion: show card static, then auto-trigger the post-spin sequence
     if (reducedMotion) {
-      // Play sound immediately, then fade
       playTapSound();
       fadeTimeoutRef.current = setTimeout(() => setFading(true), 800);
       hideTimeoutRef.current = setTimeout(() => setShow(false), 1300);
@@ -82,7 +82,6 @@ export default function CardIntroScreen() {
   const handleSpinEnd = useCallback(() => {
     if (fading) return;
     playTapSound();
-    // 800ms pause, then 500ms fade
     fadeTimeoutRef.current = setTimeout(() => setFading(true), 800);
     hideTimeoutRef.current = setTimeout(() => setShow(false), 1300);
   }, [fading, playTapSound]);
@@ -93,31 +92,32 @@ export default function CardIntroScreen() {
     hideTimeoutRef.current = setTimeout(() => setShow(false), 500);
   }, [clearAll]);
 
-  // Stable ref so the mount effect never re-runs when startIntro recreates
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === "Escape" || e.key === " ") {
+        skip();
+      }
+    },
+    [skip],
+  );
+
   const startIntroRef = useRef(startIntro);
   useEffect(() => {
     startIntroRef.current = startIntro;
   });
 
-  // Mount effect — runs exactly once
   useEffect(() => {
     const isDarkNow = () => document.documentElement.classList.contains("dark");
-    if (!isDarkNow()) return;
+    if (!isDarkNow() || introPlayedThisSession) return;
 
-    const navEntry = performance.getEntriesByType("navigation")[0] as
-      | PerformanceNavigationTiming
-      | undefined;
-    const isReload = navEntry?.type === "reload";
-    const hasSeenIntro =
-      sessionStorage.getItem("profile-card-intro-seen") === "true";
+    introPlayedThisSession = true;
+    startIntroRef.current();
 
-    if (!hasSeenIntro || isReload) {
-      sessionStorage.setItem("profile-card-intro-seen", "true");
-      startIntroRef.current();
-    }
+    return () => {
+      introPlayedThisSession = false;
+    };
   }, []);
 
-  // Dark-mode observer — reacts to theme toggles
   useEffect(() => {
     const isDarkNow = () => document.documentElement.classList.contains("dark");
     let prevDark = isDarkNow();
@@ -151,7 +151,10 @@ export default function CardIntroScreen() {
 
   return (
     <div
-      className={`fixed inset-0 z-100 flex flex-col items-center justify-center bg-zinc-950 transition-opacity duration-500 cursor-pointer ${
+      role="button"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      className={`fixed inset-0 z-100 outline-none flex flex-col items-center justify-center bg-zinc-950 transition-opacity duration-500 cursor-pointer ${
         fading ? "opacity-0 pointer-events-none" : "opacity-100"
       }`}
       onClick={skip}

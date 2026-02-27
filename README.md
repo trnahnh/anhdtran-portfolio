@@ -26,7 +26,7 @@ personal portfolio built with Next.js. nothing crazy, just a solar system, real-
 
 ## features
 
-**`/profile`** — where it starts. 2D solar system background, bio, contact.
+**`/profile`** — where it starts. 3D spinning matte black card intro (Amex Centurion / Chase Sapphire vibes) with gold borders, EMV chip, gradient blobs, tap-to-pay SFX, and fluid `clamp()`-based responsive scaling. dark mode only, click to skip. 2D solar system background, bio, contact.
 
 **`/space`** *(dark mode only)* — full 3D interactive solar system. all 8 planets with PBR materials, realistic axial tilts, Saturn's rings, procedural Sun/Jupiter/Earth/Saturn textures, animated comets, asteroid belt, shooting stars, nebula backdrop, and unreal bloom post-processing. orbit the solar system by dragging, swiping your hand (Iron Man style), or arrow keys. pinch or scroll to zoom. hover/tap planets for fun facts. hand tracking via webcam for simultaneous pinch-to-zoom + open-hand orbit. keyboard fallback (← → orbit, ↑ ↓ zoom, W/S tilt). press Esc to exit.
 
