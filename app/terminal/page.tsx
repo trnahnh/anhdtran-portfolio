@@ -15,7 +15,6 @@ export default function TerminalPage() {
   // Track whether we were navigated to (vs direct URL entry)
   useEffect(() => {
     // history.length > 1 means there's a previous entry to go back to
-    // (works with both client-side navigation and browser history)
     hasHistoryRef.current = window.history.length > 1;
   }, []);
 
