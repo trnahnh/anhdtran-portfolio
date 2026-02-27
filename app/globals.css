@@ -133,6 +133,8 @@
   }
   html {
     overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted-foreground) var(--background);
   }
   body {
     @apply bg-background text-foreground font-sans;
@@ -267,6 +269,7 @@ html.theme-transitioning * {
 
 .animate-blob {
   animation: blob 20s infinite ease-in-out;
+  will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -401,6 +404,19 @@ html.theme-transitioning * {
   .hover-lift:hover {
     transform: translateY(-2px);
   }
+}
+
+/* Card intro spin */
+@keyframes cardSpin {
+  0%   { transform: rotateY(0deg) translateZ(0); }
+  100% { transform: rotateY(1080deg) translateZ(0); }
+}
+.card-spin {
+  animation: cardSpin 2.4s cubic-bezier(0.12, 0.8, 0.24, 1) forwards;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-spin { animation: none; transform: rotateY(0deg); }
 }
 
 /* Mobile: show default cursor */
