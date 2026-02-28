@@ -9,10 +9,10 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    name: "VelocityMatch",
+    name: "Ferrox",
     description:
       "Low-latency order matching engine targeting sub-50µs P99 latency at 1M+ orders/sec with zero heap allocation on the hot path.",
-    link: "https://github.com/trnahnh/velocity-match",
+    link: "https://github.com/trnahnh/ferrox",
     techStack: [
       "Rust",
       "Lock-Free SPSC Ring Buffer",
