@@ -9,6 +9,22 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    name: "VelocityMatch",
+    description:
+      "Low-latency order matching engine targeting sub-50µs P99 latency at 1M+ orders/sec with zero heap allocation on the hot path.",
+    link: "https://github.com/trnahnh/velocity-match",
+    techStack: [
+      "Rust",
+      "Lock-Free SPSC Ring Buffer",
+      "UDP Multicast",
+      "Memory-Mapped I/O",
+      "Arena Allocator",
+      "HdrHistogram",
+      "Criterion",
+    ],
+    status: "current",
+  },
+  {
     name: "Inyeon",
     nameAlt: "(인연)",
     description:
