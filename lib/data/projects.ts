@@ -55,6 +55,7 @@ export const projects: Project[] = [
       "Bun",
       "Hono",
       "TypeScript",
+      "Nginx",
       "PostgreSQL",
       "GitHub Actions CI/CD",
     ],
