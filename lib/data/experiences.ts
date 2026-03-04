@@ -8,17 +8,17 @@ export interface Experience {
 
 export const experiences: Experience[] = [
   {
-    title: "Founding Engineer",
-    company: "KatanaID",
-    companyUrl: "https://www.katanaid.com",
-    description: "AI-integrated Branding Toolkit",
-    status: "current",
-  },
-  {
     title: "Lead Software Engineer",
     company: "Caphne",
     companyUrl: "https://caphne.co",
     description: "Tinder for Study Buddies",
+    status: "current",
+  },
+  {
+    title: "Founding Engineer",
+    company: "KatanaID",
+    companyUrl: "https://www.katanaid.com",
+    description: "AI-integrated Branding Toolkit",
     status: "current",
   },
   {
