@@ -12,7 +12,7 @@ export const projects: Project[] = [
     name: "Ferrox",
     description:
       "Low-latency order matching engine targeting sub-50µs P99 latency at 1M+ orders/sec with zero heap allocation on the hot path.",
-    link: "https://github.com/trnahnh/ferrox",
+    link: "https://ferrox-engine.vercel.app/",
     techStack: [
       "Rust",
       "Lock-Free SPSC Ring Buffer",
@@ -29,7 +29,7 @@ export const projects: Project[] = [
     nameAlt: "(인연)",
     description:
       "Agentic AI Git companion that orchestrates the full workflow in one command.",
-    link: "https://inyeon-upstream.vercel.app",
+    link: "https://inyeon-upstream.vercel.app/",
     techStack: [
       "FastAPI",
       "Pydantic",
