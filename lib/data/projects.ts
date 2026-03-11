@@ -11,7 +11,7 @@ export const projects: Project[] = [
   {
     name: "Ferrox",
     description:
-      "Low-latency order matching engine targeting sub-50µs P99 latency at 1M+ orders/sec with zero heap allocation on the hot path.",
+      "High-frequency order matching engine utilizing an LMAX-inspired single-threaded core, benchmarked at sub-microsecond latency and 4.7M simulated orders/sec.",
     link: "https://ferrox-engine.vercel.app/",
     techStack: [
       "Rust",
