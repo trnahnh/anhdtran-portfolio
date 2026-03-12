@@ -16,12 +16,12 @@ export const projects: Project[] = [
     techStack: [
       "Go",
       "Shannon Entropy",
-      "Groq/OpenAI/Anthropic",
+      "Groq / OpenAI / Anthropic",
       "Qdrant",
       "Redis",
       "Prometheus",
       "Grafana",
-      "Docker Compose",
+      "Docker",
     ],
     status: "current",
   },
@@ -45,7 +45,7 @@ export const projects: Project[] = [
     name: "Inyeon",
     nameAlt: "(인연)",
     description:
-      "Agentic AI Git companion that orchestrates the full workflow in one command.",
+      "Agentic AI Git companion that orchestrates the full workflow automation in one command.",
     link: "https://inyeon-upstream.vercel.app/",
     techStack: [
       "FastAPI",
