@@ -11,7 +11,7 @@ export const projects: Project[] = [
   {
     name: "DraftThinker",
     description:
-      "Cost-aware LLM gateway that reduces inference costs by 60%+ through entropy-based draft-and-verify routing with speculative execution.",
+      "Cost-aware LLM gateway that reduces inference costs through entropy-based draft-and-verify routing with speculative execution.",
     link: "https://github.com/trnahnh/draft-thinker",
     techStack: [
       "Go",
