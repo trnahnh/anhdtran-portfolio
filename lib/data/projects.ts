@@ -9,6 +9,23 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    name: "DraftThinker",
+    description:
+      "Cost-aware LLM gateway that reduces inference costs by 60%+ through entropy-based draft-and-verify routing with speculative execution.",
+    link: "https://github.com/trnahnh/draft-thinker",
+    techStack: [
+      "Go",
+      "Shannon Entropy",
+      "Groq/OpenAI/Anthropic",
+      "Qdrant",
+      "Redis",
+      "Prometheus",
+      "Grafana",
+      "Docker Compose",
+    ],
+    status: "current",
+  },
+  {
     name: "Ferrox",
     description:
       "LMAX-inspired high-frequency order matching engine benchmarked at sub-microsecond latency and 4.7M simulated orders/sec.",
