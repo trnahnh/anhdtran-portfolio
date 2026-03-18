@@ -9,14 +9,14 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    name: "DraftThinker",
+    name: "Draft-Thinker",
     description:
-      "Cost-aware LLM gateway that reduces inference costs through entropy-based draft-and-verify routing with speculative execution.",
-    link: "https://github.com/trnahnh/draft-thinker",
+      "Cost-aware LLM gateway that cuts inference costs by 91.6% through entropy-based draft-and-verify routing with speculative execution and semantic caching.",
+    link: "https://draft-thinker.vercel.app/",
     techStack: [
       "Go",
       "Shannon Entropy",
-      "Groq / OpenAI / Anthropic",
+      "OpenAI API",
       "Qdrant",
       "Redis",
       "Prometheus",
