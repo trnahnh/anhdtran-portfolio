@@ -9,6 +9,23 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    name: "RG2026-Predict",
+    description:
+      "ML pipeline predicting the Roland Garros 2026 winner with 65.2% match accuracy and 0.714 AUC by training XGBoost on 37 temporal features from 75K+ ATP matches and simulating 10K Monte Carlo bracket draws.",
+    link: "https://github.com/trnahnh/rg2026-predict",
+    techStack: [
+      "Python",
+      "XGBoost",
+      "Optuna",
+      "pandas",
+      "scikit-learn",
+      "Plotly",
+      "Monte Carlo",
+      "Elo Rating",
+    ],
+    status: "current",
+  },
+  {
     name: "Draft-Thinker",
     description:
       "Cost-aware LLM gateway that cuts inference costs by 91.6% through entropy-based draft-and-verify routing with speculative execution and semantic caching.",
