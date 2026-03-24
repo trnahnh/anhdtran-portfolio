@@ -11,7 +11,7 @@ export const projects: Project[] = [
   {
     name: "RG2026-Predict",
     description:
-      "ML pipeline predicting the Roland Garros 2026 winner with 65.2% match accuracy and 0.714 AUC by training XGBoost on 37 temporal features from 75K+ ATP matches and simulating 10K Monte Carlo bracket draws.",
+      "ML pipeline predicting Roland Garros 2026 winner with 65.2% match accuracy and 0.714 AUC by training XGBoost on 37 temporal features from 75K+ ATP matches and simulating 10K Monte Carlo bracket draws.",
     link: "https://github.com/trnahnh/rg2026-predict",
     techStack: [
       "Python",
