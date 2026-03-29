@@ -21,7 +21,6 @@ export const projects: Project[] = [
       "scikit-learn",
       "Plotly",
       "Monte Carlo",
-      "Elo Rating",
     ],
     status: "current",
   },
