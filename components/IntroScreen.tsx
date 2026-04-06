@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useSyncExternalStore,
+} from "react";
 
 const SEGMENTS_DARK = [
   { text: "console", className: "text-blue-400" },
@@ -24,6 +30,9 @@ const SEGMENTS_LIGHT = [
 
 const FULL_TEXT = SEGMENTS_DARK.map((s) => s.text).join("");
 
+const STORAGE_KEY = "intro-home-seen";
+const subscribeNoop = () => () => {};
+
 function renderSegments(charCount: number, isDark: boolean) {
   const segments = isDark ? SEGMENTS_DARK : SEGMENTS_LIGHT;
   let remaining = charCount;
@@ -41,10 +50,15 @@ function renderSegments(charCount: number, isDark: boolean) {
 
 export default function IntroScreen() {
   const [mounted, setMounted] = useState(false);
-  const [show, setShow] = useState(true);
+  const [show, setShow] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const [fading, setFading] = useState(false);
   const [isDark, setIsDark] = useState(true);
+  const hasSeen = useSyncExternalStore(
+    subscribeNoop,
+    () => localStorage.getItem(STORAGE_KEY) === "true",
+    () => false,
+  );
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const fadeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -57,8 +71,11 @@ export default function IntroScreen() {
         ? saved === "dark"
         : window.matchMedia("(prefers-color-scheme: dark)").matches,
     );
+    if (!hasSeen) {
+      setShow(true);
+    }
     setMounted(true);
-  }, []);
+  }, [hasSeen]);
 
   const stopAudio = useCallback(() => {
     if (audioRef.current) {
@@ -75,6 +92,7 @@ export default function IntroScreen() {
     }
     stopAudio();
     setFading(true);
+    localStorage.setItem(STORAGE_KEY, "true");
     setTimeout(() => setShow(false), 500);
   }, [stopAudio]);
 
@@ -88,6 +106,11 @@ export default function IntroScreen() {
   );
 
   useEffect(() => {
+    if (!show) return;
+
+    setCharCount(0);
+    setFading(false);
+
     const audio = new Audio("/sfx/keyboard-typing.mp3");
     audioRef.current = audio;
 
@@ -123,6 +146,7 @@ export default function IntroScreen() {
         clearInterval(timerRef.current!);
         timerRef.current = null;
         stopAudio();
+        localStorage.setItem(STORAGE_KEY, "true");
         fadeRef.current = setTimeout(() => setFading(true), 500);
         hideRef.current = setTimeout(() => setShow(false), 1000);
       }
@@ -135,7 +159,13 @@ export default function IntroScreen() {
       removeUnlock();
       stopAudio();
     };
-  }, [stopAudio]);
+  }, [show, stopAudio]);
+
+  useEffect(() => {
+    const handleReplay = () => setShow(true);
+    window.addEventListener("replay-intro", handleReplay);
+    return () => window.removeEventListener("replay-intro", handleReplay);
+  }, []);
 
   if (!mounted || !show) return null;
 

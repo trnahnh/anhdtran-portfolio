@@ -1,14 +1,26 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useSyncExternalStore,
+} from "react";
 import Image from "next/image";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
-let introPlayedThisSession = false;
+const STORAGE_KEY = "intro-profile-seen";
+const subscribeNoop = () => () => {};
 
 export default function CardIntroScreen() {
   const [show, setShow] = useState(false);
   const [fading, setFading] = useState(false);
+  const hasSeen = useSyncExternalStore(
+    subscribeNoop,
+    () => localStorage.getItem(STORAGE_KEY) === "true",
+    () => false,
+  );
 
   const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -74,6 +86,7 @@ export default function CardIntroScreen() {
 
     if (reducedMotion) {
       playTapSound();
+      localStorage.setItem(STORAGE_KEY, "true");
       fadeTimeoutRef.current = setTimeout(() => setFading(true), 800);
       hideTimeoutRef.current = setTimeout(() => setShow(false), 1300);
     }
@@ -82,6 +95,7 @@ export default function CardIntroScreen() {
   const handleSpinEnd = useCallback(() => {
     if (fading) return;
     playTapSound();
+    localStorage.setItem(STORAGE_KEY, "true");
     fadeTimeoutRef.current = setTimeout(() => setFading(true), 800);
     hideTimeoutRef.current = setTimeout(() => setShow(false), 1300);
   }, [fading, playTapSound]);
@@ -89,6 +103,7 @@ export default function CardIntroScreen() {
   const skip = useCallback(() => {
     clearAll();
     setFading(true);
+    localStorage.setItem(STORAGE_KEY, "true");
     hideTimeoutRef.current = setTimeout(() => setShow(false), 500);
   }, [clearAll]);
 
@@ -108,15 +123,10 @@ export default function CardIntroScreen() {
 
   useEffect(() => {
     const isDarkNow = () => document.documentElement.classList.contains("dark");
-    if (!isDarkNow() || introPlayedThisSession) return;
+    if (!isDarkNow() || hasSeen) return;
 
-    introPlayedThisSession = true;
     startIntroRef.current();
-
-    return () => {
-      introPlayedThisSession = false;
-    };
-  }, []);
+  }, [hasSeen]);
 
   useEffect(() => {
     const isDarkNow = () => document.documentElement.classList.contains("dark");
@@ -127,9 +137,9 @@ export default function CardIntroScreen() {
       if (nowDark === prevDark) return;
       prevDark = nowDark;
 
-      if (nowDark) {
+      if (nowDark && localStorage.getItem(STORAGE_KEY) !== "true") {
         startIntro();
-      } else {
+      } else if (!nowDark) {
         clearAll();
         setFading(true);
         hideTimeoutRef.current = setTimeout(() => setShow(false), 500);
@@ -146,6 +156,12 @@ export default function CardIntroScreen() {
       observer.disconnect();
     };
   }, [startIntro, clearAll]);
+
+  useEffect(() => {
+    const handleReplay = () => startIntro();
+    window.addEventListener("replay-intro", handleReplay);
+    return () => window.removeEventListener("replay-intro", handleReplay);
+  }, [startIntro]);
 
   if (!show) return null;
 
