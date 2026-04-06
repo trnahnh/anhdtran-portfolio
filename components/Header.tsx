@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import RotatingText from "./RotatingText";
 import UnderlineLink from "./UnderlineLink";
 import ThemeToggle from "./ThemeToggle";
+import ReplayIntro from "./ReplayIntro";
 
 const DOB = new Date(2006, 4, 11); // May 11, 2006 since JS/TS is based-0
 
@@ -46,7 +47,10 @@ export default function Header() {
               Resume
             </UnderlineLink>
           </nav>
-          <ThemeToggle />
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <ReplayIntro />
+          </div>
         </div>
       </div>
       <p className="text-muted-foreground pl-6 sm:pl-7">
