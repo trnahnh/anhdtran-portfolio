@@ -162,7 +162,15 @@ export default function IntroScreen() {
   }, [show, stopAudio]);
 
   useEffect(() => {
-    const handleReplay = () => setShow(true);
+    const handleReplay = () => {
+      const saved = localStorage.getItem("theme");
+      setIsDark(
+        saved
+          ? saved === "dark"
+          : window.matchMedia("(prefers-color-scheme: dark)").matches,
+      );
+      setShow(true);
+    };
     window.addEventListener("replay-intro", handleReplay);
     return () => window.removeEventListener("replay-intro", handleReplay);
   }, []);
