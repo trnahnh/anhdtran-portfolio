@@ -122,8 +122,11 @@ export default function CardIntroScreen() {
   });
 
   useEffect(() => {
-    const isDarkNow = () => document.documentElement.classList.contains("dark");
-    if (!isDarkNow() || hasSeen) return;
+    const saved = localStorage.getItem("theme");
+    const isDark = saved
+      ? saved === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    if (!isDark || hasSeen) return;
 
     startIntroRef.current();
   }, [hasSeen]);
