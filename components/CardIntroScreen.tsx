@@ -129,33 +129,22 @@ export default function CardIntroScreen() {
   }, [hasSeen]);
 
   useEffect(() => {
-    const isDarkNow = () => document.documentElement.classList.contains("dark");
-    let prevDark = isDarkNow();
-
-    const observer = new MutationObserver(() => {
-      const nowDark = isDarkNow();
-      if (nowDark === prevDark) return;
-      prevDark = nowDark;
-
-      if (nowDark && localStorage.getItem(STORAGE_KEY) !== "true") {
-        startIntro();
-      } else if (!nowDark) {
+    const handleThemeChange = (e: Event) => {
+      const theme = (e as CustomEvent).detail?.theme as string;
+      if (theme === "dark" && localStorage.getItem(STORAGE_KEY) !== "true") {
+        startIntroRef.current();
+      } else if (theme === "light") {
         clearAll();
         setFading(true);
         hideTimeoutRef.current = setTimeout(() => setShow(false), 500);
       }
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
+    };
+    window.addEventListener("theme-change", handleThemeChange);
     return () => {
       clearAll();
-      observer.disconnect();
+      window.removeEventListener("theme-change", handleThemeChange);
     };
-  }, [startIntro, clearAll]);
+  }, [clearAll]);
 
   useEffect(() => {
     const handleReplay = () => startIntro();

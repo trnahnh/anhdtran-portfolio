@@ -53,6 +53,9 @@ export default function ThemeToggle() {
     }, 300);
 
     notifyThemeChange();
+    window.dispatchEvent(
+      new CustomEvent("theme-change", { detail: { theme: newTheme } }),
+    );
   };
 
   if (!mounted) {
