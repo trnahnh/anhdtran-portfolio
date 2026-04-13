@@ -93,7 +93,7 @@ export const projects: Project[] = [
       "PostgreSQL",
       "GitHub Actions CI/CD",
     ],
-    status: "current",
+    status: "past",
   },
   {
     name: "FixBuddy",
