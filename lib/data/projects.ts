@@ -62,7 +62,7 @@ export const projects: Project[] = [
     nameAlt: "(인연)",
     description:
       "Agentic AI Git companion that orchestrates the full workflow automation in one command.",
-    link: "https://inyeon-upstream.vercel.app/",
+    link: "https://inyeon.cloud/",
     techStack: [
       "FastAPI",
       "Pydantic",
@@ -83,7 +83,7 @@ export const projects: Project[] = [
     nameAlt: "(暗语-Dock)",
     description:
       "Pronounced ànyǔ (ahn-yoo). Simple S3 file storage for sharing files and env configs between machines.",
-    link: "https://github.com/suka712/renga-anyu-s3",
+    link: "https://anyudock.cloud/",
     techStack: [
       "AWS S3",
       "Bun",
@@ -93,7 +93,7 @@ export const projects: Project[] = [
       "PostgreSQL",
       "GitHub Actions CI/CD",
     ],
-    status: "past",
+    status: "current",
   },
   {
     name: "FixBuddy",
