@@ -3,10 +3,15 @@ export interface Experience {
   company: string;
   companyUrl?: string;
   description?: string;
-  status: "current" | "past";
+  status: "current" | "past" | "future";
 }
 
 export const experiences: Experience[] = [
+  {
+    title: "TBD",
+    company: "TBD",
+    status: "future",
+  },
   {
     title: "Lead Software Engineer",
     company: "Caphne",
@@ -43,6 +48,9 @@ export const experiences: Experience[] = [
   },
 ];
 
+export const futureExperiences = experiences.filter(
+  (e) => e.status === "future",
+);
 export const currentExperiences = experiences.filter(
   (e) => e.status === "current",
 );
