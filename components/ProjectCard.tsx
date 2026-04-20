@@ -58,7 +58,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                   : "grid-rows-[0fr] opacity-0"
               }`}
             >
-              <div className="overflow-hidden">
+              <div className="overflow-hidden pb-px">
                 <div className="flex flex-wrap gap-2">
                   {project.techStack.map((tech) => (
                     <span
