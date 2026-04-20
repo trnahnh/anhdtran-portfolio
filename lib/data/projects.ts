@@ -9,6 +9,22 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    name: "Dasi",
+    description:
+      "End-to-end encrypted journaling app - thoughts are encrypted on-device before sync with daily writing prompts to beat the blank page.",
+    link: "https://github.com/NauriFive/dasi-encrypted-journal",
+    techStack: [
+      "Go",
+      "Chi",
+      "PostgreSQL",
+      "Resend",
+      "React",
+      "TypeScript",
+      "AWS Lambda",
+    ],
+    status: "current",
+  },
+  {
     name: "RG2026-Predict",
     description:
       "ML pipeline predicting Roland Garros 2026 winner with 65.2% match accuracy and 0.714 AUC by training XGBoost on 37 temporal features from 75K+ ATP matches and simulating 10K Monte Carlo bracket draws.",
