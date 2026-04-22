@@ -39,7 +39,7 @@ export const experiences: Experience[] = [
   {
     title: "Fitness Floor Coordinator",
     company: "UC Campus Recreation Center",
-    status: "past",
+    status: "current",
   },
   {
     title: "Lead Robot Designer",
