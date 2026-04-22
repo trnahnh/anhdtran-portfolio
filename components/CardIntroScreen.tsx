@@ -1,26 +1,16 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  useSyncExternalStore,
-} from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 const STORAGE_KEY = "intro-profile-seen";
-const subscribeNoop = () => () => {};
+
+let hasPlayedThisLoad = false;
 
 export default function CardIntroScreen() {
   const [show, setShow] = useState(false);
   const [fading, setFading] = useState(false);
-  const hasSeen = useSyncExternalStore(
-    subscribeNoop,
-    () => localStorage.getItem(STORAGE_KEY) === "true",
-    () => false,
-  );
 
   const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -80,6 +70,7 @@ export default function CardIntroScreen() {
   }, []);
 
   const startIntro = useCallback(() => {
+    hasPlayedThisLoad = true;
     clearAll();
     setFading(false);
     setShow(true);
@@ -126,15 +117,15 @@ export default function CardIntroScreen() {
     const isDark = saved
       ? saved === "dark"
       : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    if (!isDark || hasSeen) return;
+    if (!isDark || hasPlayedThisLoad) return;
 
     startIntroRef.current();
-  }, [hasSeen]);
+  }, []);
 
   useEffect(() => {
     const handleThemeChange = (e: Event) => {
       const theme = (e as CustomEvent).detail?.theme as string;
-      if (theme === "dark" && localStorage.getItem(STORAGE_KEY) !== "true") {
+      if (theme === "dark" && !hasPlayedThisLoad) {
         startIntroRef.current();
       } else if (theme === "light") {
         clearAll();
