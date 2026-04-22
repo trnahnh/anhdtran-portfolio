@@ -1597,7 +1597,7 @@ export default function SpacePage() {
       </motion.div>
 
       <motion.div
-        className="absolute bottom-4 right-4 text-right text-white/25 text-xs tracking-wide leading-6 select-none"
+        className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-right text-white/25 text-[10px] sm:text-xs tracking-wide leading-4 sm:leading-6 select-none max-w-[55%] sm:max-w-none"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1, delay: 4.0 }}
