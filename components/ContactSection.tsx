@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import UnderlineLink from "./UnderlineLink";
+import { ExternalLink } from "lucide-react";
 import { contacts } from "@/lib/data/contacts";
 
 export default function ContactSection() {
@@ -44,10 +44,16 @@ export default function ContactSection() {
       <div className="space-y-2 pl-6 sm:pl-7">
         {contacts.map((contact) => {
           const iconSrc = getIconSrc(contact);
+          const isMailto = contact.href.startsWith("mailto:");
           return (
-            <div
+            <a
               key={contact.label}
-              className="group text-muted-foreground flex items-center rounded-lg p-2 -mx-2 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3"
+              href={contact.href}
+              {...(!isMailto && {
+                target: "_blank",
+                rel: "noopener noreferrer",
+              })}
+              className="group text-muted-foreground flex items-center rounded-lg p-2 -mx-2 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3 interactive"
             >
               <span className="mr-2" aria-hidden="true">
                 &#8627;
@@ -62,12 +68,11 @@ export default function ContactSection() {
                 />
               )}
               <span className="text-foreground">{contact.label}:</span>
-              <span className="ml-2">
-                <UnderlineLink href={contact.href} external>
-                  {contact.value}
-                </UnderlineLink>
+              <span className="ml-2 underline-link">
+                {contact.value}
+                <ExternalLink className="inline-block w-3.5 h-3.5 ml-1 -mt-0.5" />
               </span>
-            </div>
+            </a>
           );
         })}
       </div>
