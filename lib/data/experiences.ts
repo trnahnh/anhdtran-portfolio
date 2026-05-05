@@ -16,14 +16,14 @@ export const experiences: Experience[] = [
     title: "Lead Software Engineer",
     company: "Caphne",
     companyUrl: "https://caphne.co",
-    description: "Tinder for Study Buddies",
+    description: "Study Buddies Matchmaking",
     status: "current",
   },
   {
     title: "Founding Engineer",
     company: "KatanaID",
     companyUrl: "https://www.katanaid.com",
-    description: "AI-integrated Branding Toolkit",
+    description: "AI Branding Toolkit",
     status: "current",
   },
   {
