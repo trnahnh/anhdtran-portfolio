@@ -117,10 +117,24 @@ export default function CardIntroScreen() {
     const isDark = saved
       ? saved === "dark"
       : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    if (!isDark || hasPlayedThisLoad) return;
+    if (!isDark || hasPlayedThisLoad) {
+      window.dispatchEvent(new Event("intro-done"));
+      return;
+    }
 
     startIntroRef.current();
   }, []);
+
+  const wasShownRef = useRef(false);
+  useEffect(() => {
+    if (show) {
+      wasShownRef.current = true;
+      window.dispatchEvent(new Event("intro-shown"));
+    } else if (wasShownRef.current) {
+      wasShownRef.current = false;
+      window.dispatchEvent(new Event("intro-done"));
+    }
+  }, [show]);
 
   useEffect(() => {
     const handleThemeChange = (e: Event) => {

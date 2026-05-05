@@ -162,6 +162,14 @@ export default function IntroScreen() {
   }, [show, stopAudio]);
 
   useEffect(() => {
+    if (show) {
+      window.dispatchEvent(new Event("intro-shown"));
+    } else if (mounted) {
+      window.dispatchEvent(new Event("intro-done"));
+    }
+  }, [show, mounted]);
+
+  useEffect(() => {
     const handleReplay = () => {
       const saved = localStorage.getItem("theme");
       setIsDark(
