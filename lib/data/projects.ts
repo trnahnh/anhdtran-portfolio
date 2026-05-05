@@ -78,7 +78,7 @@ export const projects: Project[] = [
     nameAlt: "(인연)",
     description:
       "Agentic AI Git companion that orchestrates the full workflow automation in one command.",
-    link: "https://inyeon.cloud/",
+    link: "https://inyeon-upstream.vercel.app/",
     techStack: [
       "FastAPI",
       "Pydantic",
