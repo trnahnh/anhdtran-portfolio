@@ -21,6 +21,7 @@ export const projects: Project[] = [
       "React",
       "TypeScript",
       "AWS Lambda",
+      "AWS ECS",
     ],
     status: "current",
   },
