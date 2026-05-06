@@ -4,10 +4,10 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const SplashCursor = dynamic(
-  () => import("./SplashCursor").then((mod) => mod.SplashCursor),
-  { ssr: false },
-);
+const loadSplashCursor = () =>
+  import("./SplashCursor").then((mod) => mod.SplashCursor);
+
+const SplashCursor = dynamic(loadSplashCursor, { ssr: false });
 
 function getInitialIntroActive(pathname: string): boolean {
   if (typeof window === "undefined") return false;
@@ -28,11 +28,19 @@ export default function ConditionalSplashCursor() {
   const [introActive, setIntroActive] = useState(false);
 
   useEffect(() => {
-    setIntroActive(getInitialIntroActive(pathname));
+    const active = getInitialIntroActive(pathname);
+    // Client-only init: reads localStorage/matchMedia, so it can't run during SSR
+    // or lazy useState init without a hydration mismatch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setIntroActive(active);
+    if (active) loadSplashCursor();
   }, [pathname]);
 
   useEffect(() => {
-    const onShown = () => setIntroActive(true);
+    const onShown = () => {
+      setIntroActive(true);
+      loadSplashCursor();
+    };
     const onDone = () => setIntroActive(false);
     window.addEventListener("intro-shown", onShown);
     window.addEventListener("intro-done", onDone);
