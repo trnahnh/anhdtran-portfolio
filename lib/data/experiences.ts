@@ -13,6 +13,12 @@ export const experiences: Experience[] = [
     status: "future",
   },
   {
+    title: "Founder, CTO",
+    company: "Commma",
+    companyUrl: "https://github.com/NauriFive/commma-coding-progress-tracker",
+    status: "current",
+  },
+  {
     title: "Lead Software Engineer",
     company: "Caphne",
     companyUrl: "https://caphne.co",
