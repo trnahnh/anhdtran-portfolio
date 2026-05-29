@@ -15,7 +15,8 @@ export const experiences: Experience[] = [
   {
     title: "Founder, CTO",
     company: "Commma",
-    companyUrl: "https://github.com/NauriFive/commma-coding-progress-tracker",
+    companyUrl: "https://commma.vercel.app",
+    description: "Pace your Code",
     status: "current",
   },
   {
