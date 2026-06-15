@@ -15,7 +15,7 @@ export const experiences: Experience[] = [
   {
     title: "Founder, CTO",
     company: "Commma",
-    companyUrl: "https://commma.vercel.app",
+    companyUrl: "https://commma.dev",
     description: "Pace your Code",
     status: "current",
   },
@@ -29,7 +29,7 @@ export const experiences: Experience[] = [
   {
     title: "Founding Engineer",
     company: "KatanaID",
-    companyUrl: "https://www.katanaid.com",
+    companyUrl: "https://katanaid.com",
     description: "AI Branding Toolkit",
     status: "current",
   },
