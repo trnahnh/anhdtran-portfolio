@@ -11,7 +11,7 @@ export const projects: Project[] = [
   {
     name: "commma",
     description:
-      "Developer-activity tracker that turns coding into a sport - sessions, pace, streaks, and leaderboards, plus a shareable per-session keyboard heatmap. Privacy-first: it records which keys you press, never what you type.",
+      "Developer-activity tracker that turns coding into a sport - sessions, pace, streaks, and leaderboards, plus a shareable per-session keyboard heatmap.",
     link: "https://commma.dev/",
     techStack: [
       "TypeScript",
