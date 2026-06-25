@@ -9,6 +9,34 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    name: "commma",
+    description:
+      "Developer-activity tracker that turns coding into a sport - sessions, pace, streaks, and leaderboards, plus a shareable per-session keyboard heatmap. Privacy-first: it records which keys you press, never what you type.",
+    link: "https://commma.dev/",
+    techStack: [
+      "TypeScript",
+      "Hono",
+      "Node.js",
+      "Zod",
+      "Drizzle",
+      "PostgreSQL",
+      "Redis",
+      "React Ecosystem",
+      "Stripe",
+      "Resend",
+      "OpenAI",
+      "AWS EC2",
+      "AWS S3",
+      "AWS CloudFront",
+      "AWS Route 53",
+      "AWS CloudWatch",
+      "Terraform",
+      "PM2/nginx",
+      "GitHub Actions CI/CD",
+    ],
+    status: "current",
+  },
+  {
     name: "Dasi",
     description:
       "End-to-end encrypted journaling app - thoughts are encrypted on-device before sync with daily writing prompts to beat the blank page.",
