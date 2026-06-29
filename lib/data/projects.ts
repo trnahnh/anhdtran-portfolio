@@ -25,6 +25,7 @@ export const projects: Project[] = [
       "Stripe",
       "Resend",
       "OpenAI",
+      "Grafana Loki",
       "AWS EC2",
       "AWS S3",
       "AWS CloudFront",
