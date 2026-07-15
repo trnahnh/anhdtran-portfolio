@@ -20,9 +20,9 @@ const photos = [
     caption: "Full-stack by day, full-scare by night.",
   },
   {
-    src: "/profile/basketball.png",
-    alt: "Basketball",
-    caption: "Hooping between deployments.",
+    src: "/profile/tennis.png",
+    alt: "Tennis",
+    caption: "Rallying between deployments.",
   },
   {
     src: "/profile/gym.png",
