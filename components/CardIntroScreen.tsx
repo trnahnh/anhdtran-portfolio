@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { prime, ready } from "@/lib/sfx";
+
+const SFX = "/sfx/tap-to-pay.mp3";
 
 const STORAGE_KEY = "intro-profile-seen";
 
@@ -30,8 +33,11 @@ export default function CardIntroScreen() {
     }
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.removeAttribute("src");
-      audioRef.current.load();
+      // Rewind but keep the source. The element is shared and cached, so
+      // dropping src would discard the buffered download.
+      try {
+        audioRef.current.currentTime = 0;
+      } catch {}
       audioRef.current = null;
     }
     if (removeUnlockRef.current) {
@@ -41,31 +47,39 @@ export default function CardIntroScreen() {
   }, []);
 
   const playTapSound = useCallback(() => {
-    const audio = new Audio("/sfx/tap-to-pay.mp3");
-    audioRef.current = audio;
+    // The tap sound is small, but it was still fetched at the instant it was
+    // wanted. Wait for it to buffer — with a ceiling — so the card's tap
+    // lands with the sound rather than ahead of it.
+    void ready(SFX).then((audio) => {
+      if (!audio) return;
+      audioRef.current = audio;
+      try {
+        audio.currentTime = 0;
+      } catch {}
 
-    const unlock = () => {
-      document.removeEventListener("click", unlock);
-      document.removeEventListener("keydown", unlock);
-      document.removeEventListener("touchstart", unlock);
-      document.removeEventListener("mousemove", unlock);
-      removeUnlockRef.current = null;
-      if (audioRef.current) audioRef.current.play().catch(() => {});
-    };
-
-    audio.play().catch((err: unknown) => {
-      if (!(err instanceof DOMException && err.name === "NotAllowedError"))
-        return;
-      document.addEventListener("click", unlock);
-      document.addEventListener("keydown", unlock);
-      document.addEventListener("touchstart", unlock);
-      document.addEventListener("mousemove", unlock);
-      removeUnlockRef.current = () => {
+      const unlock = () => {
         document.removeEventListener("click", unlock);
         document.removeEventListener("keydown", unlock);
         document.removeEventListener("touchstart", unlock);
         document.removeEventListener("mousemove", unlock);
+        removeUnlockRef.current = null;
+        if (audioRef.current) audioRef.current.play().catch(() => {});
       };
+
+      audio.play().catch((err: unknown) => {
+        if (!(err instanceof DOMException && err.name === "NotAllowedError"))
+          return;
+        document.addEventListener("click", unlock);
+        document.addEventListener("keydown", unlock);
+        document.addEventListener("touchstart", unlock);
+        document.addEventListener("mousemove", unlock);
+        removeUnlockRef.current = () => {
+          document.removeEventListener("click", unlock);
+          document.removeEventListener("keydown", unlock);
+          document.removeEventListener("touchstart", unlock);
+          document.removeEventListener("mousemove", unlock);
+        };
+      });
     });
   }, []);
 
@@ -122,6 +136,9 @@ export default function CardIntroScreen() {
       return;
     }
 
+    // The card spins for 2.4s before the tap sound is wanted. Fetch it now
+    // and that whole spin becomes head start instead of dead time.
+    prime(SFX);
     startIntroRef.current();
   }, []);
 

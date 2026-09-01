@@ -30,6 +30,9 @@ const SEGMENTS_LIGHT = [
 
 const FULL_TEXT = SEGMENTS_DARK.map((s) => s.text).join("");
 
+import { prime, ready, play as playSfx } from "@/lib/sfx";
+
+const SFX = "/sfx/keyboard-typing.mp3";
 const STORAGE_KEY = "intro-home-seen";
 const subscribeNoop = () => () => {};
 
@@ -72,6 +75,9 @@ export default function IntroScreen() {
         : window.matchMedia("(prefers-color-scheme: dark)").matches,
     );
     if (!hasSeen) {
+      // Start the download the moment we know the intro will run, rather
+      // than at the moment we want to hear it.
+      prime(SFX);
       setShow(true);
     }
     setMounted(true);
@@ -80,7 +86,11 @@ export default function IntroScreen() {
   const stopAudio = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.src = "";
+      // Rewind but keep the source. The element is shared and cached, so
+      // clearing src would throw away the buffered download.
+      try {
+        audioRef.current.currentTime = 0;
+      } catch {}
       audioRef.current = null;
     }
   }, []);
@@ -111,16 +121,7 @@ export default function IntroScreen() {
     setCharCount(0);
     setFading(false);
 
-    const audio = new Audio("/sfx/keyboard-typing.mp3");
-    audioRef.current = audio;
-
-    const unlock = () => {
-      document.removeEventListener("click", unlock);
-      document.removeEventListener("keydown", unlock);
-      document.removeEventListener("touchstart", unlock);
-      document.removeEventListener("mousemove", unlock);
-      if (audioRef.current) audioRef.current.play().catch(() => {});
-    };
+    let cancelled = false;
 
     const removeUnlock = () => {
       document.removeEventListener("click", unlock);
@@ -129,30 +130,54 @@ export default function IntroScreen() {
       document.removeEventListener("mousemove", unlock);
     };
 
-    audio.play().catch((err: unknown) => {
-      if (!(err instanceof DOMException && err.name === "NotAllowedError"))
-        return;
-      document.addEventListener("click", unlock);
-      document.addEventListener("keydown", unlock);
-      document.addEventListener("touchstart", unlock);
-      document.addEventListener("mousemove", unlock);
+    function unlock() {
+      removeUnlock();
+      if (audioRef.current) playSfx(audioRef.current);
+    }
+
+    const startTyping = () => {
+      let index = 0;
+      timerRef.current = setInterval(() => {
+        index++;
+        setCharCount(index);
+        if (index === FULL_TEXT.length) {
+          clearInterval(timerRef.current!);
+          timerRef.current = null;
+          stopAudio();
+          localStorage.setItem(STORAGE_KEY, "true");
+          fadeRef.current = setTimeout(() => setFading(true), 500);
+          hideRef.current = setTimeout(() => setShow(false), 1000);
+        }
+      }, 67);
+    };
+
+    // Sound and typing start together. play() used to be called before a
+    // single byte had arrived, so on a cold cache the text typed itself out
+    // in silence and the audio turned up late — that desync is what read as
+    // lag. ready() has a ceiling, so a slow network delays the opening by a
+    // beat instead of pulling it apart.
+    ready(SFX).then((audio) => {
+      if (cancelled) return;
+      if (audio) {
+        audioRef.current = audio;
+        // Cached elements are reused across replays, so rewind first.
+        try {
+          audio.currentTime = 0;
+        } catch {}
+        audio.play().catch((err: unknown) => {
+          if (!(err instanceof DOMException && err.name === "NotAllowedError"))
+            return;
+          document.addEventListener("click", unlock);
+          document.addEventListener("keydown", unlock);
+          document.addEventListener("touchstart", unlock);
+          document.addEventListener("mousemove", unlock);
+        });
+      }
+      startTyping();
     });
 
-    let index = 0;
-    timerRef.current = setInterval(() => {
-      index++;
-      setCharCount(index);
-      if (index === FULL_TEXT.length) {
-        clearInterval(timerRef.current!);
-        timerRef.current = null;
-        stopAudio();
-        localStorage.setItem(STORAGE_KEY, "true");
-        fadeRef.current = setTimeout(() => setFading(true), 500);
-        hideRef.current = setTimeout(() => setShow(false), 1000);
-      }
-    }, 67);
-
     return () => {
+      cancelled = true;
       if (timerRef.current) clearInterval(timerRef.current);
       if (fadeRef.current) clearTimeout(fadeRef.current);
       if (hideRef.current) clearTimeout(hideRef.current);
