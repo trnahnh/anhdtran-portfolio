@@ -5,6 +5,7 @@ import GradientBlobs from "@/components/GradientBlobs";
 import InstrumentMatrix from "@/components/matrix/InstrumentMatrix";
 import MatrixScore from "@/components/matrix/MatrixScore";
 import MotionGate from "@/components/MotionGate";
+import LoadBar from "@/components/LoadBar";
 import PageTransition from "@/components/PageTransition";
 import ScrollToTop from "@/components/ScrollToTop";
 import PagePeel from "@/components/PagePeel";
@@ -82,6 +83,7 @@ export default function RootLayout({
         className={`${archivo.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <MotionGate />
+        <LoadBar />
         <SmoothScroll />
         <GradientBlobs />
         <InstrumentMatrix />

@@ -34,7 +34,7 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="fade-in-up fade-in-up-delay-3" data-matrix="idle">
+    <section id="contact" className="fade-in-up fade-in-up-delay-3" data-matrix="idle" data-load="Contact">
       <h2 className="text-lg font-medium mb-4">
         <span className="text-muted-foreground mr-2" aria-hidden="true">
           &#9670;

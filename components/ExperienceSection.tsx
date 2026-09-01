@@ -51,7 +51,7 @@ function Row({ exp }: { exp: Experience }) {
 
 export default function ExperienceSection() {
   return (
-    <section data-matrix="timeline">
+    <section data-matrix="timeline" data-load="Experience">
       <div className="space-y-8">
         {GROUPS.map((group) => (
           <div key={group.title}>

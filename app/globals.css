@@ -656,3 +656,140 @@ html.motion-off *::after {
     transform: scaleY(1);
   }
 }
+
+/* ==========================================================================
+   THE LOAD BAR
+   --------------------------------------------------------------------------
+   A sleeve down the left edge that loads plates as the page is read. Present
+   at every width — it is a few pixels wide, and it gives a phone the position
+   readout the xl-only rail cannot.
+   ========================================================================== */
+
+.load-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  height: 100vh;
+  height: 100lvh;
+  display: flex;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+@supports not (height: 100lvh) {
+  .load-bar {
+    height: 100vh;
+  }
+}
+
+.load-bar-track {
+  position: relative;
+  width: 5px;
+  height: 100%;
+  background: var(--rule);
+  pointer-events: auto;
+  transition: width var(--dur-tap) var(--ease-out-expo);
+}
+
+.load-bar:hover .load-bar-track,
+.load-bar:focus-within .load-bar-track {
+  width: 9px;
+}
+
+.load-bar-plate {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: block;
+}
+
+/* Clips the lit stack from the top down. The stack inside stays full height,
+   so plates never stretch as the fill grows — only more of them shows. */
+.load-bar-fill {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.load-bar-stack {
+  position: absolute;
+  inset: 0;
+  height: 100vh;
+  height: 100lvh;
+}
+
+/* The collar: where the loaded plates stop. */
+.load-bar-head {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--foreground);
+  box-shadow: 0 0 6px 1px var(--background);
+}
+
+.load-bar-hit {
+  position: absolute;
+  left: 0;
+  width: 22px; /* past the tap-target floor without widening the visible bar */
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.load-bar-label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  white-space: nowrap;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--readout-strong);
+  background: color-mix(in srgb, var(--background) 88%, transparent);
+  padding: 4px 7px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-tap) var(--ease-out-expo),
+    transform var(--dur-tap) var(--ease-out-expo);
+}
+
+.load-bar-hit:hover .load-bar-label,
+.load-bar-hit:focus-visible .load-bar-label {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.load-bar-hit:focus-visible {
+  outline: 2px solid var(--plate-25);
+  outline-offset: 2px;
+}
+
+.load-bar-pct {
+  margin-left: 9px;
+  margin-top: 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.1em;
+  color: var(--readout);
+}
+
+/* The reading column already clears the bar at narrow widths via its own
+   padding; nudge it only where the bar would otherwise crowd the gutter. */
+@media (max-width: 639px) {
+  .load-bar-pct {
+    display: none;
+  }
+}

@@ -28,7 +28,7 @@ export default function ProjectsSection({
   showAll = false,
 }: ProjectsSectionProps) {
   return (
-    <section>
+    <section data-load="Projects">
       <h2 className="fade-in-up fade-in-up-delay-2 text-lg font-medium mb-4">
         <span className="text-muted-foreground mr-2" aria-hidden="true">
           &#9670;

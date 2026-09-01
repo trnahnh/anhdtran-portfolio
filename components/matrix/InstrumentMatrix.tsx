@@ -14,7 +14,6 @@ import { DATA_H, DATA_W, matrix } from "./matrixStore";
  * degradation, which is what full mobile parity requires.
  *
  * Content comes from a 128x72 greyscale texture that sections write into.
- * Phase 3 ships the substrate with an idle sweep; phase 4 writes the score.
  */
 
 const VERT = `
@@ -91,10 +90,6 @@ function compile(gl: WebGLRenderingContext, type: number, src: string) {
   if (!shader) return null;
   gl.shaderSource(shader, src);
   gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    gl.deleteShader(shader);
-    return null;
-  }
   return shader;
 }
 
@@ -138,159 +133,193 @@ export default function InstrumentMatrix() {
 
     const vs = compile(gl, gl.VERTEX_SHADER, VERT);
     const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
-    if (!vs || !fs) return;
-
     const program = gl.createProgram();
-    if (!program) return;
+    if (!vs || !fs || !program) return;
+
     gl.attachShader(program, vs);
     gl.attachShader(program, fs);
     gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
-    gl.useProgram(program);
 
-    // Fullscreen triangle pair.
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 3, -1, -1, 3]),
-      gl.STATIC_DRAW,
-    );
-    const aPos = gl.getAttribLocation(program, "aPos");
-    gl.enableVertexAttribArray(aPos);
-    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+    let disposed = false;
+    let pollFrame = 0;
+    let teardown: (() => void) | null = null;
 
-    const u = {
-      res: gl.getUniformLocation(program, "uRes"),
-      cell: gl.getUniformLocation(program, "uCell"),
-      time: gl.getUniformLocation(program, "uTime"),
-      ink: gl.getUniformLocation(program, "uInk"),
-      accent: gl.getUniformLocation(program, "uAccent"),
-      amp: gl.getUniformLocation(program, "uAmp"),
-      data: gl.getUniformLocation(program, "uData"),
-    };
+    /**
+     * Reading LINK_STATUS makes the main thread wait for the driver to finish
+     * compiling and linking. On the home page that stall lands in the same
+     * moment as the intro screen and its audio. KHR_parallel_shader_compile
+     * lets us ask whether the link is finished rather than blocking until it
+     * is, so the wait costs a frame or two of idle instead of a hitch.
+     */
+    const parallel = gl.getExtension("KHR_parallel_shader_compile") as {
+      COMPLETION_STATUS_KHR: number;
+    } | null;
 
-    const texture = gl.createTexture();
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-    gl.uniform1i(u.data, 0);
+    const start = () => {
+      if (disposed) return;
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+      gl.useProgram(program);
 
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-    gl.clearColor(0, 0, 0, 0);
+      // Fullscreen triangle.
+      const buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array([-1, -1, 3, -1, -1, 3]),
+        gl.STATIC_DRAW,
+      );
+      const aPos = gl.getAttribLocation(program, "aPos");
+      gl.enableVertexAttribArray(aPos);
+      gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
-    const resize = () => {
-      // Measure the canvas box, never window.innerHeight. On mobile the URL
-      // bar collapses as you scroll, innerHeight changes with it, and sizing
-      // from it reallocated the drawing buffer on nearly every scroll frame.
-      // The element is pinned to 100lvh, which does not move.
-      const cssW = canvas.clientWidth;
-      const cssH = canvas.clientHeight;
-      if (!cssW || !cssH) return;
+      const u = {
+        res: gl.getUniformLocation(program, "uRes"),
+        cell: gl.getUniformLocation(program, "uCell"),
+        time: gl.getUniformLocation(program, "uTime"),
+        ink: gl.getUniformLocation(program, "uInk"),
+        accent: gl.getUniformLocation(program, "uAccent"),
+        amp: gl.getUniformLocation(program, "uAmp"),
+        data: gl.getUniformLocation(program, "uData"),
+      };
 
-      // Cap device pixel ratio hard. The field is flat cells; above 1.5x
-      // there is nothing left to resolve and it costs fill-rate a mid-range
-      // phone does not have.
-      const dpr = Math.min(window.devicePixelRatio || 1, cssW < 768 ? 1 : 1.5);
-      const w = Math.floor(cssW * dpr);
-      const h = Math.floor(cssH * dpr);
-      if (canvas.width === w && canvas.height === h) return;
+      const texture = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+      gl.uniform1i(u.data, 0);
 
-      canvas.width = w;
-      canvas.height = h;
-      gl.viewport(0, 0, w, h);
-      gl.uniform2f(u.res, w, h);
-      gl.uniform1f(u.cell, (cssW < 640 ? CELL_MOBILE : CELL_DESKTOP) * dpr);
-    };
-    resize();
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      gl.clearColor(0, 0, 0, 0);
 
-    // Fires on real box changes only — orientation, window resize, zoom —
-    // and not on the URL-bar scroll jitter that a per-frame check picked up.
-    const sizeObserver = new ResizeObserver(resize);
-    sizeObserver.observe(canvas);
+      const resize = () => {
+        // Measure the canvas box, never window.innerHeight. On mobile the URL
+        // bar collapses as you scroll, innerHeight changes with it, and sizing
+        // from it reallocated the drawing buffer on nearly every scroll frame.
+        // The element is pinned to 100lvh, which does not move.
+        const cssW = canvas.clientWidth;
+        const cssH = canvas.clientHeight;
+        if (!cssW || !cssH) return;
 
-    const applyTheme = () => {
-      gl.uniform3fv(u.ink, readColor("--matrix-ink", [0.51, 0.52, 0.56]));
-      gl.uniform3fv(u.accent, readColor("--matrix-accent", [0.95, 0.33, 0.37]));
-    };
-    applyTheme();
+        const dpr = Math.min(window.devicePixelRatio || 1, cssW < 768 ? 1 : 1.5);
+        const w = Math.floor(cssW * dpr);
+        const h = Math.floor(cssH * dpr);
+        if (canvas.width === w && canvas.height === h) return;
 
-    const themeObserver = new MutationObserver(() =>
-      requestAnimationFrame(applyTheme),
-    );
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
+        canvas.width = w;
+        canvas.height = h;
+        gl.viewport(0, 0, w, h);
+        gl.uniform2f(u.res, w, h);
+        gl.uniform1f(u.cell, (cssW < 640 ? CELL_MOBILE : CELL_DESKTOP) * dpr);
+      };
+      resize();
 
-    // Allocate once; stream updates. The score eases the field every frame,
-    // so this path runs at 60fps and texImage2D would reallocate each call.
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.LUMINANCE,
-      DATA_W,
-      DATA_H,
-      0,
-      gl.LUMINANCE,
-      gl.UNSIGNED_BYTE,
-      matrix.pixels,
-    );
-    const uploadData = () => {
-      gl.texSubImage2D(
+      const sizeObserver = new ResizeObserver(resize);
+      sizeObserver.observe(canvas);
+
+      const applyTheme = () => {
+        gl.uniform3fv(u.ink, readColor("--matrix-ink", [0.51, 0.52, 0.56]));
+        gl.uniform3fv(
+          u.accent,
+          readColor("--matrix-accent", [0.95, 0.33, 0.37]),
+        );
+      };
+      applyTheme();
+
+      const themeObserver = new MutationObserver(() =>
+        requestAnimationFrame(applyTheme),
+      );
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+
+      // Allocate once; stream updates. The score eases the field every frame,
+      // so this path runs at 60fps and texImage2D would reallocate each call.
+      gl.texImage2D(
         gl.TEXTURE_2D,
         0,
-        0,
-        0,
+        gl.LUMINANCE,
         DATA_W,
         DATA_H,
+        0,
         gl.LUMINANCE,
         gl.UNSIGNED_BYTE,
         matrix.pixels,
       );
-      matrix.dirty = false;
-    };
-
-    const start = performance.now();
-    let frame = 0;
-
-    const draw = (now: number) => {
-      if (matrix.dirty) uploadData();
-      gl.uniform1f(u.time, (now - start) / 1000);
-      gl.uniform1f(u.amp, matrix.amp);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-    };
-
-    if (reducedMotion) {
-      // Doctrine rule 3: no loop. One frame, held.
-      draw(start);
-    } else {
-      const loop = (now: number) => {
-        draw(now);
-        frame = requestAnimationFrame(loop);
+      const uploadData = () => {
+        gl.texSubImage2D(
+          gl.TEXTURE_2D,
+          0,
+          0,
+          0,
+          DATA_W,
+          DATA_H,
+          gl.LUMINANCE,
+          gl.UNSIGNED_BYTE,
+          matrix.pixels,
+        );
+        matrix.dirty = false;
       };
-      frame = requestAnimationFrame(loop);
-    }
 
-    const onLost = (e: Event) => {
-      e.preventDefault();
-      cancelAnimationFrame(frame);
+      const t0 = performance.now();
+      let frame = 0;
+
+      const draw = (now: number) => {
+        if (matrix.dirty) uploadData();
+        gl.uniform1f(u.time, (now - t0) / 1000);
+        gl.uniform1f(u.amp, matrix.amp);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+      };
+
+      if (reducedMotion) {
+        draw(t0);
+      } else {
+        const loop = (now: number) => {
+          draw(now);
+          frame = requestAnimationFrame(loop);
+        };
+        frame = requestAnimationFrame(loop);
+      }
+
+      const onLost = (e: Event) => {
+        e.preventDefault();
+        cancelAnimationFrame(frame);
+      };
+      canvas.addEventListener("webglcontextlost", onLost);
+
+      teardown = () => {
+        cancelAnimationFrame(frame);
+        sizeObserver.disconnect();
+        themeObserver.disconnect();
+        canvas.removeEventListener("webglcontextlost", onLost);
+        gl.deleteTexture(texture);
+        gl.deleteBuffer(buffer);
+      };
     };
-    canvas.addEventListener("webglcontextlost", onLost);
+
+    const awaitLink = () => {
+      if (disposed) return;
+      if (
+        !parallel ||
+        gl.getProgramParameter(program, parallel.COMPLETION_STATUS_KHR)
+      ) {
+        start();
+        return;
+      }
+      pollFrame = requestAnimationFrame(awaitLink);
+    };
+    awaitLink();
 
     return () => {
-      cancelAnimationFrame(frame);
-      sizeObserver.disconnect();
-      themeObserver.disconnect();
-      canvas.removeEventListener("webglcontextlost", onLost);
-      gl.deleteTexture(texture);
-      gl.deleteBuffer(buffer);
+      disposed = true;
+      cancelAnimationFrame(pollFrame);
+      teardown?.();
       gl.deleteProgram(program);
       gl.deleteShader(vs);
       gl.deleteShader(fs);

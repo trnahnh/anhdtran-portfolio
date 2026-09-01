@@ -20,7 +20,7 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="fade-in-up" data-matrix="wave">
+    <header className="fade-in-up" data-matrix="wave" data-load="Identity">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
         <div>
           <h1

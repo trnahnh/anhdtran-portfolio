@@ -40,12 +40,57 @@ function Channel({
   );
 }
 
+/**
+ * The track, linked through to Spotify.
+ *
+ * A visitor who recognises what is playing should be able to go and hear it —
+ * the readout was showing a title with no way to act on it. Falls back to a
+ * plain block when the API has no song URL, so the layout never shifts
+ * depending on whether the link happens to exist.
+ */
+function NowPlayingLink({ track }: { track: Track }) {
+  const body = (
+    <>
+      <div className="flex items-end gap-[3px] h-4" aria-hidden="true">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <span
+            key={i}
+            className="w-[3px] bg-plate-25 origin-bottom animate-[eq_900ms_ease-in-out_infinite]"
+            style={{ height: "100%", animationDelay: `${i * 120}ms` }}
+          />
+        ))}
+      </div>
+      <p className="truncate font-mono text-[11px] text-readout-strong">
+        {track.title}
+      </p>
+      <p className="truncate font-mono text-[11px] text-readout">
+        {track.artist}
+      </p>
+    </>
+  );
+
+  if (!track.songUrl) return <div className="space-y-1">{body}</div>;
+
+  return (
+    <a
+      href={track.songUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`${track.title} — ${track.artist}. Open in Spotify.`}
+      className="group block space-y-1 rounded-md -m-1.5 p-1.5 transition-colors duration-[var(--dur-tap)] hover:bg-black/5 dark:hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-plate-25"
+    >
+      {body}
+      <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-readout/0 transition-colors duration-[var(--dur-tap)] group-hover:text-readout group-focus-visible:text-readout">
+        open in spotify ↗
+      </span>
+    </a>
+  );
+}
+
 export default function InstrumentRail() {
   const ageRef = useRef<HTMLParagraphElement>(null);
   const clockRef = useRef<HTMLParagraphElement>(null);
   const sessionRef = useRef<HTMLParagraphElement>(null);
-  const depthRef = useRef<HTMLDivElement>(null);
-  const depthLabelRef = useRef<HTMLSpanElement>(null);
 
   const [track, setTrack] = useState<Track>({ isPlaying: false });
   const reducedMotion = usePrefersReducedMotion();
@@ -82,15 +127,6 @@ export default function InstrumentRail() {
         )}:${pad(s % 60)}`;
       }
 
-      const doc = document.documentElement;
-      const scrollable = doc.scrollHeight - doc.clientHeight;
-      const pct = scrollable > 0 ? Math.min(1, doc.scrollTop / scrollable) : 0;
-      if (depthRef.current) {
-        depthRef.current.style.transform = `scaleX(${pct.toFixed(4)})`;
-      }
-      if (depthLabelRef.current) {
-        depthLabelRef.current.textContent = `${Math.round(pct * 100)}%`;
-      }
     };
 
     // Reduced motion still gets every reading — just once a second instead of
@@ -139,43 +175,12 @@ export default function InstrumentRail() {
 
         <Channel label="Now playing">
           {track.isPlaying ? (
-            <div className="space-y-1">
-              <div className="flex items-end gap-[3px] h-4" aria-hidden="true">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <span
-                    key={i}
-                    className="w-[3px] bg-plate-25 origin-bottom animate-[eq_900ms_ease-in-out_infinite]"
-                    style={{
-                      height: "100%",
-                      animationDelay: `${i * 120}ms`,
-                    }}
-                  />
-                ))}
-              </div>
-              <p className="truncate font-mono text-[11px] text-readout-strong">
-                {track.title}
-              </p>
-              <p className="truncate font-mono text-[11px] text-readout">
-                {track.artist}
-              </p>
-            </div>
+            <NowPlayingLink track={track} />
           ) : (
             <p className="font-mono text-[11px] text-readout">—</p>
           )}
         </Channel>
 
-        <Channel label="Depth" hidden>
-          <div className="h-[3px] w-full bg-rule">
-            <div
-              ref={depthRef}
-              className="h-full w-full origin-left scale-x-0 bg-plate-chrome"
-            />
-          </div>
-          <span
-            ref={depthLabelRef}
-            className="mt-1 block font-mono text-[10px] tabular-nums text-readout"
-          />
-        </Channel>
       </div>
     </aside>
   );
