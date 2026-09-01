@@ -793,3 +793,22 @@ html.motion-off *::after {
     display: none;
   }
 }
+
+/* On a touch screen the left edge belongs to the browser. iOS starts its
+   back-swipe within roughly 20px of it, and a full-height interactive strip
+   sitting there either intercepts that gesture or fights it. Below the point
+   where a pointer exists, the bar reports and does not respond — the plates,
+   the collar and the proportions all still read, but nothing competes with
+   a system gesture the visitor relies on. */
+@media (hover: none), (max-width: 639px) {
+  .load-bar-track,
+  .load-bar-hit {
+    pointer-events: none;
+  }
+  .load-bar-hit {
+    width: 5px;
+  }
+  .load-bar-label {
+    display: none;
+  }
+}
