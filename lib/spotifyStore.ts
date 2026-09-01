@@ -6,6 +6,12 @@ export interface Track {
   artist?: string;
   albumArt?: string;
   songUrl?: string;
+  /**
+   * Present only when the feed is broken rather than quiet — "auth",
+   * "network", or "http_<status>". Consumers render silence either way; it
+   * exists so a dead credential is distinguishable from nobody listening.
+   */
+  error?: string;
 }
 
 /**
