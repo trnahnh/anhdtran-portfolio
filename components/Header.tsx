@@ -20,10 +20,14 @@ export default function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="fade-in-up">
+    <header className="fade-in-up" data-matrix="wave">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-medium tracking-tight">
+          <h1
+            className={`text-2xl sm:text-3xl font-medium tracking-tight ${
+              pathname === "/" ? "name-settle" : ""
+            }`}
+          >
             <span className="text-muted-foreground mr-2" aria-hidden="true">
               &#9670;
             </span>

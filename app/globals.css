@@ -4,45 +4,234 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ==========================================================================
+   INSTRUMENT — design tokens
+   --------------------------------------------------------------------------
+   Two layers, and they never mix:
+
+     LAYER 1  primitives   raw values. Named, never referenced from markup.
+     LAYER 2  semantics    roles. What components actually use.
+
+   To reskin the site, change layer 1. Layer 2 and every component follow.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   LAYER 1 — PRIMITIVES
+   ========================================================================== */
+
+:root {
+  /* -- Calibrated plates ---------------------------------------------------
+     IPF/IWF competition plate colours: a real standard from the subject's
+     own world, and the categorical ramp for every readout on the site.
+     ---------------------------------------------------------------------- */
+  --plate-25: #c8202e; /* 25kg red    — load, max, primary accent */
+  --plate-20: #1b5fc1; /* 20kg blue   — links, information */
+  --plate-15: #e8b923; /* 15kg yellow — in progress, warning */
+  --plate-10: #1e8a4c; /* 10kg green  — shipped, success */
+  --plate-chrome: #b8bcc0; /* collar and sleeve — structural hairlines */
+
+  /* -- The ramp ------------------------------------------------------------
+     Eight steps, chalk to iron. Slightly cool, so it never reads as stock
+     neutral grey. The endpoints match the ground and ink already in use,
+     so nothing shifts underfoot.
+     ---------------------------------------------------------------------- */
+  --chalk: #fafaf9;
+  --collar: #ececed;
+  --knurl: #d8d9dc;
+  --sleeve: #b4b6bd;
+  --bar: #83868f;
+  --rack: #52545c;
+  --platform: #2a2b31;
+  --iron: #0a0a0b;
+
+  --white: #ffffff;
+
+  /* -- Motion --------------------------------------------------------------
+     One vocabulary. Defined in phase 1, applied in phase 2.
+     ---------------------------------------------------------------------- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1); /* the default arrival */
+  --ease-draw: cubic-bezier(0.22, 1, 0.36, 1); /* stroke-dashoffset */
+  --ease-settle: cubic-bezier(0.5, 0, 0.2, 1); /* weighted travel */
+  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1); /* tone and colour */
+
+  --dur-tap: 180ms;
+  --dur-quick: 380ms;
+  --dur-arrive: 550ms;
+  --dur-travel: 900ms;
+  --dur-draw: 1150ms;
+
+  /* -- Geometry ------------------------------------------------------------ */
+  --radius: 0.625rem;
+}
+
+
+/* ==========================================================================
+   LAYER 2 — SEMANTICS (light)
+   ========================================================================== */
+
+:root {
+  --background: var(--chalk);
+  --foreground: var(--iron);
+
+  --card: var(--white);
+  --card-foreground: var(--iron);
+  --popover: var(--white);
+  --popover-foreground: var(--iron);
+
+  --primary: var(--iron);
+  --primary-foreground: var(--chalk);
+  --secondary: var(--collar);
+  --secondary-foreground: var(--iron);
+
+  --muted: var(--collar);
+  --muted-foreground: var(--rack); /* 7.9:1 on chalk, was 4.9:1 */
+  --accent: var(--collar);
+  --accent-foreground: var(--iron);
+
+  --border: var(--knurl);
+  --input: var(--knurl);
+  --ring: var(--bar);
+
+  --destructive: var(--plate-25);
+  --success: var(--plate-10);
+  --warning: var(--plate-15);
+  --info: var(--plate-20);
+
+  /* Load-bearing triad. GradientBlobs and ::selection read these. */
+  --accent-1: var(--plate-25);
+  --accent-2: var(--plate-20);
+  --accent-3: var(--plate-10);
+
+  /* Categorical ramp for readouts and charts. */
+  --chart-1: var(--plate-25);
+  --chart-2: var(--plate-20);
+  --chart-3: var(--plate-15);
+  --chart-4: var(--plate-10);
+  --chart-5: var(--bar);
+
+  /* The matrix reads these directly. Literal hex, no indirection — the
+     shader parses the computed value and cannot resolve a var() chain. */
+  --matrix-ink: #b4b6bd;
+  --matrix-accent: #c8202e;
+
+  /* Instrument surfaces. */
+  --rule: var(--knurl); /* hairline dividers */
+  --readout: var(--rack); /* mono labels */
+  --readout-strong: var(--iron); /* mono values */
+}
+
+
+/* ==========================================================================
+   LAYER 2 — SEMANTICS (dark, the default)
+   --------------------------------------------------------------------------
+   Plate colours are lifted here. Competition plates sit on a white platform;
+   on iron they need luminance back or they read as mud.
+   ========================================================================== */
+
+.dark {
+  --plate-25: #f2555f;
+  --plate-20: #5b91f0;
+  --plate-15: #f5cf4a;
+  --plate-10: #3fb972;
+  --plate-chrome: #8d9197;
+
+  --background: var(--iron);
+  --foreground: var(--chalk);
+
+  --card: var(--platform);
+  --card-foreground: var(--chalk);
+  --popover: var(--platform);
+  --popover-foreground: var(--chalk);
+
+  --primary: var(--chalk);
+  --primary-foreground: var(--iron);
+  --secondary: var(--platform);
+  --secondary-foreground: var(--chalk);
+
+  --muted: var(--platform);
+  --muted-foreground: var(--sleeve); /* 9.2:1 on iron */
+  --accent: var(--platform);
+  --accent-foreground: var(--chalk);
+
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: var(--rack);
+
+  --matrix-ink: #83868f;
+  --matrix-accent: #f2555f;
+
+  --rule: rgba(255, 255, 255, 0.1);
+  --readout: var(--bar);
+  --readout-strong: var(--chalk);
+}
+
+
+/* ==========================================================================
+   TAILWIND BRIDGE
+   ========================================================================== */
 
 @theme inline {
+  /* Type. Three faces, three roles.
+     display — Archivo, variable wdth 62-125. The width axis is the one risk.
+     sans    — Instrument Sans. Body prose.
+     mono    — JetBrains Mono. Every number, label and terminal on the site. */
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-sans: var(--font-instrument), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-serif: "Inter", system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+
   --color-accent-1: var(--accent-1);
   --color-accent-2: var(--accent-2);
   --color-accent-3: var(--accent-3);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-rule: var(--rule);
+  --color-readout: var(--readout);
+  --color-readout-strong: var(--readout-strong);
+
+  --color-plate-25: var(--plate-25);
+  --color-plate-20: var(--plate-20);
+  --color-plate-15: var(--plate-15);
+  --color-plate-10: var(--plate-10);
+  --color-plate-chrome: var(--plate-chrome);
+
+  --color-chalk: var(--chalk);
+  --color-collar: var(--collar);
+  --color-knurl: var(--knurl);
+  --color-sleeve: var(--sleeve);
+  --color-bar: var(--bar);
+  --color-rack: var(--rack);
+  --color-platform: var(--platform);
+  --color-iron: var(--iron);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -50,81 +239,6 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-}
-
-:root {
-  --radius: 0.625rem;
-  --background: #fafafa;
-  --foreground: #0a0a0b;
-  --card: #ffffff;
-  --card-foreground: #0a0a0b;
-  --popover: #ffffff;
-  --popover-foreground: #0a0a0b;
-  --primary: #0a0a0b;
-  --primary-foreground: #fafafa;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #0a0a0b;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #f4f4f5;
-  --accent-foreground: #0a0a0b;
-  --destructive: #ef4444;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --ring: #a1a1aa;
-  --accent-1: #6366f1;
-  --accent-2: #8b5cf6;
-  --accent-3: #ec4899;
-  --chart-1: #6366f1;
-  --chart-2: #8b5cf6;
-  --chart-3: #ec4899;
-  --chart-4: #f59e0b;
-  --chart-5: #10b981;
-  --sidebar: #fafafa;
-  --sidebar-foreground: #0a0a0b;
-  --sidebar-primary: #0a0a0b;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #f4f4f5;
-  --sidebar-accent-foreground: #0a0a0b;
-  --sidebar-border: #e4e4e7;
-  --sidebar-ring: #a1a1aa;
-}
-
-.dark {
-  --background: #0a0a0b;
-  --foreground: #fafafa;
-  --card: #18181b;
-  --card-foreground: #fafafa;
-  --popover: #18181b;
-  --popover-foreground: #fafafa;
-  --primary: #fafafa;
-  --primary-foreground: #0a0a0b;
-  --secondary: #27272a;
-  --secondary-foreground: #fafafa;
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
-  --accent: #27272a;
-  --accent-foreground: #fafafa;
-  --destructive: #dc2626;
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.15);
-  --ring: #52525b;
-  --accent-1: #818cf8;
-  --accent-2: #a78bfa;
-  --accent-3: #f472b6;
-  --chart-1: #818cf8;
-  --chart-2: #a78bfa;
-  --chart-3: #f472b6;
-  --chart-4: #fbbf24;
-  --chart-5: #34d399;
-  --sidebar: #18181b;
-  --sidebar-foreground: #fafafa;
-  --sidebar-primary: #818cf8;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #27272a;
-  --sidebar-accent-foreground: #fafafa;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #52525b;
 }
 
 @layer base {
@@ -139,17 +253,25 @@
   body {
     @apply bg-background text-foreground font-sans;
     overflow-x: hidden;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition:
+      background-color var(--dur-quick) var(--ease-smooth),
+      color var(--dur-quick) var(--ease-smooth);
   }
+  /* Every heading on the display face. Archivo spans wght 100–900 and
+     wdth 62–125, so thin display type is real here rather than synthesised. */
   h1, h2, h3, h4, h5, h6 {
-    font-family: inherit;
+    font-family: var(--font-display);
+    font-variation-settings: "wdth" var(--wdth, 100);
   }
 }
 
 /* Smooth theme transitions */
 html.theme-transitioning,
 html.theme-transitioning * {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease !important;
+  transition:
+    background-color var(--dur-quick) var(--ease-smooth),
+    border-color var(--dur-quick) var(--ease-smooth),
+    color var(--dur-quick) var(--ease-smooth) !important;
 }
 
 
@@ -158,7 +280,7 @@ html.theme-transitioning * {
   position: relative;
   display: inline;
   text-decoration: none;
-  transition: transform 450ms ease;
+  transition: transform var(--dur-arrive) var(--ease-out-expo);
 }
 
 .underline-link::after {
@@ -171,7 +293,7 @@ html.theme-transitioning * {
   background-color: currentColor;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 400ms ease;
+  transition: transform var(--dur-quick) var(--ease-out-expo);
 }
 
 .underline-link:hover {
@@ -198,7 +320,7 @@ html.theme-transitioning * {
 }
 
 .page-transition {
-  animation: pageFadeIn 0.3s ease forwards;
+  animation: pageFadeIn var(--dur-quick) var(--ease-smooth) forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -220,7 +342,7 @@ html.theme-transitioning * {
 }
 
 .fade-in-up {
-  animation: fadeInUp 0.6s ease forwards;
+  animation: fadeInUp var(--dur-arrive) var(--ease-out-expo) forwards;
   opacity: 0;
 }
 
@@ -374,7 +496,7 @@ html.theme-transitioning * {
 }
 
 .peel-expand-overlay {
-  animation: peelExpand 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: peelExpand var(--dur-arrive) var(--ease-settle) forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -427,5 +549,110 @@ html.theme-transitioning * {
   .cursor-dot,
   .cursor-ring {
     display: none;
+  }
+}
+
+/* ==========================================================================
+   MOTION DOCTRINE
+   --------------------------------------------------------------------------
+   Rule 3, the half that per-component observers cannot reach. Fixed ambient
+   layers are permanently "in view" as far as an IntersectionObserver is
+   concerned, so MotionGate marks the document instead.
+   ========================================================================== */
+
+html.motion-paused *,
+html.motion-paused *::before,
+html.motion-paused *::after {
+  animation-play-state: paused !important;
+}
+
+html.motion-off *,
+html.motion-off *::before,
+html.motion-off *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* The shared arrival transition, on the doctrine's own vocabulary. */
+.motion-token {
+  transition:
+    transform var(--dur-quick) var(--ease-out-expo),
+    opacity var(--dur-quick) var(--ease-out-expo);
+}
+
+/* ==========================================================================
+   THE FOG
+   --------------------------------------------------------------------------
+   The reading column floats on a bleed of its own ground. The matrix stays
+   legible at the margins and dissolves behind the text, so an ambient scene
+   can run under the whole site without ever competing with prose.
+   ========================================================================== */
+
+.fog {
+  background-color: color-mix(in srgb, var(--background) 82%, transparent);
+  box-shadow: 0 0 70px 70px color-mix(in srgb, var(--background) 82%, transparent);
+}
+
+/* ==========================================================================
+   THE ONE RISK
+   --------------------------------------------------------------------------
+   Archivo carries a real width axis, so the name can settle into its set
+   width the way a needle settles onto a reading. Spent once, on the name,
+   during calibration — never on a section heading, where repetition would
+   turn a moment into a tic. font-variation-settings animates on the
+   compositor, so it is free even under full mobile parity.
+   ========================================================================== */
+
+@keyframes nameSettle {
+  from {
+    font-variation-settings: "wdth" 64;
+    letter-spacing: -0.045em;
+    opacity: 0.55;
+  }
+  to {
+    font-variation-settings: "wdth" 100;
+    letter-spacing: -0.02em;
+    opacity: 1;
+  }
+}
+
+.name-settle {
+  animation: nameSettle 1100ms var(--ease-out-expo) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .name-settle {
+    animation: none;
+  }
+}
+
+/* The scene is pinned to the large viewport height, not the dynamic one.
+   `dvh` and `innerHeight` both move as a mobile URL bar collapses, which
+   would resize a WebGL drawing buffer mid-scroll. `lvh` holds still. */
+.matrix-canvas {
+  height: 100lvh;
+}
+
+/* The two-declaration fallback does not survive minification here — Lightning
+   CSS knows `lvh` is valid and drops the earlier `vh` as redundant. Without a
+   height the canvas collapses to nothing and the scene silently vanishes, so
+   the fallback is stated in a form that cannot be deduped. */
+@supports not (height: 100lvh) {
+  .matrix-canvas {
+    height: 100vh;
+  }
+}
+
+/* Now-playing equaliser. Only rendered while something is actually playing,
+   so it is a loop that is genuinely unfinished. */
+@keyframes eq {
+  0%,
+  100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
   }
 }

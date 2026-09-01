@@ -60,7 +60,7 @@ export default function QuotesSection() {
         </button>
 
         <div className="flex-1 text-center space-y-2">
-          <p className="text-base font-light italic">&ldquo;{text}&rdquo;</p>
+          <p className="font-display text-base font-light italic">&ldquo;{text}&rdquo;</p>
           <p className="text-xs text-muted-foreground">— {author}</p>
         </div>
 

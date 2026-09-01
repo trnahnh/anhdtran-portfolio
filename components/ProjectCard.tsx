@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import UnderlineLink from "./UnderlineLink";
+import ProjectMetric from "./ProjectMetric";
 import type { Project } from "@/lib/data/projects";
 
 interface ProjectCardProps {
@@ -13,7 +14,10 @@ export default function ProjectCard({ project }: ProjectCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3">
+    <div
+      data-matrix={project.readout ?? "idle"}
+      className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3"
+    >
       <div className="flex items-start gap-2">
         <span className="mt-0.5" aria-hidden="true">
           &#8627;
@@ -50,6 +54,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <div className="mt-1">
             <span>— {project.description}</span>
           </div>
+          {project.metric && <ProjectMetric metric={project.metric} />}
           {project.techStack && project.techStack.length > 0 && (
             <div
               className={`grid transition-all duration-300 ease-in-out ${

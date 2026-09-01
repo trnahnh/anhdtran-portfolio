@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Archivo, Instrument_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import ConditionalSplashCursor from "@/components/ConditionalSplashCursor";
 import GradientBlobs from "@/components/GradientBlobs";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import InstrumentMatrix from "@/components/matrix/InstrumentMatrix";
+import MatrixScore from "@/components/matrix/MatrixScore";
+import MotionGate from "@/components/MotionGate";
 import PageTransition from "@/components/PageTransition";
 import ScrollToTop from "@/components/ScrollToTop";
 import PagePeel from "@/components/PagePeel";
@@ -12,7 +13,30 @@ import SmoothScroll from "@/components/SmoothScroll";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
 
-const inter = Inter({ subsets: ["latin"], weight: ["200", "300", "700"] });
+// Display. Variable width axis (wdth 62–125) — the one aesthetic risk, spent
+// once on the name during calibration and nowhere else.
+const archivo = Archivo({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-archivo",
+  display: "swap",
+});
+
+// Body prose.
+const instrumentSans = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--font-instrument",
+  display: "swap",
+});
+
+// Every number, label, readout and terminal on the site. Previously
+// --font-mono pointed at a Geist Mono that was never loaded, so all mono
+// fell back to the browser default.
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://anhdtrn.com"),
@@ -54,12 +78,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
-        <ErrorBoundary>
-          <ConditionalSplashCursor />
-        </ErrorBoundary>
+      <body
+        className={`${archivo.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} antialiased`}
+      >
+        <MotionGate />
         <SmoothScroll />
         <GradientBlobs />
+        <InstrumentMatrix />
+        <MatrixScore />
         <PageTransition>{children}</PageTransition>
         <ScrollToTop />
         <PagePeel />

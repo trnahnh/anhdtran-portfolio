@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
+import { useInView } from "@/hooks/useInView";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -8,32 +10,18 @@ interface ScrollRevealProps {
   className?: string;
 }
 
-const reducedMotionCached =
-  typeof window !== "undefined" &&
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
 export default function ScrollReveal({
   children,
   delay = 0,
   className,
 }: ScrollRevealProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const reducedMotion = reducedMotionCached;
-  const [isVisible, setIsVisible] = useState(reducedMotion);
+  const reducedMotion = usePrefersReducedMotion();
+  // Doctrine rule 1: fired once on entry and then held. This previously
+  // re-triggered on every scroll-back, so the page kept re-animating content
+  // the reader had already arrived at.
+  const [ref, inView] = useInView<HTMLDivElement>({ threshold: 0.1, once: true });
 
-  useEffect(() => {
-    if (reducedMotion || !ref.current) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setIsVisible(entry.isIntersecting);
-      },
-      { threshold: 0.1 },
-    );
-
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [reducedMotion]);
+  const shown = reducedMotion || inView;
 
   return (
     <div
@@ -43,9 +31,9 @@ export default function ScrollReveal({
         reducedMotion
           ? undefined
           : {
-              opacity: isVisible ? 1 : 0,
-              transform: isVisible ? "translateY(0)" : "translateY(20px)",
-              transition: `opacity 0.6s ease ${delay}ms, transform 0.6s ease ${delay}ms`,
+              opacity: shown ? 1 : 0,
+              transform: shown ? "translateY(0)" : "translateY(20px)",
+              transition: `opacity var(--dur-arrive) var(--ease-out-expo) ${delay}ms, transform var(--dur-arrive) var(--ease-out-expo) ${delay}ms`,
             }
       }
     >

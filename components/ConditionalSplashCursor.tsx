@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const loadSplashCursor = () =>
@@ -9,32 +8,31 @@ const loadSplashCursor = () =>
 
 const SplashCursor = dynamic(loadSplashCursor, { ssr: false });
 
-function getInitialIntroActive(pathname: string): boolean {
-  if (typeof window === "undefined") return false;
-  if (pathname === "/") {
-    return localStorage.getItem("intro-home-seen") !== "true";
-  }
-  if (pathname === "/profile") {
-    const saved = localStorage.getItem("theme");
-    return saved
-      ? saved === "dark"
-      : window.matchMedia("(prefers-color-scheme: dark)").matches;
-  }
-  return false;
-}
-
+/**
+ * The fluid cursor is the /profile room's surface, and only that room's.
+ *
+ * It used to be mounted in the root layout, which put a second WebGL context
+ * on every route — a 1,426-line fluid simulation competing for the GPU with
+ * the instrument matrix that is supposed to be the site's one scene.
+ * It is now mounted by app/profile/page.tsx alone.
+ */
 export default function ConditionalSplashCursor() {
-  const pathname = usePathname();
   const [introActive, setIntroActive] = useState(false);
 
   useEffect(() => {
-    const active = getInitialIntroActive(pathname);
-    // Client-only init: reads localStorage/matchMedia, so it can't run during SSR
-    // or lazy useState init without a hydration mismatch.
+    // CardIntroScreen owns the viewport on first visit; hold the cursor back
+    // until it is done. Client-only: reads localStorage and matchMedia, so it
+    // cannot run during SSR or in a lazy useState initialiser without a
+    // hydration mismatch.
+    const saved = localStorage.getItem("theme");
+    const active = saved
+      ? saved === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIntroActive(active);
     if (active) loadSplashCursor();
-  }, [pathname]);
+  }, []);
 
   useEffect(() => {
     const onShown = () => {
@@ -50,7 +48,6 @@ export default function ConditionalSplashCursor() {
     };
   }, []);
 
-  if (pathname === "/space" || pathname === "/terminal") return null;
   if (introActive) return null;
   return <SplashCursor />;
 }

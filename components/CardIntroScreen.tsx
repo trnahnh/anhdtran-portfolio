@@ -382,7 +382,7 @@ export default function CardIntroScreen() {
                         DUY ANH TRAN
                       </p>
                       <p
-                        className="font-light tracking-[0.2em] text-zinc-500 mt-0.5"
+                        className="font-display font-light tracking-[0.2em] text-zinc-500 mt-0.5"
                         style={{
                           fontSize: "clamp(0.45rem, 1.5vw, 0.75rem)",
                           textShadow:

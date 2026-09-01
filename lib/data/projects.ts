@@ -1,3 +1,5 @@
+import type { ReadoutKind } from "@/components/matrix/readouts";
+
 export interface Project {
   name: string;
   nameAlt?: string;
@@ -5,11 +7,16 @@ export interface Project {
   link: string;
   techStack?: string[];
   status: "current" | "past";
+  /** Which instrument this project drives when it comes into view. */
+  readout?: ReadoutKind;
+  /** The measured headline. Real, dated, and committed — never authored. */
+  metric?: { value: string; label: string; measured: string };
 }
 
 export const projects: Project[] = [
   {
     name: "commma",
+    readout: "heatmap",
     description:
       "Developer-activity tracker that turns coding into a sport - sessions, pace, streaks, and leaderboards, plus a shareable per-session keyboard heatmap.",
     link: "https://commma.dev/",
@@ -39,6 +46,7 @@ export const projects: Project[] = [
   },
   {
     name: "Dasi",
+    readout: "cipher",
     description:
       "End-to-end encrypted journaling app - thoughts are encrypted on-device before sync with daily writing prompts to beat the blank page.",
     link: "https://github.com/NauriFive/dasi-encrypted-journal",
@@ -55,6 +63,12 @@ export const projects: Project[] = [
   },
   {
     name: "RG2026-Predict",
+    readout: "curve",
+    metric: {
+      value: "0.714",
+      label: "AUC · 65.2% match accuracy",
+      measured: "2026-05",
+    },
     description:
       "ML pipeline predicting Roland Garros 2026 winner with 65.2% match accuracy and 0.714 AUC by training XGBoost on 37 temporal features from 75K+ ATP matches and simulating 10K Monte Carlo bracket draws.",
     link: "https://github.com/trnahnh/rg2026-predict",
@@ -71,6 +85,12 @@ export const projects: Project[] = [
   },
   {
     name: "Draft-Thinker",
+    readout: "decay",
+    metric: {
+      value: "-91.6%",
+      label: "inference cost",
+      measured: "2026-03",
+    },
     description:
       "Cost-aware LLM gateway that cuts inference costs by 91.6% through entropy-based draft-and-verify routing with speculative execution and semantic caching.",
     link: "https://draft-thinker.vercel.app/",
@@ -88,6 +108,12 @@ export const projects: Project[] = [
   },
   {
     name: "Ferrox",
+    readout: "histogram",
+    metric: {
+      value: "4.7M",
+      label: "orders/sec · sub-microsecond p50",
+      measured: "2026-02",
+    },
     description:
       "LMAX-inspired high-frequency order matching engine benchmarked at sub-microsecond latency and 4.7M simulated orders/sec.",
     link: "https://ferrox-engine.vercel.app/",
@@ -104,6 +130,7 @@ export const projects: Project[] = [
   },
   {
     name: "Inyeon",
+    readout: "blocks",
     nameAlt: "(인연)",
     description:
       "Agentic AI Git companion that orchestrates the full workflow automation in one command.",
@@ -125,6 +152,7 @@ export const projects: Project[] = [
   },
   {
     name: "AnyuDock",
+    readout: "blocks",
     nameAlt: "(暗语-Dock)",
     description:
       "Pronounced ànyǔ (ahn-yoo). Simple S3 file storage for sharing files and env configs between machines.",

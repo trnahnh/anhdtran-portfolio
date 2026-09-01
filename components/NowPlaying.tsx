@@ -3,28 +3,13 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import UnderlineLink from "./UnderlineLink";
-
-interface Track {
-  isPlaying: boolean;
-  title?: string;
-  artist?: string;
-  albumArt?: string;
-  songUrl?: string;
-}
+import { subscribeSpotify, type Track } from "@/lib/spotifyStore";
 
 export default function NowPlaying() {
   const [track, setTrack] = useState<Track | null>(null);
 
   useEffect(() => {
-    const fetch_ = () =>
-      fetch("/api/spotify")
-        .then((r) => r.json())
-        .then(setTrack)
-        .catch(() => {});
-
-    fetch_();
-    const interval = setInterval(fetch_, 20_000);
-    return () => clearInterval(interval);
+    return subscribeSpotify(setTrack);
   }, []);
 
   if (!track) return null;

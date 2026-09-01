@@ -153,7 +153,7 @@ export default function SpaceIntroScreen() {
       onClick={skip}
     >
       <div className="flex flex-col items-center gap-5 sm:gap-7 text-center">
-        <p className="font-thin text-6xl sm:text-8xl lg:text-9xl tracking-[0.15em] text-white/90">
+        <p className="font-display font-thin text-6xl sm:text-8xl lg:text-9xl tracking-[0.15em] text-white/90">
           {LINE_1.slice(0, line1)}
           <span
             className={`inline-block w-[2px] h-12 sm:h-16 lg:h-20 ml-1 align-middle bg-white/60 ${
@@ -163,7 +163,7 @@ export default function SpaceIntroScreen() {
         </p>
 
         {line2 !== null && (
-          <p className="font-extralight text-sm sm:text-base lg:text-lg tracking-[0.4em] uppercase text-white/35">
+          <p className="font-display font-extralight text-sm sm:text-base lg:text-lg tracking-[0.4em] uppercase text-white/35">
             {LINE_2.slice(0, line2)}
             <span
               className={`inline-block w-[1.5px] h-3.5 sm:h-4 ml-0.5 align-middle bg-white/35 ${

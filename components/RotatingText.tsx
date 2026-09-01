@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useInView } from "@/hooks/useInView";
 
 interface RotatingTextProps {
   texts: string[];
@@ -11,10 +12,15 @@ export default function RotatingText({
   texts,
   interval = 3000,
 }: RotatingTextProps) {
+  const [containerRef, inView] = useInView<HTMLSpanElement>({ threshold: 0 });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
+    // Doctrine rule 3: this loop is never finished, so it is allowed to run —
+    // but it stops the moment it scrolls out of the viewport.
+    if (!inView) return;
+
     let timeoutId: ReturnType<typeof setTimeout>;
     const timer = setInterval(() => {
       setIsAnimating(true);
@@ -28,12 +34,12 @@ export default function RotatingText({
       clearInterval(timer);
       clearTimeout(timeoutId);
     };
-  }, [texts.length, interval]);
+  }, [texts.length, interval, inView]);
 
   return (
-    <span className="rotating-text-container">
+    <span ref={containerRef} className="rotating-text-container">
       <span
-        className={`rotating-text inline-block transition-all duration-300 ${
+        className={`rotating-text inline-block motion-token ${
           isAnimating
             ? "-translate-y-full opacity-0"
             : "translate-y-0 opacity-100"
