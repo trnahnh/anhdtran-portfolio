@@ -60,7 +60,12 @@ function PhotoCard({
         className={`w-full h-auto transition-all duration-500 group-hover:scale-105 ${
           loaded ? "opacity-100" : "opacity-0"
         }`}
-        sizes="(max-width: 640px) 50vw, 320px"
+        // Must track the reading column's real width. When PageShell widened
+        // to max-w-4xl at lg and max-w-6xl at xl, each grid cell went from
+        // ~306px to ~418px and ~442px while this still claimed 320px — so a
+        // 320px file was being stretched 1.31x and 1.38x. Values include
+        // headroom for the 1.05 hover scale.
+        sizes="(max-width: 639px) 50vw, (max-width: 1023px) 340px, (max-width: 1279px) 450px, 480px"
       />
       <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300" />
       <p className="absolute bottom-3 left-3 right-3 text-xs text-white/90 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 leading-snug">
