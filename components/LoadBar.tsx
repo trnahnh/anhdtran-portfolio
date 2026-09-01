@@ -61,6 +61,11 @@ export default function LoadBar() {
   const [segments, setSegments] = useState<Segment[]>([]);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  // The component renders nothing until it has measured sections, so the
+  // canvas is absent on the first pass. Without this in the deps the setup
+  // effect runs once against a null ref, returns early, and never runs again
+  // — the bar mounts and never draws a single frame.
+  const hasSegments = segments.length > 0;
   const pctRef = useRef<HTMLSpanElement>(null);
   // The simulation loop reads the segments without depending on them, so it
   // is never torn down and restarted when a measurement changes.
@@ -124,7 +129,14 @@ export default function LoadBar() {
     const nextDye = new Float32Array(N * 3);
 
     let plates: RGB[] = [];
+    let collarInk = "#fafaf9";
     const readPlates = () => {
+      // Literal primitives only. --foreground is a var() chain and browsers
+      // differ on whether a chain is resolved by the time getComputedStyle
+      // sees it; --chalk and --iron are always plain hex.
+      const dark = document.documentElement.classList.contains("dark");
+      const c = readPlate(dark ? "--chalk" : "--iron", dark ? [250, 250, 249] : [10, 10, 11]);
+      collarInk = `rgb(${c[0]},${c[1]},${c[2]})`;
       plates = [
         readPlate("--plate-25", [200, 32, 46]),
         readPlate("--plate-20", [27, 95, 193]),
@@ -158,7 +170,11 @@ export default function LoadBar() {
     let lastPointerY = 0;
     const onPointerMove = (e: PointerEvent) => {
       if (e.clientX > POINTER_REACH) {
+        // Forget where the cursor was. Re-entering from across the screen
+        // would otherwise register as one enormous downward flick.
         pointerRow = -1;
+        pointerVel = 0;
+        lastPointerY = e.clientY;
         return;
       }
       const strength = 1 - e.clientX / POINTER_REACH;
@@ -196,7 +212,10 @@ export default function LoadBar() {
         // Splat. Scrolling injects velocity and dye at the collar, so a hard
         // flick sends colour surging ahead of where you actually are and it
         // dissipates back — the bar overshoots the way the fluid does.
-        vel[collar] += delta * SPLAT_FORCE;
+        // A jump-scroll — clicking a plate, an anchor, restoring position —
+        // arrives as one enormous delta. Clamped, so a jump stirs the column
+        // instead of firing dye clean off the end of it.
+        vel[collar] += Math.max(-6, Math.min(6, delta * SPLAT_FORCE));
         const c = plateAt(seen);
         if (c) {
           const o = collar * 3;
@@ -275,10 +294,9 @@ export default function LoadBar() {
 
       // The collar: where the loaded plates stop.
       const y = Math.round(seen * canvas.height);
-      ctx.fillStyle =
-        getComputedStyle(document.documentElement)
-          .getPropertyValue("--foreground")
-          .trim() || "#fff";
+      // Read once on mount and on theme change, never in the loop: this was
+      // forcing a style recalculation on every frame.
+      ctx.fillStyle = collarInk;
       ctx.fillRect(0, Math.max(0, y - 1), canvas.width, 2);
 
       if (pctRef.current)
@@ -294,7 +312,7 @@ export default function LoadBar() {
       themeObserver.disconnect();
       window.removeEventListener("pointermove", onPointerMove);
     };
-  }, [reducedMotion]);
+  }, [reducedMotion, hasSegments]);
 
   const jump = (offset: number) => {
     window.scrollTo({ top: Math.max(0, offset - 24), behavior: "smooth" });

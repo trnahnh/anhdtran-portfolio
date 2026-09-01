@@ -27,15 +27,3 @@ export const matrix: MatrixState = {
   amp: 1,
   locked: false,
 };
-
-/** Clear the field. */
-export function clearMatrix(): void {
-  matrix.pixels.fill(0);
-  matrix.dirty = true;
-}
-
-/** Write one cell, ignoring out-of-range coordinates. */
-export function setCell(x: number, y: number, value: number): void {
-  if (x < 0 || y < 0 || x >= DATA_W || y >= DATA_H) return;
-  matrix.pixels[y * DATA_W + x] = Math.max(0, Math.min(255, value | 0));
-}
