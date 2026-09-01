@@ -685,51 +685,37 @@ html.motion-off *::after {
 
 .load-bar-track {
   position: relative;
-  width: 5px;
+  width: 10px;
   height: 100%;
   background: var(--rule);
   pointer-events: auto;
   transition: width var(--dur-tap) var(--ease-out-expo);
+  overflow: hidden;
 }
 
 .load-bar:hover .load-bar-track,
 .load-bar:focus-within .load-bar-track {
-  width: 9px;
+  width: 16px;
 }
 
-.load-bar-plate {
-  position: absolute;
-  left: 0;
-  right: 0;
-  display: block;
-}
-
-/* Clips the lit stack from the top down. The stack inside stays full height,
-   so plates never stretch as the fill grows — only more of them shows. */
-.load-bar-fill {
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 0;
-  overflow: hidden;
-}
-
-.load-bar-stack {
+/* The simulation surface. Plates, dye and collar are all drawn here — the
+   structure has to survive the fluid, so it is composed in one pass rather
+   than layered as separate elements. */
+.load-bar-canvas {
   position: absolute;
   inset: 0;
-  height: 100vh;
-  height: 100lvh;
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-/* The collar: where the loaded plates stop. */
-.load-bar-head {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  margin-top: -1px;
-  background: var(--foreground);
-  box-shadow: 0 0 6px 1px var(--background);
-}
+
+
+
+
+
+
+
 
 .load-bar-hit {
   position: absolute;
@@ -806,7 +792,7 @@ html.motion-off *::after {
     pointer-events: none;
   }
   .load-bar-hit {
-    width: 5px;
+    width: 10px;
   }
   .load-bar-label {
     display: none;
