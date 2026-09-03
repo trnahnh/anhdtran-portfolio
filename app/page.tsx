@@ -4,14 +4,12 @@ import ExperienceSection from "@/components/ExperienceSection";
 import ProjectsSection from "@/components/ProjectsSection";
 import ContactSection from "@/components/ContactSection";
 import Footer from "@/components/Footer";
-import IntroScreen from "@/components/IntroScreen";
-import MatrixCalibration from "@/components/matrix/MatrixCalibration";
+import PortraitScan from "@/components/PortraitScan";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
-      <MatrixCalibration />
-      <IntroScreen />
+      <PortraitScan />
       <PageShell>
           <Header />
           <ExperienceSection />
