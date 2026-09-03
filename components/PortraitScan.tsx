@@ -659,9 +659,9 @@ export default function PortraitScan() {
       tabIndex={0}
       aria-label="Skip intro"
       onKeyDown={onKeyDown}
-      className="fixed inset-0 z-100 cursor-pointer select-none outline-none"
+      className="scan-root fixed inset-x-0 top-0 z-100 cursor-pointer select-none outline-none"
     >
-      <div ref={backdropRef} className="absolute inset-0 bg-background" />
+      <div ref={backdropRef} className="absolute inset-x-0 top-0 -bottom-[20%] bg-background" />
       <canvas
         ref={canvasRef}
         className="matrix-canvas absolute inset-x-0 top-0 w-full"
@@ -674,7 +674,7 @@ export default function PortraitScan() {
       />
       <p
         ref={hintRef}
-        className="absolute inset-x-0 bottom-8 text-center text-sm text-muted-foreground/70 transition-opacity duration-300"
+        className="scan-hint absolute inset-x-0 text-center text-sm text-muted-foreground/70 transition-opacity duration-300"
       >
         Tap anywhere to skip.
       </p>

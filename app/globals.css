@@ -636,6 +636,27 @@ html.scanning .name-settle {
   animation-play-state: paused;
 }
 
+/* The scan overlay is pinned to the large viewport, like the matrix canvas.
+   A fixed `inset: 0` box on iPhone stops at the top of Safari's translucent
+   bottom bar and the page shows through that strip; `lvh` reaches under it.
+   The skip hint is placed against the small viewport so it stays visible
+   while the bar is expanded. */
+.scan-root {
+  height: 100lvh;
+}
+.scan-hint {
+  top: calc(100svh - 2.75rem);
+}
+@supports not (height: 100lvh) {
+  .scan-root {
+    height: 100vh;
+  }
+  .scan-hint {
+    top: auto;
+    bottom: 2rem;
+  }
+}
+
 /* The scene is pinned to the large viewport height, not the dynamic one.
    `dvh` and `innerHeight` both move as a mobile URL bar collapses, which
    would resize a WebGL drawing buffer mid-scroll. `lvh` holds still. */
