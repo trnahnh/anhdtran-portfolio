@@ -15,8 +15,7 @@ import { matrix } from "@/components/matrix/matrixStore";
  * A pointer adds parallax where one exists. The page arrives behind the
  * volume as it fades, still in depth.
  *
- * Same length as the profile route's card intro: 3.7 seconds including the
- * fade. Shown once per visitor, skippable by any input. Reduced motion or
+ * About four and a half seconds including the fade. Shown once per visitor, skippable by any input. Reduced motion or
  * no WebGL shows nothing extra. The page's arrival animations are held by a
  * class on <html>, set before first paint by app/layout.tsx, and released as
  * the fade begins.
@@ -30,10 +29,10 @@ const HTML_CLASS = "scanning";
 const CELL_MOBILE = 8;
 const CELL_DESKTOP = 13;
 
-// Beats, in seconds. Scan, turn, fade: 3.7s, the card intro's length.
-const SCAN = 1.3;
-const ROTATE = 1.6;
-const FADE = 0.8;
+// Beats, in seconds. Scan, turn, fade: 4.7s in all.
+const SCAN = 1.5;
+const ROTATE = 2.3;
+const FADE = 0.9;
 const T_SCAN = SCAN;
 const T_ROTATE = T_SCAN + ROTATE;
 const TOTAL = T_ROTATE + FADE;
