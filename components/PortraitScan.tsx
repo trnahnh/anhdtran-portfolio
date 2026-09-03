@@ -53,8 +53,13 @@ const CENTRE_Y = 0.47; // from the top
 
 const ASSET_WAIT_MS = 2500;
 
+// Fixed to the camera, upper left and in front, so the lit side changes as
+// the volume turns.
+const LIGHT = [-0.55, 0.6, 1.0];
+
 const VERT = `
 attribute vec3 aPos;      // cloud cells, centred; z is depth 0..1 minus 0.5
+attribute vec3 aNormal;   // surface normal from the depth map, model space
 
 uniform mat4  uProj;
 uniform float uScale;     // world units per cloud cell
@@ -65,6 +70,7 @@ uniform float uCamD;
 uniform float uHead;      // scan plane, in cloud-cell x
 uniform float uFade;      // 1 .. 0 at the end
 uniform float uPointPx;   // point size, device px, at the camera plane
+uniform vec3  uLight;     // camera space, normalised
 
 varying float vV;
 varying float vA;
@@ -80,17 +86,21 @@ void main() {
   vec4 clip = uProj * vec4(r, 1.0);
   gl_Position = vec4(clip.xy / clip.w, 0.0, 1.0);
 
-  // Near cells are larger and brighter, so the volume reads on a still
-  // frame as well as in motion.
+  // Near cells are larger, so the volume reads on a still frame too.
   float depthN = aPos.z + 0.5;
   gl_PointSize = uPointPx * (0.7 + 0.6 * depthN) * (uCamD / clip.w);
+
+  // Diffuse light on the surface the depth map describes, turned with it.
+  vec3 n = vec3(c * aNormal.x + s * aNormal.z, aNormal.y, -s * aNormal.x + c * aNormal.z);
+  n = vec3(n.x, cp * n.y - sp * n.z, sp * n.y + cp * n.z);
+  float lit = max(dot(normalize(n), uLight), 0.0);
 
   // The scan plane, in model space, so it wraps over the face on screen.
   float d = uHead - aPos.x;
   float passed = step(0.0, d);
   float flare = exp(-max(d, 0.0) * 0.9);
   float comb = (0.5 + 0.5 * cos(d * 6.2832 / 3.0)) * exp(-max(d, 0.0) / 9.0);
-  float base = 0.16 + 0.5 * depthN;
+  float base = 0.14 + 0.16 * depthN + 0.42 * lit;
   vV = clamp(base + comb * 0.45 + flare * 1.2, 0.0, 1.0);
   vA = passed * uFade;
 }
@@ -110,6 +120,8 @@ void main() {
 `;
 
 type Asset = { w: number; h: number; mask: Uint8ClampedArray; depth: Uint8ClampedArray };
+
+const STRIDE = 6; // floats per point: position, normal
 
 type Layout = {
   cloud: Float32Array;
@@ -208,7 +220,11 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
   // sits a little above it, so its cells are shifted up in cloud units.
   const lift = ((0.5 - CENTRE_Y) * cssH) / pitchCss;
 
-  const pts: number[] = [];
+  // Sample the asset onto the cloud grid first, so normals can be taken
+  // between neighbouring cells with the same z scale the shader will use.
+  const zExtent = rows * DEPTH_EXTENT; // cloud cells, matching uDepth
+  const inside = new Uint8Array(cols * rows);
+  const z = new Float32Array(cols * rows);
   for (let j = 0; j < rows; j++) {
     const v = 1 - (j + 0.5) / rows; // asset rows run top-down
     const ay = Math.min(asset.h - 1, Math.floor(v * asset.h));
@@ -217,7 +233,31 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
       const ax = Math.min(asset.w - 1, Math.floor(u * asset.w));
       const idx = ay * asset.w + ax;
       if (asset.mask[idx] < 128) continue;
-      pts.push(i - cols / 2 + 0.5, j - rows / 2 + 0.5 + lift, asset.depth[idx] / 255 - 0.5);
+      inside[j * cols + i] = 1;
+      z[j * cols + i] = asset.depth[idx] / 255 - 0.5;
+    }
+  }
+  const zAt = (i: number, j: number, fallback: number) =>
+    i >= 0 && j >= 0 && i < cols && j < rows && inside[j * cols + i] ? z[j * cols + i] : fallback;
+
+  const pts: number[] = [];
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < cols; i++) {
+      if (!inside[j * cols + i]) continue;
+      const zc = z[j * cols + i];
+      // Central differences, falling back to the cell itself at the
+      // silhouette so the edge does not get a normal that points sideways.
+      const dzdx = ((zAt(i + 1, j, zc) - zAt(i - 1, j, zc)) / 2) * zExtent;
+      const dzdy = ((zAt(i, j + 1, zc) - zAt(i, j - 1, zc)) / 2) * zExtent;
+      const len = Math.hypot(dzdx, dzdy, 1) || 1;
+      pts.push(
+        i - cols / 2 + 0.5,
+        j - rows / 2 + 0.5 + lift,
+        zc,
+        -dzdx / len,
+        -dzdy / len,
+        1 / len,
+      );
     }
   }
 
@@ -233,7 +273,7 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
 
   return {
     cloud: new Float32Array(pts),
-    count: pts.length / 3,
+    count: pts.length / STRIDE,
     cols,
     rows,
     pointPx: pitchPx * 0.8,
@@ -437,6 +477,7 @@ export default function PortraitScan() {
     g.useProgram(prog);
 
     const aPos = g.getAttribLocation(prog, "aPos");
+    const aNormal = g.getAttribLocation(prog, "aNormal");
     const u = (name: string) => g.getUniformLocation(prog, name);
     const uni = {
       proj: u("uProj"),
@@ -448,6 +489,7 @@ export default function PortraitScan() {
       head: u("uHead"),
       fade: u("uFade"),
       pointPx: u("uPointPx"),
+      light: u("uLight"),
       ink: u("uInk"),
       accent: u("uAccent"),
     };
@@ -456,6 +498,10 @@ export default function PortraitScan() {
     g.blendFunc(g.ONE, g.ONE_MINUS_SRC_ALPHA);
     g.clearColor(0, 0, 0, 0);
     g.uniform1f(uni.camD, CAM_D);
+    {
+      const l = Math.hypot(LIGHT[0], LIGHT[1], LIGHT[2]);
+      g.uniform3f(uni.light, LIGHT[0] / l, LIGHT[1] / l, LIGHT[2] / l);
+    }
 
     const readColors = () => {
       g.uniform3fv(uni.ink, readColor("--matrix-ink", [0.51, 0.52, 0.56]));
@@ -484,14 +530,20 @@ export default function PortraitScan() {
       g.bindBuffer(g.ARRAY_BUFFER, cloudBuf);
       g.bufferData(g.ARRAY_BUFFER, lay.cloud, g.STATIC_DRAW);
       g.enableVertexAttribArray(aPos);
-      g.vertexAttribPointer(aPos, 3, g.FLOAT, false, 12, 0);
+      g.vertexAttribPointer(aPos, 3, g.FLOAT, false, STRIDE * 4, 0);
+      g.enableVertexAttribArray(aNormal);
+      g.vertexAttribPointer(aNormal, 3, g.FLOAT, false, STRIDE * 4, 12);
 
       g.uniformMatrix4fv(uni.proj, false, lay.proj);
       g.uniform1f(uni.scale, lay.scale);
       g.uniform1f(uni.depth, lay.depth);
       g.uniform1f(uni.pointPx, lay.pointPx);
 
-      caption.style.top = `${lay.captionTop}px`;
+      // On a short viewport (a phone in landscape) the caption would land
+      // on the skip hint, so the caption is clamped and the hint gives way.
+      const short = cssH < 520;
+      caption.style.top = `${Math.min(lay.captionTop, cssH - 36)}px`;
+      hint.hidden = short;
     };
 
     resizeObserver = new ResizeObserver(() => rebuild());
@@ -504,6 +556,12 @@ export default function PortraitScan() {
       lastCaption = s;
       caption.textContent = s;
     };
+
+    // Frame time as a rolling average, and a caption that only re-renders
+    // a few times a second: the numbers are real, the text is not jittery.
+    let lastFrame = 0;
+    let frameMs = 0;
+    let captionAt = 0;
 
     const step = (now: number) => {
       if (disposed) return;
@@ -547,11 +605,18 @@ export default function PortraitScan() {
 
       driveAudio(t);
 
-      if (t < T_SCAN) {
-        const pct = Math.round(clamp01(t / T_SCAN) * 100);
-        setCaption(`SCAN 01 · DEPTH · ${lay.count.toLocaleString()} CELLS · ${pct}%`);
-      } else {
-        setCaption(`SCAN 01 · DEPTH · ${lay.count.toLocaleString()} CELLS · COMPLETE`);
+      if (lastFrame) frameMs += (now - lastFrame - frameMs) * 0.1;
+      lastFrame = now;
+      if (now - captionAt > 120) {
+        captionAt = now;
+        const cells = lay.count.toLocaleString();
+        const ms = frameMs.toFixed(1);
+        const deg = ((yaw * 180) / Math.PI).toFixed(0).replace("-0", "0");
+        const stage =
+          t < T_SCAN ? `${Math.round(clamp01(t / T_SCAN) * 100)}%` : "COMPLETE";
+        setCaption(
+          `SCAN 01 · ${cells} CELLS · ${ms} MS · YAW ${Number(deg) >= 0 ? "+" : ""}${deg}° · Z ${DEPTH_EXTENT.toFixed(2)} · ${stage}`,
+        );
       }
       hint.style.opacity = t < T_ROTATE ? "1" : "0";
     };
