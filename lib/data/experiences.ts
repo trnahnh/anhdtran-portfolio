@@ -8,12 +8,6 @@ export interface Experience {
 
 export const experiences: Experience[] = [
   {
-    title: "Software Engineer Intern",
-    company: "Open Prem",
-    companyUrl: "https://openprem.com",
-    status: "future",
-  },
-  {
     title: "AI Researcher",
     company: "University of Cincinnati Department of Computer Science",
     status: "future",
