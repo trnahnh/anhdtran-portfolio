@@ -10,49 +10,42 @@ import { matrix } from "@/components/matrix/matrixStore";
  * offline by scripts/build-portrait-scan.py — is revealed by a vertical plane
  * sweeping left to right through the volume. Nothing exists ahead of the
  * plane. Cells flare to the accent as it passes and decay to ink behind it.
- * The camera yaws slowly across the whole opening so the depth is visible on
- * every device without input; a pointer adds parallax where one exists.
+ * Then the volume turns: out to one side, back through front to the other,
+ * and settles face-on, so the depth is seen on every device without input.
+ * A pointer adds parallax where one exists. The page arrives behind the
+ * volume as it fades, still in depth.
  *
- * Then the volume collapses: depth eases to zero and every 2x2 group of cloud
- * points converges onto one cell of the instrument matrix's grid, exactly
- * aligned, so the measurement snaps to the readout's resolution. The flat
- * silhouette re-purposes its cells into the name, drawn in true on-screen
- * cells, holds, and the overlay fades while the header's own name settles.
- *
- * Shown once per visitor, skippable by any input. Reduced motion or no WebGL
- * shows nothing extra. The page's arrival animations are paused behind the
- * backdrop by a class on <html> and released at the handoff.
+ * Same length as the profile route's card intro: 3.7 seconds including the
+ * fade. Shown once per visitor, skippable by any input. Reduced motion or
+ * no WebGL shows nothing extra. The page's arrival animations are held by a
+ * class on <html>, set before first paint by app/layout.tsx, and released as
+ * the fade begins.
  */
 
 export const SCAN_STORAGE_KEY = "portrait-scanned";
 const ASSET = "/profile/portrait-scan.png";
 const HTML_CLASS = "scanning";
 
-// Same rule as InstrumentMatrix, so the two canvases share a pixel grid.
+// Same rule as InstrumentMatrix; the cloud runs at half its pitch.
 const CELL_MOBILE = 8;
 const CELL_DESKTOP = 13;
 
-// Beats, in seconds. The order is the argument.
-const SCAN = 1.2;
-const HOLD = 0.8;
-const COLLAPSE = 0.8;
-const NAME_IN = 0.4;
-const NAME_HOLD = 0.5;
-const FADE = 0.4;
+// Beats, in seconds. Scan, turn, fade: 3.7s, the card intro's length.
+const SCAN = 1.3;
+const ROTATE = 1.6;
+const FADE = 0.8;
 const T_SCAN = SCAN;
-const T_HOLD = T_SCAN + HOLD;
-const T_COLLAPSE = T_HOLD + COLLAPSE;
-const T_NAME = T_COLLAPSE + NAME_IN;
-const T_RELEASE = T_NAME + NAME_HOLD;
-const TOTAL = T_RELEASE + FADE;
+const T_ROTATE = T_SCAN + ROTATE;
+const TOTAL = T_ROTATE + FADE;
 
-// Camera and volume.
+// Camera and volume. A single-photo depth map is a relief with no back, so
+// the turn stays inside the angle where that is not exposed.
 const FOV = (35 * Math.PI) / 180;
 const CAM_D = 10;
-const YAW = (14 * Math.PI) / 180; // authored sweep, -YAW to +YAW
+const YAW = (28 * Math.PI) / 180;
 const POINTER_YAW = (6 * Math.PI) / 180;
 const POINTER_PITCH = (3 * Math.PI) / 180;
-const DEPTH_EXTENT = 0.42; // z range as a fraction of the cloud's height
+const DEPTH_EXTENT = 0.9; // z range as a fraction of the cloud's height
 
 // Fit: the cloud's share of the viewport.
 const FIT_H = 0.7;
@@ -62,10 +55,7 @@ const CENTRE_Y = 0.47; // from the top
 const ASSET_WAIT_MS = 2500;
 
 const VERT = `
-attribute vec3  aPos;     // cloud cells, centred; z is depth 0..1 minus 0.5
-attribute vec2  aTarget;  // NDC of the matrix cell this point lands on
-attribute float aLead;    // 1 for the point that survives the 2x2 merge
-attribute float aSeed;    // per-point hash, for staggers
+attribute vec3 aPos;      // cloud cells, centred; z is depth 0..1 minus 0.5
 
 uniform mat4  uProj;
 uniform float uScale;     // world units per cloud cell
@@ -74,30 +64,14 @@ uniform float uYaw;
 uniform float uPitch;
 uniform float uCamD;
 uniform float uHead;      // scan plane, in cloud-cell x
-uniform float uCollapse;  // 0 volume .. 1 flat on the grid
-uniform float uSil;       // 0 .. 1, silhouette handing its cells to the name
-uniform float uNameK;     // 0 .. 1, name resolving
-uniform float uFade;      // 1 .. 0 at the very end
-uniform float uPointPx;   // cloud point size, device px, at the camera plane
-uniform float uCellPx;    // matrix cell size, device px
-uniform float uMode;      // 0 cloud, 1 name
+uniform float uFade;      // 1 .. 0 at the end
+uniform float uPointPx;   // point size, device px, at the camera plane
 
 varying float vV;
 varying float vA;
 
 void main() {
-  if (uMode > 0.5) {
-    // Name cells: already flat, intensity in aPos.z, staggered arrival.
-    float k = smoothstep(aSeed * 0.6, aSeed * 0.6 + 0.4, uNameK);
-    vV = aPos.z * k;
-    vA = uFade;
-    gl_Position = vec4(aTarget, 0.0, 1.0);
-    gl_PointSize = uCellPx * 0.8;
-    return;
-  }
-
-  float k = uCollapse;
-  vec3 p = vec3(aPos.x, aPos.y, aPos.z * uDepth * (1.0 - k)) * uScale;
+  vec3 p = vec3(aPos.x, aPos.y, aPos.z * uDepth) * uScale;
 
   float c = cos(uYaw), s = sin(uYaw);
   vec3 r = vec3(c * p.x + s * p.z, p.y, -s * p.x + c * p.z);
@@ -105,24 +79,21 @@ void main() {
   r = vec3(r.x, cp * r.y - sp * r.z, sp * r.y + cp * r.z);
 
   vec4 clip = uProj * vec4(r, 1.0);
-  vec2 ndc = clip.xy / clip.w;
-  gl_Position = vec4(mix(ndc, aTarget, k), 0.0, 1.0);
+  gl_Position = vec4(clip.xy / clip.w, 0.0, 1.0);
 
-  float size = uPointPx * (uCamD / clip.w);
-  gl_PointSize = mix(size, aLead * uCellPx * 0.8, k);
+  // Near cells are larger and brighter, so the volume reads on a still
+  // frame as well as in motion.
+  float depthN = aPos.z + 0.5;
+  gl_PointSize = uPointPx * (0.7 + 0.6 * depthN) * (uCamD / clip.w);
 
   // The scan plane, in model space, so it wraps over the face on screen.
   float d = uHead - aPos.x;
   float passed = step(0.0, d);
   float flare = exp(-max(d, 0.0) * 0.9);
   float comb = (0.5 + 0.5 * cos(d * 6.2832 / 3.0)) * exp(-max(d, 0.0) / 9.0);
-  float depthN = aPos.z + 0.5;
-  float base = mix(0.28 + 0.32 * depthN, 0.5, k);
+  float base = 0.16 + 0.5 * depthN;
   vV = clamp(base + comb * 0.45 + flare * 1.2, 0.0, 1.0);
-
-  // Non-lead points fade as they converge; the silhouette hands off staggered.
-  float sil = 1.0 - smoothstep(aSeed * 0.6, aSeed * 0.6 + 0.4, uSil);
-  vA = passed * mix(1.0, aLead, k) * sil * uFade;
+  vA = passed * uFade;
 }
 `;
 
@@ -134,44 +105,24 @@ varying float vV;
 varying float vA;
 void main() {
   float a = vV * vA;
-  vec3 ink = mix(uInk, uAccent, smoothstep(0.55, 1.0, vV));
+  vec3 ink = mix(uInk, uAccent, smoothstep(0.6, 1.0, vV));
   gl_FragColor = vec4(ink * a, a);
 }
 `;
-
-const STRIDE = 7; // floats per point
 
 type Asset = { w: number; h: number; mask: Uint8ClampedArray; depth: Uint8ClampedArray };
 
 type Layout = {
   cloud: Float32Array;
-  name: Float32Array | null;
-  gridW: number;
-  gridH: number;
-  centreRow: number;
-  ndcX: (mx: number) => number;
-  ndcY: (my: number) => number;
   count: number;
-  leads: number;
   cols: number;
   rows: number;
-  cellPx: number;
   pointPx: number;
   scale: number;
   depth: number;
   proj: Float32Array;
   captionTop: number; // CSS px
 };
-
-function hash(x: number, y: number) {
-  const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
-  return n - Math.floor(n);
-}
-
-function easeInOut(t: number) {
-  t = Math.min(1, Math.max(0, t));
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-}
 
 function clamp01(t: number) {
   return t < 0 ? 0 : t > 1 ? 1 : t;
@@ -199,7 +150,6 @@ function perspective(fovy: number, aspect: number, near: number, far: number) {
   m[10] = (far + near) * nf;
   m[11] = -1;
   m[14] = 2 * far * near * nf;
-  // translate(0, 0, -CAM_D) on the right: column 3 += column 2 * -CAM_D
   m[12] += m[8] * -CAM_D;
   m[13] += m[9] * -CAM_D;
   m[14] += m[10] * -CAM_D;
@@ -243,34 +193,23 @@ function loadAsset(src: string, timeoutMs: number): Promise<Asset | null> {
   });
 }
 
-/**
- * Lay the cloud out for a viewport. Everything is derived from the matrix's
- * own cell grid so that the collapse lands cell on cell.
- */
+/** Lay the cloud out for a viewport: contain-fit, at half the matrix pitch. */
 function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
   const cellCss = cssW < 640 ? CELL_MOBILE : CELL_DESKTOP;
-  const cellPx = cellCss * dpr;
-  const W = Math.floor(cssW * dpr);
+  const pitchCss = cellCss / 2;
   const H = Math.floor(cssH * dpr);
-  const gridW = Math.max(1, Math.floor(W / cellPx));
-  const gridH = Math.max(1, Math.floor(H / cellPx));
+  const W = Math.floor(cssW * dpr);
 
-  // Contain-fit, in whole matrix cells, so 2x2 blocks stay aligned.
   const aspect = asset.w / asset.h;
   const targetH = Math.min(cssH * FIT_H, (cssW * FIT_W) / aspect);
-  const mrows = Math.max(2, Math.floor(targetH / cellCss));
-  const mcols = Math.max(2, Math.floor(mrows * aspect));
-  const rows = mrows * 2;
-  const cols = mcols * 2;
-  const ox = Math.floor((gridW - mcols) / 2);
-  const oy = Math.floor(gridH * (1 - CENTRE_Y) - mrows / 2);
+  const rows = Math.max(4, Math.floor(targetH / pitchCss));
+  const cols = Math.max(4, Math.floor(rows * aspect));
 
-  const ndcX = (mx: number) => (((mx + 0.5) * cellPx) / W) * 2 - 1;
-  const ndcY = (my: number) => (((my + 0.5) * cellPx) / H) * 2 - 1;
+  // The camera looks at the origin, which is the screen's centre; the cloud
+  // sits a little above it, so its cells are shifted up in cloud units.
+  const lift = ((0.5 - CENTRE_Y) * cssH) / pitchCss;
 
   const pts: number[] = [];
-  const leadTaken = new Uint8Array(mcols * mrows);
-  let leads = 0;
   for (let j = 0; j < rows; j++) {
     const v = 1 - (j + 0.5) / rows; // asset rows run top-down
     const ay = Math.min(asset.h - 1, Math.floor(v * asset.h));
@@ -279,98 +218,31 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
       const ax = Math.min(asset.w - 1, Math.floor(u * asset.w));
       const idx = ay * asset.w + ax;
       if (asset.mask[idx] < 128) continue;
-      const bi = (j >> 1) * mcols + (i >> 1);
-      let lead = 0;
-      if (!leadTaken[bi]) {
-        leadTaken[bi] = 1;
-        lead = 1;
-        leads++;
-      }
-      pts.push(
-        i - cols / 2 + 0.5,
-        j - rows / 2 + 0.5,
-        asset.depth[idx] / 255 - 0.5,
-        ndcX(ox + (i >> 1)),
-        ndcY(oy + (j >> 1)),
-        lead,
-        hash(i, j),
-      );
+      pts.push(i - cols / 2 + 0.5, j - rows / 2 + 0.5 + lift, asset.depth[idx] / 255 - 0.5);
     }
   }
 
-  // World scale so a cloud cell projects to exactly half a matrix cell at
-  // the camera plane. Perspective then does the rest.
-  const scale = (cellPx * CAM_D * Math.tan(FOV / 2)) / H;
+  // World scale so a cloud cell projects to exactly one pitch at the camera
+  // plane: a world height h at distance D covers h * (H/2) / (D tan(fov/2))
+  // device pixels. Perspective then does the rest.
+  const pitchPx = pitchCss * dpr;
+  const scale = (2 * pitchPx * CAM_D * Math.tan(FOV / 2)) / H;
   const proj = perspective(FOV, W / H, 1, 40);
 
-  const cloudBottomCss = (H - oy * cellPx) / dpr;
+  const centreCss = cssH * CENTRE_Y;
+  const cloudBottomCss = centreCss + (rows * pitchCss) / 2;
 
   return {
     cloud: new Float32Array(pts),
-    name: null,
-    gridW,
-    gridH,
-    centreRow: oy + mrows / 2,
-    ndcX,
-    ndcY,
-    count: pts.length / STRIDE,
-    leads,
+    count: pts.length / 3,
     cols,
     rows,
-    cellPx,
-    pointPx: cellPx * 0.5 * 0.8,
+    pointPx: pitchPx * 0.8,
     scale,
     depth: rows * DEPTH_EXTENT,
     proj,
     captionTop: cloudBottomCss + 14,
   };
-}
-
-function rasterName(
-  gridW: number,
-  gridH: number,
-  centreRow: number,
-  ndcX: (mx: number) => number,
-  ndcY: (my: number) => number,
-): Float32Array {
-  const c = document.createElement("canvas");
-  c.width = gridW;
-  c.height = gridH;
-  const ctx = c.getContext("2d", { willReadFrequently: true });
-  if (!ctx) return new Float32Array(0);
-  // next/font sets the variable on <body>, not the root.
-  const family =
-    getComputedStyle(document.body).getPropertyValue("--font-jetbrains").trim() ||
-    "ui-monospace";
-  // A phone grid is about fifty cells wide: one line of eight characters
-  // would be seven cells tall and unreadable, so narrow grids set the name
-  // on two lines at twice the size.
-  const twoLines = gridW < 64;
-  const size = twoLines
-    ? Math.min(14, Math.floor(gridW / 3.2))
-    : Math.min(16, Math.max(7, Math.round(gridW * 0.12)));
-  ctx.fillStyle = "#fff";
-  ctx.textBaseline = "middle";
-  ctx.textAlign = "center";
-  ctx.font = `700 ${size}px ${family}, ui-monospace, monospace`;
-  const cy = gridH - centreRow;
-  if (twoLines) {
-    ctx.fillText("ANH", gridW / 2, cy - size * 0.6);
-    ctx.fillText("TRAN", gridW / 2, cy + size * 0.6);
-  } else {
-    ctx.fillText("ANH TRAN", gridW / 2, cy);
-  }
-  const px = ctx.getImageData(0, 0, gridW, gridH).data;
-  const pts: number[] = [];
-  for (let row = 0; row < gridH; row++) {
-    for (let col = 0; col < gridW; col++) {
-      const a = px[(row * gridW + col) * 4 + 3];
-      if (a <= 24) continue;
-      const my = gridH - 1 - row;
-      pts.push(0, 0, a / 255, ndcX(col), ndcY(my), 1, hash(col, my));
-    }
-  }
-  return new Float32Array(pts);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -384,14 +256,16 @@ export default function PortraitScan() {
   const hintRef = useRef<HTMLParagraphElement>(null);
   const skipRef = useRef<() => void>(() => {});
 
-  // Decide before first paint, so the page's arrival animations are paused
-  // before they have drawn a frame.
+  // Decide before first paint. The gate script in the layout has already
+  // set the class for a first visit; this keeps the two in step.
   useLayoutEffect(() => {
     const seen = localStorage.getItem(SCAN_STORAGE_KEY) === "true";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!seen && !reduced) {
       document.documentElement.classList.add(HTML_CLASS);
       setShow(true);
+    } else {
+      document.documentElement.classList.remove(HTML_CLASS);
     }
     const onReplay = () => setShow(true);
     window.addEventListener("replay-intro", onReplay);
@@ -416,7 +290,6 @@ export default function PortraitScan() {
     let asset: Asset | null = null;
     let lay: Layout | null = null;
     let cloudBuf: WebGLBuffer | null = null;
-    let nameBuf: WebGLBuffer | null = null;
     let start = 0;
     let skipAt = -1;
     let released = false;
@@ -454,10 +327,7 @@ export default function PortraitScan() {
       window.removeEventListener("pointermove", onPointer);
       observer?.disconnect();
       resizeObserver?.disconnect();
-      if (gl) {
-        if (cloudBuf) gl.deleteBuffer(cloudBuf);
-        if (nameBuf) gl.deleteBuffer(nameBuf);
-      }
+      if (gl && cloudBuf) gl.deleteBuffer(cloudBuf);
       setShow(false);
       window.dispatchEvent(new Event("intro-done"));
     };
@@ -465,7 +335,7 @@ export default function PortraitScan() {
     const skip = () => {
       if (skipAt >= 0 || start === 0) return;
       const t = (performance.now() - start) / 1000;
-      if (t >= T_RELEASE) return;
+      if (t >= T_ROTATE) return;
       skipAt = performance.now();
     };
     skipRef.current = skip;
@@ -567,12 +437,7 @@ export default function PortraitScan() {
     }
     g.useProgram(prog);
 
-    const attr = {
-      pos: g.getAttribLocation(prog, "aPos"),
-      target: g.getAttribLocation(prog, "aTarget"),
-      lead: g.getAttribLocation(prog, "aLead"),
-      seed: g.getAttribLocation(prog, "aSeed"),
-    };
+    const aPos = g.getAttribLocation(prog, "aPos");
     const u = (name: string) => g.getUniformLocation(prog, name);
     const uni = {
       proj: u("uProj"),
@@ -582,13 +447,8 @@ export default function PortraitScan() {
       pitch: u("uPitch"),
       camD: u("uCamD"),
       head: u("uHead"),
-      collapse: u("uCollapse"),
-      sil: u("uSil"),
-      nameK: u("uNameK"),
       fade: u("uFade"),
       pointPx: u("uPointPx"),
-      cellPx: u("uCellPx"),
-      mode: u("uMode"),
       ink: u("uInk"),
       accent: u("uAccent"),
     };
@@ -597,19 +457,6 @@ export default function PortraitScan() {
     g.blendFunc(g.ONE, g.ONE_MINUS_SRC_ALPHA);
     g.clearColor(0, 0, 0, 0);
     g.uniform1f(uni.camD, CAM_D);
-
-    const bindLayout = (buf: WebGLBuffer) => {
-      g.bindBuffer(g.ARRAY_BUFFER, buf);
-      const bytes = STRIDE * 4;
-      g.enableVertexAttribArray(attr.pos);
-      g.vertexAttribPointer(attr.pos, 3, g.FLOAT, false, bytes, 0);
-      g.enableVertexAttribArray(attr.target);
-      g.vertexAttribPointer(attr.target, 2, g.FLOAT, false, bytes, 12);
-      g.enableVertexAttribArray(attr.lead);
-      g.vertexAttribPointer(attr.lead, 1, g.FLOAT, false, bytes, 20);
-      g.enableVertexAttribArray(attr.seed);
-      g.vertexAttribPointer(attr.seed, 1, g.FLOAT, false, bytes, 24);
-    };
 
     const readColors = () => {
       g.uniform3fv(uni.ink, readColor("--matrix-ink", [0.51, 0.52, 0.56]));
@@ -635,32 +482,20 @@ export default function PortraitScan() {
 
       lay = layout(asset, cssW, cssH, dpr);
       if (!cloudBuf) cloudBuf = g.createBuffer();
-      if (!nameBuf) nameBuf = g.createBuffer();
       g.bindBuffer(g.ARRAY_BUFFER, cloudBuf);
       g.bufferData(g.ARRAY_BUFFER, lay.cloud, g.STATIC_DRAW);
-      // The name is rasterised on first use, by which time the mono face
-      // has loaded; a resize after that just rasterises it again.
-      nameCount = 0;
+      g.enableVertexAttribArray(aPos);
+      g.vertexAttribPointer(aPos, 3, g.FLOAT, false, 12, 0);
 
       g.uniformMatrix4fv(uni.proj, false, lay.proj);
       g.uniform1f(uni.scale, lay.scale);
       g.uniform1f(uni.depth, lay.depth);
       g.uniform1f(uni.pointPx, lay.pointPx);
-      g.uniform1f(uni.cellPx, lay.cellPx);
 
       caption.style.top = `${lay.captionTop}px`;
     };
 
     resizeObserver = new ResizeObserver(() => rebuild());
-
-    let nameCount = 0;
-    const ensureName = () => {
-      if (!lay || lay.name) return;
-      lay.name = rasterName(lay.gridW, lay.gridH, lay.centreRow, lay.ndcX, lay.ndcY);
-      nameCount = lay.name.length / STRIDE;
-      g.bindBuffer(g.ARRAY_BUFFER, nameBuf!);
-      g.bufferData(g.ARRAY_BUFFER, lay.name, g.STATIC_DRAW);
-    };
 
     /* ---- the timeline ------------------------------------------------- */
 
@@ -676,12 +511,12 @@ export default function PortraitScan() {
       frame = requestAnimationFrame(step);
       if (!lay) return;
 
-      // A skip fast-forwards to the release beat and plays the fade from
-      // there, so every uniform stays a pure function of t.
+      // A skip fast-forwards to the fade and plays it from there, so every
+      // uniform stays a pure function of t.
       let t = (now - start) / 1000;
-      if (skipAt >= 0) t = T_RELEASE + (now - skipAt) / 1000;
+      if (skipAt >= 0) t = T_ROTATE + (now - skipAt) / 1000;
 
-      if (t >= T_RELEASE) release();
+      if (t >= T_ROTATE) release();
       if (t >= TOTAL) {
         finish();
         return;
@@ -691,52 +526,35 @@ export default function PortraitScan() {
       pointer.y += (pointer.ty - pointer.y) * 0.08;
 
       const head = -lay.cols / 2 - 3 + (lay.cols + 6) * clamp01(t / T_SCAN);
-      const collapse = easeInOut((t - T_HOLD) / COLLAPSE);
-      const sil = clamp01((t - T_COLLAPSE) / NAME_IN);
-      const nameK = clamp01((t - T_COLLAPSE) / NAME_IN);
-      const fade = 1 - clamp01((t - T_RELEASE) / FADE);
-      const yaw =
-        (-YAW + 2 * YAW * easeInOut(t / T_COLLAPSE)) * (1 - collapse) +
-        pointer.x * POINTER_YAW * (1 - collapse);
-      const pitch = -pointer.y * POINTER_PITCH * (1 - collapse);
+      // Out to one side, back through front to the other, settle face-on.
+      const turn = Math.sin(2 * Math.PI * clamp01((t - T_SCAN) / ROTATE));
+      const yaw = YAW * turn + pointer.x * POINTER_YAW;
+      const pitch = -pointer.y * POINTER_PITCH;
+      const fadeP = clamp01((t - T_ROTATE) / FADE);
+      const fade = 1 - fadeP;
 
-      // The page arrives behind the collapse; the matrix returns with the fade.
-      backdrop.style.opacity = String(1 - collapse);
-      matrix.amp = 1 - fade;
+      // The page arrives first, under the volume; the matrix returns with it.
+      backdrop.style.opacity = String(1 - clamp01(fadeP / 0.6));
+      matrix.amp = fadeP;
       root.style.opacity = String(fade);
 
       g.uniform1f(uni.head, head);
-      g.uniform1f(uni.collapse, collapse);
-      g.uniform1f(uni.sil, sil);
-      g.uniform1f(uni.nameK, nameK);
       g.uniform1f(uni.fade, fade);
       g.uniform1f(uni.yaw, yaw);
       g.uniform1f(uni.pitch, pitch);
 
       g.clear(g.COLOR_BUFFER_BIT);
-      g.uniform1f(uni.mode, 0);
-      bindLayout(cloudBuf!);
       g.drawArrays(g.POINTS, 0, lay.count);
-      if (t >= T_HOLD) ensureName();
-      if (nameK > 0 && nameCount) {
-        g.uniform1f(uni.mode, 1);
-        bindLayout(nameBuf!);
-        g.drawArrays(g.POINTS, 0, nameCount);
-      }
 
       driveAudio(t);
 
       if (t < T_SCAN) {
         const pct = Math.round(clamp01(t / T_SCAN) * 100);
         setCaption(`SCAN 01 · DEPTH · ${lay.count.toLocaleString()} CELLS · ${pct}%`);
-      } else if (t < T_HOLD) {
-        setCaption(`SCAN 01 · DEPTH · ${lay.count.toLocaleString()} CELLS · COMPLETE`);
-      } else if (t < T_COLLAPSE) {
-        setCaption(`READOUT · ${lay.leads.toLocaleString()} CELLS · ${Math.round(collapse * 100)}%`);
       } else {
-        setCaption("");
+        setCaption(`SCAN 01 · DEPTH · ${lay.count.toLocaleString()} CELLS · COMPLETE`);
       }
-      hint.style.opacity = t < T_HOLD ? "1" : "0";
+      hint.style.opacity = t < T_ROTATE ? "1" : "0";
     };
 
     window.addEventListener("pointerdown", skip, { passive: true });

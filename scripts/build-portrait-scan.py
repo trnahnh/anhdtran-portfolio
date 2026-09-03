@@ -89,7 +89,7 @@ def blur(a: np.ndarray, radius: float) -> np.ndarray:
 # How much of the final depth is local relief (nose, brow, collar) versus the
 # model's global ordering (chest nearer than head). The global term alone
 # spends the whole range on torso-versus-head and the face reads flat.
-RELIEF_MIX = 0.6
+RELIEF_MIX = 0.35
 RELIEF_RADIUS = 0.07  # of the crop width
 
 
