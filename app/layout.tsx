@@ -5,7 +5,8 @@ import GradientBlobs from "@/components/GradientBlobs";
 import InstrumentMatrix from "@/components/matrix/InstrumentMatrix";
 import MatrixScore from "@/components/matrix/MatrixScore";
 import MotionGate from "@/components/MotionGate";
-import LoadBar from "@/components/LoadBar";
+// LoadBar (the scroll progress column) is unmounted at the user's request;
+// the component stays in components/ per the nothing-deleted rule.
 import PageTransition from "@/components/PageTransition";
 import ScrollToTop from "@/components/ScrollToTop";
 import PagePeel from "@/components/PagePeel";
@@ -91,7 +92,6 @@ export default function RootLayout({
             component that owns the scan releases it, or never lets it run. */}
         <script dangerouslySetInnerHTML={{ __html: SCAN_GATE }} />
         <MotionGate />
-        <LoadBar />
         <SmoothScroll />
         <GradientBlobs />
         <InstrumentMatrix />
