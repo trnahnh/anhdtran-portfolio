@@ -628,6 +628,14 @@ html.motion-off *::after {
   }
 }
 
+/* While the portrait scan owns the viewport the page's arrival is held, so
+   the name settles as the overlay leaves rather than under it. The class is
+   only ever set for a first visit; returning visitors never see it. */
+html.scanning .fade-in-up,
+html.scanning .name-settle {
+  animation-play-state: paused;
+}
+
 /* The scene is pinned to the large viewport height, not the dynamic one.
    `dvh` and `innerHeight` both move as a mobile URL bar collapses, which
    would resize a WebGL drawing buffer mid-scroll. `lvh` holds still. */

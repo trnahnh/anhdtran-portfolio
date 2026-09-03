@@ -6,7 +6,7 @@ import { Play } from "lucide-react";
 import { useMounted } from "@/hooks/useMounted";
 
 const STORAGE_KEYS: Record<string, string> = {
-  "/": "intro-home-seen",
+  "/": "portrait-scanned",
   "/profile": "intro-profile-seen",
 };
 
