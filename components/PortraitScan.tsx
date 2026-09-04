@@ -135,6 +135,8 @@ const STRIDE = 6; // floats per point: position, normal
 type Layout = {
   cloud: Float32Array;
   count: number;
+  /** Cells at or left of each cloud column, so the count can follow the line. */
+  seenByCol: Uint32Array;
   cols: number;
   rows: number;
   pointPx: number;
@@ -265,6 +267,13 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
   const zAt = (i: number, j: number, fallback: number) =>
     i >= 0 && j >= 0 && i < cols && j < rows && inside[j * cols + i] ? z[j * cols + i] : fallback;
 
+  const seenByCol = new Uint32Array(cols + 1);
+  for (let i = 0; i < cols; i++) {
+    let n = 0;
+    for (let j = 0; j < rows; j++) n += inside[j * cols + i];
+    seenByCol[i + 1] = seenByCol[i] + n;
+  }
+
   const pts: number[] = [];
   for (let j = 0; j < rows; j++) {
     for (let i = 0; i < cols; i++) {
@@ -299,13 +308,14 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
   return {
     cloud: new Float32Array(pts),
     count: pts.length / STRIDE,
+    seenByCol,
     cols,
     rows,
     pointPx: pitchPx * 0.8,
     scale,
     depth: rows * DEPTH_EXTENT,
     proj,
-    captionTop: cloudBottomCss + 14,
+    captionTop: cloudBottomCss + 30,
   };
 }
 
@@ -317,6 +327,8 @@ export default function PortraitScan() {
   const backdropRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const captionRef = useRef<HTMLParagraphElement>(null);
+  const line1Ref = useRef<HTMLSpanElement>(null);
+  const line2Ref = useRef<HTMLSpanElement>(null);
   const hintRef = useRef<HTMLParagraphElement>(null);
   const skipRef = useRef<() => void>(() => {});
 
@@ -345,8 +357,10 @@ export default function PortraitScan() {
     const root = rootRef.current;
     const backdrop = backdropRef.current;
     const caption = captionRef.current;
+    const line1 = line1Ref.current;
+    const line2 = line2Ref.current;
     const hint = hintRef.current;
-    if (!canvas || !root || !backdrop || !caption || !hint) return;
+    if (!canvas || !root || !backdrop || !caption || !line1 || !line2 || !hint) return;
 
     let disposed = false;
     let frame = 0;
@@ -576,10 +590,12 @@ export default function PortraitScan() {
     /* ---- the timeline ------------------------------------------------- */
 
     let lastCaption = "";
-    const setCaption = (s: string) => {
-      if (s === lastCaption) return;
-      lastCaption = s;
-      caption.textContent = s;
+    const setCaption = (a: string, b: string) => {
+      const key = a + "|" + b;
+      if (key === lastCaption) return;
+      lastCaption = key;
+      line1.textContent = a;
+      line2.textContent = b;
     };
 
     // Frame time as a rolling average, and a caption that only re-renders
@@ -632,15 +648,18 @@ export default function PortraitScan() {
 
       if (lastFrame) frameMs += (now - lastFrame - frameMs) * 0.1;
       lastFrame = now;
-      if (now - captionAt > 120) {
+      if (now - captionAt > 100) {
         captionAt = now;
-        const cells = lay.count.toLocaleString();
+        // The count follows the line: cells it has passed so far.
+        const col = Math.max(0, Math.min(lay.cols, Math.floor(head + lay.cols / 2 + 0.5)));
+        const seen = t < T_SCAN ? lay.seenByCol[col] : lay.count;
         const ms = frameMs.toFixed(1);
         const deg = ((yaw * 180) / Math.PI).toFixed(0).replace("-0", "0");
         const stage =
           t < T_SCAN ? `${Math.round(clamp01(t / T_SCAN) * 100)}%` : "COMPLETE";
         setCaption(
-          `SCAN 01 · ${cells} CELLS · ${ms} MS · YAW ${Number(deg) >= 0 ? "+" : ""}${deg}° · Z ${DEPTH_EXTENT.toFixed(2)} · ${stage}`,
+          `SCAN 01 · ${seen.toLocaleString()} CELLS · ${stage}`,
+          `${ms} MS · YAW ${Number(deg) >= 0 ? "+" : ""}${deg}° · Z ${DEPTH_EXTENT.toFixed(2)}`,
         );
       }
       hint.style.opacity = t < T_ROTATE ? "1" : "0";
@@ -694,9 +713,14 @@ export default function PortraitScan() {
       />
       <p
         ref={captionRef}
-        className="absolute inset-x-0 text-center font-mono text-[11px] tracking-[0.18em] text-muted-foreground"
+        className="absolute inset-x-0 px-4 text-center font-mono text-[11px] leading-5 tracking-[0.18em] text-muted-foreground"
         aria-live="off"
-      />
+      >
+        <span ref={line1Ref} />
+        <span className="hidden sm:inline"> · </span>
+        <br className="sm:hidden" />
+        <span ref={line2Ref} />
+      </p>
       <p
         ref={hintRef}
         className="scan-hint absolute inset-x-0 text-center text-sm text-muted-foreground/70 transition-opacity duration-300"
