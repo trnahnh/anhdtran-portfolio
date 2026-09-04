@@ -1,10 +1,44 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import {
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useSyncExternalStore,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useMounted } from "@/hooks/useMounted";
 
 const HIDDEN_ROUTES = ["/terminal", "/space"];
+
+// Whether an intro currently owns the viewport. Every intro announces
+// itself with intro-shown / intro-done; the home scan also sets
+// html.scanning before first paint, which covers the frame between this
+// mounting and that event arriving.
+let introFlag: boolean | null = null;
+function getIntroActive() {
+  if (introFlag === null) {
+    introFlag = document.documentElement.classList.contains("scanning");
+  }
+  return introFlag;
+}
+function subscribeIntro(onChange: () => void) {
+  const shown = () => {
+    introFlag = true;
+    onChange();
+  };
+  const done = () => {
+    introFlag = false;
+    onChange();
+  };
+  window.addEventListener("intro-shown", shown);
+  window.addEventListener("intro-done", done);
+  return () => {
+    window.removeEventListener("intro-shown", shown);
+    window.removeEventListener("intro-done", done);
+  };
+}
 
 export default function PagePeel() {
   const pathname = usePathname();
@@ -16,6 +50,14 @@ export default function PagePeel() {
   const [viewportSize, setViewportSize] = useState({ w: 1920, h: 1080 });
   const [isDark, setIsDark] = useState(true);
   const [prevPathname, setPrevPathname] = useState(pathname);
+  // Every intro announces itself with intro-shown / intro-done. The home
+  // scan also sets html.scanning before first paint, which covers the frame
+  // between this mounting and that event arriving.
+  const introActive = useSyncExternalStore(
+    subscribeIntro,
+    getIntroActive,
+    () => false,
+  );
 
   // Drag state kept in refs to avoid re-renders on every pointer move
   const draggingRef = useRef(false);
@@ -233,7 +275,7 @@ export default function PagePeel() {
   }, [mounted, expanding, idleSize, hoverExtra, hovered, applyPeelSize]);
 
   if (HIDDEN_ROUTES.includes(pathname)) return null;
-  if (!mounted) return null;
+  if (!mounted || introActive) return null;
 
   const s = hovered ? idleSize + hoverExtra : idleSize;
   const sh = s * 1.15;

@@ -92,6 +92,10 @@ def blur(a: np.ndarray, radius: float) -> np.ndarray:
 RELIEF_MIX = 0.35
 RELIEF_RADIUS = 0.07  # of the crop width
 
+# The face window inside the crop, as fractions (x0, x1, y0, y1). Keep in
+# step with FACE_CROP in components/PortraitScan.tsx.
+FACE = (0.31, 0.75, 0.0, 0.52)
+
 
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -152,6 +156,38 @@ def main() -> int:
     # background does not bleed into the relief at the silhouette edge.
     d_fill = np.where(inside, d, d[inside].mean())
     local = d_fill - blur(d_fill, RELIEF_RADIUS * (x1 - x0))
+
+    # A second depth pass on the face alone. On the whole crop the face
+    # gets a third of the model's input; on its own it gets all of it, so
+    # eye sockets, lips and nostrils come through. Its relief is blended
+    # into the face window with a feathered edge. The window matches
+    # FACE_CROP in components/PortraitScan.tsx.
+    fw, fh = x1 - x0, y1 - y0
+    fx0, fx1 = int(FACE[0] * fw), int(FACE[1] * fw)
+    fy0, fy1 = int(FACE[2] * fh), int(FACE[3] * fh)
+    face_full = full.crop(
+        (
+            int((x0 + fx0) * k),
+            int((y0 + fy0) * k),
+            int((x0 + fx1) * k),
+            int((y0 + fy1) * k),
+        )
+    ).resize((fx1 - fx0, fy1 - fy0), Image.LANCZOS)
+    print("face depth…")
+    df = depth(face_full, Path(args.model))
+    ins_f = inside[fy0:fy1, fx0:fx1]
+    df_fill = np.where(ins_f, df, df[ins_f].mean() if ins_f.any() else df.mean())
+    local_f = df_fill - blur(df_fill, RELIEF_RADIUS * (fx1 - fx0))
+    # Match the face relief's scale to the crop relief's scale inside the
+    # window, then feather it in.
+    ref = local[fy0:fy1, fx0:fx1]
+    sf = (np.std(ref[ins_f]) / (np.std(local_f[ins_f]) + 1e-6)) if ins_f.any() else 1.0
+    yy, xx = np.mgrid[0 : fy1 - fy0, 0 : fx1 - fx0]
+    ex = np.minimum(xx, (fx1 - fx0 - 1) - xx) / max(1, (fx1 - fx0) * 0.12)
+    ey = np.minimum(yy, (fy1 - fy0 - 1) - yy) / max(1, (fy1 - fy0) * 0.12)
+    feather = np.clip(np.minimum(ex, ey), 0, 1)
+    local[fy0:fy1, fx0:fx1] = ref * (1 - feather) + (local_f * sf) * feather
+
     dn = np.clip((1 - RELIEF_MIX) * norm(d) + RELIEF_MIX * norm(local), 0, 1)
     dn[~(a > 0.02)] = 0
 

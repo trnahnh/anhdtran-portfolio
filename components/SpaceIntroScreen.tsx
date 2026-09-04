@@ -9,6 +9,9 @@ const INTERVAL = 90; // ms per character — slightly slower for drama
 export default function SpaceIntroScreen() {
   const [mounted, setMounted] = useState(false);
   const [show, setShow] = useState(true);
+  useEffect(() => {
+    window.dispatchEvent(new Event(show ? "intro-shown" : "intro-done"));
+  }, [show]);
   const [fading, setFading] = useState(false);
   const [line1, setLine1] = useState(0);
   const [line2, setLine2] = useState<number | null>(null);

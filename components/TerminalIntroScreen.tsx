@@ -21,6 +21,9 @@ interface Props {
 export default function TerminalIntroScreen({ onComplete }: Props) {
   const mounted = useMounted();
   const [show, setShow] = useState(true);
+  useEffect(() => {
+    window.dispatchEvent(new Event(show ? "intro-shown" : "intro-done"));
+  }, [show]);
   const [fading, setFading] = useState(false);
   const [visibleLines, setVisibleLines] = useState(0);
   const [progress, setProgress] = useState(0);
