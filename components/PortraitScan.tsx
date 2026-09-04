@@ -562,7 +562,7 @@ export default function PortraitScan() {
     }
 
     const readColors = () => {
-      g.uniform3fv(uni.ink, readColor("--matrix-ink", [0.51, 0.52, 0.56]));
+      g.uniform3fv(uni.ink, readColor("--scan-ink", [0.6, 0.62, 0.65]));
       g.uniform3fv(uni.accent, readColor("--matrix-accent", [0.95, 0.33, 0.37]));
     };
     readColors();

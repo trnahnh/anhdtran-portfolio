@@ -114,6 +114,9 @@
      shader parses the computed value and cannot resolve a var() chain. */
   --matrix-ink: #d0d2d7;
   --matrix-accent: #c8202e;
+  /* The intro's point cloud. Darker than the field's ink: the figure is
+     the subject for four seconds, the field is texture. */
+  --scan-ink: #55585f;
   /* How much of the reading column's fog hides the field beneath it. Light
      mode needs more: pale cells under dark type read as a pattern. */
   --fog: 92%;
@@ -163,6 +166,7 @@
 
   --matrix-ink: #83868f;
   --matrix-accent: #f2555f;
+  --scan-ink: #9a9da6;
   --fog: 82%;
 
   --rule: rgba(255, 255, 255, 0.1);
