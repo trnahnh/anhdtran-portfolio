@@ -229,9 +229,25 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
   const cropH = (crop.y1 - crop.y0) * asset.h;
   const aspect = cropW / cropH;
   const fitW = face ? FACE_FIT_W : FIT_W;
-  const targetH = Math.min(cssH * FIT_H, (cssW * fitW) / aspect);
+
+  // Perspective enlarges the nearest cells: with the volume this deep the
+  // chest projects about a quarter larger than the cloud's nominal box.
+  // Fit the projected size, not the box, or the figure runs into the
+  // caption on a short viewport. The magnification depends on the size,
+  // so it is solved by a couple of rounds.
+  const fovK = 2 * CAM_D * Math.tan(FOV / 2); // world units per full viewport height
+  const magFor = (hCss: number) => {
+    const zHalf = (DEPTH_EXTENT * (hCss / cssH) * fovK) / 2;
+    return CAM_D / (CAM_D - zHalf);
+  };
+  let targetH = Math.min(cssH * FIT_H, (cssW * fitW) / aspect);
+  for (let k = 0; k < 3; k++) {
+    const m = magFor(targetH);
+    targetH = Math.min((cssH * FIT_H) / m, (cssW * fitW) / aspect / m);
+  }
   const rows = Math.max(4, Math.floor(targetH / pitchCss));
   const cols = Math.max(4, Math.floor(rows * aspect));
+  const mag = magFor(rows * pitchCss);
 
   // The camera looks at the origin, which is the screen's centre; the cloud
   // sits a little above it, so its cells are shifted up in cloud units.
@@ -303,8 +319,10 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
   const scale = (2 * pitchPx * CAM_D * Math.tan(FOV / 2)) / H;
   const proj = perspective(FOV, W / H, 1, 40);
 
+  // The caption sits under the projected bottom edge, with room for the
+  // few degrees of pointer pitch on top.
   const centreCss = cssH * CENTRE_Y;
-  const cloudBottomCss = centreCss + (rows * pitchCss) / 2;
+  const cloudBottomCss = centreCss + ((rows * pitchCss) / 2) * mag + cssH * 0.015;
 
   return {
     cloud: new Float32Array(pts),
