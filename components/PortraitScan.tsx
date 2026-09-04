@@ -16,8 +16,10 @@ import { matrix } from "@/components/matrix/matrixStore";
  * A pointer adds parallax where one exists. The page arrives behind the
  * volume as it fades, still in depth.
  *
- * About four and a half seconds including the fade. Shown once per visitor,
- * skippable by any input. Reduced motion or no WebGL shows nothing extra. The
+ * About four and a half seconds including the fade. Shown once per browser
+ * session: the first time the site is opened in a tab, not again on a reload
+ * or a route change, and again in a new tab or after the browser is closed.
+ * Skippable by any input. Reduced motion or no WebGL shows nothing extra. The
  * page's arrival animations are held by a class on <html>, set before first
  * paint by app/layout.tsx, and released as the fade begins.
  *
@@ -28,6 +30,9 @@ import { matrix } from "@/components/matrix/matrixStore";
  */
 
 export const SCAN_STORAGE_KEY = "portrait-scanned";
+// The once-per-visitor flag the scan used until 2026-09-04. Cleared on sight
+// so a browser that carries it still gets the scan under the session rule.
+const LEGACY_STORAGE_KEY = "portrait-scanned";
 const ASSET = "/profile/portrait-scan.png";
 const HTML_CLASS = "scanning";
 
@@ -363,13 +368,16 @@ export default function PortraitScan() {
   // Decide before first paint. The gate script in the layout has already
   // set the class for a first visit; this keeps the two in step.
   useLayoutEffect(() => {
-    const seen = localStorage.getItem(SCAN_STORAGE_KEY) === "true";
+    try {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    } catch {}
+    const seen = sessionStorage.getItem(SCAN_STORAGE_KEY) === "true";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!seen && !reduced) {
       document.documentElement.classList.add(HTML_CLASS);
       setShow(true);
     } else {
-      if (!seen) skipped("prefers-reduced-motion is set");
+      skipped(seen ? "already seen this session" : "prefers-reduced-motion is set");
       document.documentElement.classList.remove(HTML_CLASS);
     }
     const onReplay = () => setShow(true);
@@ -424,7 +432,7 @@ export default function PortraitScan() {
       cancelAnimationFrame(frame);
       release();
       // Only a scan that ran counts as seen; see the note at the top.
-      if (start > 0) localStorage.setItem(SCAN_STORAGE_KEY, "true");
+      if (start > 0) sessionStorage.setItem(SCAN_STORAGE_KEY, "true");
       matrix.locked = false;
       matrix.amp = 1;
       matrix.dirty = true;

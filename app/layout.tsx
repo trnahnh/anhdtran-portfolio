@@ -84,7 +84,7 @@ export const metadata: Metadata = {
 
 // Mirrors the gate in components/PortraitScan.tsx; keep the two in step.
 const SCAN_GATE =
-  "try{if(location.pathname==='/'&&localStorage.getItem('portrait-scanned')!=='true'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('scanning')}catch(e){}";
+  "try{if(location.pathname==='/'&&sessionStorage.getItem('portrait-scanned')!=='true'&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('scanning')}catch(e){}";
 
 export default function RootLayout({
   children,

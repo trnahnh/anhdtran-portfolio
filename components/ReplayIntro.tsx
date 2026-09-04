@@ -5,10 +5,16 @@ import { usePathname } from "next/navigation";
 import { Play } from "lucide-react";
 import { useMounted } from "@/hooks/useMounted";
 
-const STORAGE_KEYS: Record<string, string> = {
-  "/": "portrait-scanned",
-  "/profile": "intro-profile-seen",
+// The scan on / is once per session; the profile card is once per browser.
+const STORAGE_KEYS: Record<string, { store: "session" | "local"; key: string }> = {
+  "/": { store: "session", key: "portrait-scanned" },
+  "/profile": { store: "local", key: "intro-profile-seen" },
 };
+
+function readFlag(entry: { store: "session" | "local"; key: string }) {
+  const store = entry.store === "session" ? sessionStorage : localStorage;
+  return store.getItem(entry.key) === "true";
+}
 
 const subscribeNoop = () => () => {};
 
@@ -32,7 +38,7 @@ export default function ReplayIntro() {
 
   const hasSeen = useSyncExternalStore(
     subscribeNoop,
-    () => (storageKey ? localStorage.getItem(storageKey) === "true" : false),
+    () => (storageKey ? readFlag(storageKey) : false),
     () => false,
   );
 

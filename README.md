@@ -27,7 +27,7 @@ personal portfolio built with Next.js. nothing crazy, just a solar system, real-
 
 ## features
 
-**`/`** — the instrument. a WebGL point cloud of my portrait gets scanned into existence by a line sweeping left to right, turns so you can see it's actually 3D (depth estimated from the one photo, lit from the upper left), then fades into the page. mono, in the same ink and accent as the cell matrix underneath, which is a live instrument panel that draws a different readout per section as you scroll. plays once, any input skips it, scanner tone synthesised in Web Audio. the cutout and depth map are built offline by `scripts/build-portrait-scan.py` (rembg + Depth Anything V2), so the page only ever loads a 50 KB PNG.
+**`/`** — the instrument. a WebGL point cloud of my portrait gets scanned into existence by a line sweeping left to right, turns so you can see it's actually 3D (depth estimated from the one photo, lit from the upper left), then fades into the page. mono, in the same ink and accent as the cell matrix underneath, which is a live instrument panel that draws a different readout per section as you scroll. plays once per browser session, any input skips it, scanner tone synthesised in Web Audio. the cutout and depth map are built offline by `scripts/build-portrait-scan.py` (rembg + Depth Anything V2), so the page only ever loads a 50 KB PNG.
 
 **`/profile`** — where it starts. 3D spinning matte black card intro (Amex Centurion / Chase Sapphire vibes) with gold borders, EMV chip, contactless icon, gradient blobs, tap-to-pay SFX, and fluid `clamp()`-based responsive scaling. dark mode only, click to skip. 2D solar system background, bio, contact.
 
