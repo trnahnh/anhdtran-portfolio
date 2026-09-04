@@ -16,10 +16,15 @@ import { matrix } from "@/components/matrix/matrixStore";
  * A pointer adds parallax where one exists. The page arrives behind the
  * volume as it fades, still in depth.
  *
- * About four and a half seconds including the fade. Shown once per visitor, skippable by any input. Reduced motion or
- * no WebGL shows nothing extra. The page's arrival animations are held by a
- * class on <html>, set before first paint by app/layout.tsx, and released as
- * the fade begins.
+ * About four and a half seconds including the fade. Shown once per visitor,
+ * skippable by any input. Reduced motion or no WebGL shows nothing extra. The
+ * page's arrival animations are held by a class on <html>, set before first
+ * paint by app/layout.tsx, and released as the fade begins.
+ *
+ * The visitor is only marked as having seen it once the scan has actually
+ * started. A bail-out before that (no WebGL context, the asset not arriving
+ * in time) leaves the flag alone so the next visit gets another try, and
+ * says why on the console so a machine that never shows it can be diagnosed.
  */
 
 export const SCAN_STORAGE_KEY = "portrait-scanned";
@@ -146,6 +151,10 @@ type Layout = {
   proj: Float32Array;
   captionTop: number; // CSS px
 };
+
+function skipped(reason: string) {
+  console.info(`[portrait scan] skipped: ${reason}`);
+}
 
 function clamp01(t: number) {
   return t < 0 ? 0 : t > 1 ? 1 : t;
@@ -360,6 +369,7 @@ export default function PortraitScan() {
       document.documentElement.classList.add(HTML_CLASS);
       setShow(true);
     } else {
+      if (!seen) skipped("prefers-reduced-motion is set");
       document.documentElement.classList.remove(HTML_CLASS);
     }
     const onReplay = () => setShow(true);
@@ -413,7 +423,8 @@ export default function PortraitScan() {
       disposed = true;
       cancelAnimationFrame(frame);
       release();
-      localStorage.setItem(SCAN_STORAGE_KEY, "true");
+      // Only a scan that ran counts as seen; see the note at the top.
+      if (start > 0) localStorage.setItem(SCAN_STORAGE_KEY, "true");
       matrix.locked = false;
       matrix.amp = 1;
       matrix.dirty = true;
@@ -513,6 +524,7 @@ export default function PortraitScan() {
       powerPreference: "high-performance",
     });
     if (!gl) {
+      skipped("no WebGL context (graphics acceleration off, or the GPU is blocklisted)");
       finish();
       return;
     }
@@ -529,6 +541,7 @@ export default function PortraitScan() {
     g.attachShader(prog, compile(g.FRAGMENT_SHADER, FRAG));
     g.linkProgram(prog);
     if (!g.getProgramParameter(prog, g.LINK_STATUS)) {
+      skipped("shader failed to link: " + (g.getProgramInfoLog(prog) || "").trim());
       finish();
       return;
     }
@@ -692,6 +705,7 @@ export default function PortraitScan() {
     loadAsset(ASSET, ASSET_WAIT_MS).then((a) => {
       if (disposed) return;
       if (!a) {
+        skipped(`asset ${ASSET} did not load within ${ASSET_WAIT_MS} ms`);
         finish();
         return;
       }
