@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { matrix } from "@/components/matrix/matrixStore";
 
 /**
@@ -696,7 +697,11 @@ export default function PortraitScan() {
 
   if (!show) return null;
 
-  return (
+  // Rendered at the end of <body>, not inside the page tree. The page
+  // transition wrapper keeps a stacking context after its fade, so anything
+  // fixed at body level would paint over an overlay nested inside it, and
+  // on iPhone an ancestor's geometry could shape what "fixed" means.
+  return createPortal(
     <div
       ref={rootRef}
       role="button"
@@ -727,6 +732,7 @@ export default function PortraitScan() {
       >
         Tap anywhere to skip.
       </p>
-    </div>
+    </div>,
+    document.body,
   );
 }

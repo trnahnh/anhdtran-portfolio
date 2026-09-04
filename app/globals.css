@@ -642,7 +642,11 @@ html.scanning .name-settle {
    The skip hint is placed against the small viewport so it stays visible
    while the bar is expanded. */
 .scan-root {
+  /* Both: the box reaches the bottom of whatever the browser calls the
+     viewport, and never less than the large viewport. */
+  bottom: 0;
   height: 100lvh;
+  min-height: 100%;
 }
 .scan-hint {
   top: calc(100svh - 2.75rem);
