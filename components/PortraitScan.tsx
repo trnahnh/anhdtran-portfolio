@@ -51,6 +51,15 @@ const FIT_H = 0.7;
 const FIT_W = 0.86;
 const CENTRE_Y = 0.47; // from the top
 
+// Phones in portrait get the face, not the bust: the whole figure on a
+// 390px screen leaves the face about 120px wide. The crop is a window on
+// the same asset, measured off its mask: hair at 3% of the height, the
+// neck's narrowest point at 47%, the collar from 50%. Everything 640px and
+// wider (iPads, a phone held sideways) keeps the bust.
+const FACE_MAX_WIDTH = 640;
+const FACE_CROP = { x0: 0.31, x1: 0.75, y0: 0.0, y1: 0.52 };
+const FACE_FIT_W = 0.8;
+
 const ASSET_WAIT_MS = 2500;
 
 // Fixed to the camera, upper left and in front, so the lit side changes as
@@ -211,8 +220,13 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
   const H = Math.floor(cssH * dpr);
   const W = Math.floor(cssW * dpr);
 
-  const aspect = asset.w / asset.h;
-  const targetH = Math.min(cssH * FIT_H, (cssW * FIT_W) / aspect);
+  const face = cssW < FACE_MAX_WIDTH;
+  const crop = face ? FACE_CROP : { x0: 0, x1: 1, y0: 0, y1: 1 };
+  const cropW = (crop.x1 - crop.x0) * asset.w;
+  const cropH = (crop.y1 - crop.y0) * asset.h;
+  const aspect = cropW / cropH;
+  const fitW = face ? FACE_FIT_W : FIT_W;
+  const targetH = Math.min(cssH * FIT_H, (cssW * fitW) / aspect);
   const rows = Math.max(4, Math.floor(targetH / pitchCss));
   const cols = Math.max(4, Math.floor(rows * aspect));
 
@@ -225,17 +239,28 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
   const zExtent = rows * DEPTH_EXTENT; // cloud cells, matching uDepth
   const inside = new Uint8Array(cols * rows);
   const z = new Float32Array(cols * rows);
+  let zMin = Infinity;
+  let zMax = -Infinity;
   for (let j = 0; j < rows; j++) {
     const v = 1 - (j + 0.5) / rows; // asset rows run top-down
-    const ay = Math.min(asset.h - 1, Math.floor(v * asset.h));
+    const ay = Math.min(asset.h - 1, Math.floor((crop.y0 + v * (crop.y1 - crop.y0)) * asset.h));
     for (let i = 0; i < cols; i++) {
       const u = (i + 0.5) / cols;
-      const ax = Math.min(asset.w - 1, Math.floor(u * asset.w));
+      const ax = Math.min(asset.w - 1, Math.floor((crop.x0 + u * (crop.x1 - crop.x0)) * asset.w));
       const idx = ay * asset.w + ax;
       if (asset.mask[idx] < 128) continue;
       inside[j * cols + i] = 1;
-      z[j * cols + i] = asset.depth[idx] / 255 - 0.5;
+      const d = asset.depth[idx] / 255;
+      z[j * cols + i] = d;
+      if (d < zMin) zMin = d;
+      if (d > zMax) zMax = d;
     }
+  }
+  // Re-stretch depth over what is actually in the crop. The asset's range
+  // runs chest-to-hair, so a face alone would sit in its far half.
+  const zSpan = zMax - zMin > 0.05 ? zMax - zMin : 1;
+  for (let k = 0; k < z.length; k++) {
+    if (inside[k]) z[k] = (z[k] - zMin) / zSpan - 0.5;
   }
   const zAt = (i: number, j: number, fallback: number) =>
     i >= 0 && j >= 0 && i < cols && j < rows && inside[j * cols + i] ? z[j * cols + i] : fallback;
