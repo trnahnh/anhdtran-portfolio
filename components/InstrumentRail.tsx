@@ -21,6 +21,25 @@ import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 const DOB = new Date(2006, 4, 11).getTime();
 const MS_PER_YEAR = 365.2425 * 24 * 60 * 60 * 1000;
 
+// Two clocks: where the work happens and where home is. Each carries its
+// offset from UTC, read live so Cincinnati's daylight shift is honest.
+const CLOCKS = [
+  { tz: "America/New_York" },
+  { tz: "Asia/Ho_Chi_Minh" },
+] as const;
+
+function offsetOf(tz: string, now: number) {
+  const part = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    timeZoneName: "longOffset",
+  })
+    .formatToParts(now)
+    .find((p) => p.type === "timeZoneName");
+  // "GMT-04:00" → "UTC−04:00"; a bare "GMT" is UTC itself.
+  const raw = part?.value ?? "GMT";
+  return raw === "GMT" ? "UTC+00:00" : raw.replace("GMT", "UTC").replace("-", "−");
+}
+
 function Channel({
   label,
   children,
@@ -90,6 +109,9 @@ function NowPlayingLink({ track }: { track: Track }) {
 export default function InstrumentRail() {
   const ageRef = useRef<HTMLParagraphElement>(null);
   const clockRef = useRef<HTMLParagraphElement>(null);
+  const clockTzRef = useRef<HTMLParagraphElement>(null);
+  const hanoiRef = useRef<HTMLParagraphElement>(null);
+  const hanoiTzRef = useRef<HTMLParagraphElement>(null);
   const sessionRef = useRef<HTMLParagraphElement>(null);
 
   const [track, setTrack] = useState<Track>({ isPlaying: false });
@@ -110,15 +132,30 @@ export default function InstrumentRail() {
         ageRef.current.textContent = ((now - DOB) / MS_PER_YEAR).toFixed(9);
       }
 
-      if (clockRef.current) {
-        clockRef.current.textContent = new Intl.DateTimeFormat("en-US", {
-          timeZone: "America/New_York",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        }).format(now);
-      }
+      const clocks: [
+        React.RefObject<HTMLParagraphElement | null>,
+        React.RefObject<HTMLParagraphElement | null>,
+      ][] = [
+        [clockRef, clockTzRef],
+        [hanoiRef, hanoiTzRef],
+      ];
+      clocks.forEach(([timeRef, tzRef], i) => {
+        const tz = CLOCKS[i].tz;
+        if (timeRef.current) {
+          timeRef.current.textContent = new Intl.DateTimeFormat("en-US", {
+            timeZone: tz,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          }).format(now);
+        }
+        // The offset only moves twice a year; write it when it changes.
+        if (tzRef.current) {
+          const off = offsetOf(tz, now);
+          if (tzRef.current.textContent !== off) tzRef.current.textContent = off;
+        }
+      });
 
       if (sessionRef.current) {
         const s = Math.floor((performance.now() - mounted) / 1000);
@@ -163,6 +200,21 @@ export default function InstrumentRail() {
           <p
             ref={clockRef}
             className="font-mono text-[13px] tabular-nums tracking-tight text-readout-strong"
+          />
+          <p
+            ref={clockTzRef}
+            className="font-mono text-[10px] tabular-nums tracking-[0.14em] text-readout"
+          />
+        </Channel>
+
+        <Channel label="Hanoi" hidden>
+          <p
+            ref={hanoiRef}
+            className="font-mono text-[13px] tabular-nums tracking-tight text-readout-strong"
+          />
+          <p
+            ref={hanoiTzRef}
+            className="font-mono text-[10px] tabular-nums tracking-[0.14em] text-readout"
           />
         </Channel>
 

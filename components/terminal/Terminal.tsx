@@ -5,26 +5,38 @@ import { useTerminal } from "./useTerminal";
 import TerminalOutput from "./TerminalOutput";
 import TerminalInput from "./TerminalInput";
 
+function readClock(now: Date, tz: string) {
+  const date = now.toLocaleDateString("en-US", {
+    timeZone: tz,
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+  const clock = now.toLocaleTimeString("en-US", {
+    timeZone: tz,
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  const off =
+    new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longOffset" })
+      .formatToParts(now)
+      .find((p) => p.type === "timeZoneName")?.value ?? "GMT";
+  const utc = off === "GMT" ? "UTC+00:00" : off.replace("GMT", "UTC").replace("-", "−");
+  return `${date}, ${clock} · ${utc}`;
+}
+
 const CincinnatiClock = memo(function CincinnatiClock() {
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState<{ cinci: string; hanoi: string } | null>(null);
 
   useEffect(() => {
     const update = () => {
       const now = new Date();
-      const date = now.toLocaleDateString("en-US", {
-        timeZone: "America/New_York",
-        weekday: "short",
-        month: "short",
-        day: "numeric",
+      setTime({
+        cinci: readClock(now, "America/New_York"),
+        hanoi: readClock(now, "Asia/Ho_Chi_Minh"),
       });
-      const clock = now.toLocaleTimeString("en-US", {
-        timeZone: "America/New_York",
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-      });
-      setTime(`${date}, ${clock}`);
     };
     update();
     const id = setInterval(update, 1000);
@@ -34,9 +46,10 @@ const CincinnatiClock = memo(function CincinnatiClock() {
   if (!time) return null;
 
   return (
-    <p className="mb-3 text-black/60 dark:text-white/40 text-[10px] sm:text-[11px] tracking-widest font-mono select-none transition-colors duration-300">
-      Cincinnati, OH — {time}
-    </p>
+    <div className="mb-3 text-black/60 dark:text-white/40 text-[10px] sm:text-[11px] tracking-widest font-mono select-none transition-colors duration-300 text-center">
+      <p>Cincinnati, OH — {time.cinci}</p>
+      <p>Hanoi, VN — {time.hanoi}</p>
+    </div>
   );
 });
 
