@@ -32,6 +32,7 @@ uniform float     uTime;
 uniform vec3      uInk;
 uniform vec3      uAccent;
 uniform float     uAmp;
+uniform vec4      uBox;   // readout window in cells: x, y, w, h (0 w = none)
 uniform sampler2D uData;
 
 float hash(vec2 p) {
@@ -57,17 +58,20 @@ void main() {
   float band  = smoothstep(0.00, 0.04, sweep) * smoothstep(0.34, 0.06, sweep);
   float idle  = band * step(0.62, hash(cell));
 
-  // Authored content, written by the score.
-  //
-  // Normalised by the on-screen grid, NOT by the texture's own dimensions.
-  // Sampling by texture size crops the readout to however many cells happen
-  // to fit: a phone showed the left 23% of every chart and a 4K display
-  // smeared the last column across half the screen. The field is meant to
-  // span whatever it is drawn on.
-  float data = texture2D(uData, (cell + 0.5) / grid).r;
+  // Authored content, written by the score, confined to a window in the
+  // margin beside the reading column so a chart is a chart and never a
+  // pattern under the words. The window keeps the buffer's aspect, so the
+  // readout is drawn at a size that fits, not stretched across the screen.
+  // No window (a phone, a narrow laptop) means no chart: the idle sweep is
+  // the whole field there.
+  vec2  bc   = (cell - uBox.xy + 0.5) / max(uBox.zw, vec2(1.0));
+  float inBox = step(0.0, bc.x) * step(bc.x, 1.0) * step(0.0, bc.y) * step(bc.y, 1.0)
+              * step(0.5, uBox.z);
+  float data = texture2D(uData, bc).r * inBox;
 
   float v   = clamp(idle * 0.55 + data, 0.0, 1.0);
-  vec3  ink = mix(uInk, uAccent, smoothstep(0.55, 1.0, v));
+  // Red is a reading, not decoration: only a chart's peaks, never the sweep.
+  vec3  ink = mix(uInk, uAccent, smoothstep(0.85, 1.0, data));
 
   gl_FragColor = vec4(ink, v * uAmp * inset);
 }
@@ -179,6 +183,7 @@ export default function InstrumentMatrix() {
         ink: gl.getUniformLocation(program, "uInk"),
         accent: gl.getUniformLocation(program, "uAccent"),
         amp: gl.getUniformLocation(program, "uAmp"),
+        box: gl.getUniformLocation(program, "uBox"),
         data: gl.getUniformLocation(program, "uData"),
       };
 
@@ -214,7 +219,26 @@ export default function InstrumentMatrix() {
         canvas.height = h;
         gl.viewport(0, 0, w, h);
         gl.uniform2f(u.res, w, h);
-        gl.uniform1f(u.cell, (cssW < 640 ? CELL_MOBILE : CELL_DESKTOP) * dpr);
+        const cellCss = cssW < 640 ? CELL_MOBILE : CELL_DESKTOP;
+        gl.uniform1f(u.cell, cellCss * dpr);
+
+        // The readout window: the right margin beside PageShell's column
+        // (672 / 896 at lg / 1152 at xl, centred), at the buffer's 16:9,
+        // centred vertically. Under a dozen cells of margin there is no
+        // room for a chart and the window is switched off.
+        const colMax = cssW >= 1280 ? 1152 : cssW >= 1024 ? 896 : 672;
+        const colRight = (cssW + Math.min(colMax, cssW)) / 2;
+        const bx0 = Math.ceil((colRight + 16) / cellCss);
+        const bx1 = Math.floor((cssW - 16) / cellCss);
+        const bw = bx1 - bx0;
+        if (bw >= 12) {
+          const bh = Math.round((bw * DATA_H) / DATA_W);
+          const gridH = Math.floor(cssH / cellCss);
+          const by0 = Math.round(gridH / 2 - bh / 2);
+          gl.uniform4f(u.box, bx0, by0, bw, bh);
+        } else {
+          gl.uniform4f(u.box, 0, 0, 0, 0);
+        }
       };
       resize();
 

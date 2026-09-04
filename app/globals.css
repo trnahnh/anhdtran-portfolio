@@ -112,8 +112,11 @@
 
   /* The matrix reads these directly. Literal hex, no indirection — the
      shader parses the computed value and cannot resolve a var() chain. */
-  --matrix-ink: #b4b6bd;
+  --matrix-ink: #d0d2d7;
   --matrix-accent: #c8202e;
+  /* How much of the reading column's fog hides the field beneath it. Light
+     mode needs more: pale cells under dark type read as a pattern. */
+  --fog: 92%;
 
   /* Instrument surfaces. */
   --rule: var(--knurl); /* hairline dividers */
@@ -160,6 +163,7 @@
 
   --matrix-ink: #83868f;
   --matrix-accent: #f2555f;
+  --fog: 82%;
 
   --rule: rgba(255, 255, 255, 0.1);
   --readout: var(--bar);
@@ -591,8 +595,8 @@ html.motion-off *::after {
    ========================================================================== */
 
 .fog {
-  background-color: color-mix(in srgb, var(--background) 82%, transparent);
-  box-shadow: 0 0 70px 70px color-mix(in srgb, var(--background) 82%, transparent);
+  background-color: color-mix(in srgb, var(--background) var(--fog), transparent);
+  box-shadow: 0 0 70px 70px color-mix(in srgb, var(--background) var(--fog), transparent);
 }
 
 /* ==========================================================================

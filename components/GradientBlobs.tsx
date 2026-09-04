@@ -1,6 +1,15 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+
+/**
+ * Colour washes for the profile route only, where they sit with the fluid
+ * cursor. Everywhere else the matrix is the whole background; three drifting
+ * blobs on top of it read as clutter, not atmosphere.
+ */
 export default function GradientBlobs() {
+  const pathname = usePathname();
+  if (pathname !== "/profile") return null;
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
       <div
