@@ -440,15 +440,65 @@ html.theme-transitioning * {
   }
 }
 
-.rotating-text-container {
-  display: inline-block;
+/* The tagline. A grid with every line stacked in the one cell: the ghosts
+   set the width, the live lines cross on top. Both directions use the
+   arrival curve so the swap reads as one motion, not a cut. */
+.tagline {
+  display: inline-grid;
+  grid-template-areas: "line";
   height: 1.5em;
   overflow: hidden;
   vertical-align: bottom;
+  text-align: left;
 }
-
-.rotating-text {
-  display: inline-block;
+.tagline > * {
+  grid-area: line;
+  white-space: nowrap;
+}
+.tagline-ghost {
+  visibility: hidden;
+}
+.tagline-line {
+  will-change: transform, opacity;
+}
+.tagline-in {
+  animation: taglineIn 700ms var(--ease-out-expo) both;
+}
+.tagline-out {
+  animation: taglineOut 700ms var(--ease-out-expo) both;
+}
+@keyframes taglineIn {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+@keyframes taglineOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.6em);
+    filter: blur(2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tagline-in,
+  .tagline-out {
+    animation: none;
+  }
+  .tagline-out {
+    display: none;
+  }
 }
 
 /* Selection styling */

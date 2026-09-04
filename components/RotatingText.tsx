@@ -8,44 +8,57 @@ interface RotatingTextProps {
   interval?: number;
 }
 
+/**
+ * The tagline, one line at a time.
+ *
+ * The old version slid a line out and snapped the next one into place, and
+ * the paragraph re-flowed to each line's width. Now the outgoing and the
+ * incoming line cross on screen — one drifting up as it fades, the other
+ * arriving from below on the doctrine's arrival curve — inside a box that
+ * is already as wide as the widest line, so nothing around it moves.
+ *
+ * Doctrine rule 3: this loop is never finished, so it is allowed to run —
+ * but it stops the moment it scrolls out of the viewport.
+ */
 export default function RotatingText({
   texts,
-  interval = 3000,
+  interval = 4000,
 }: RotatingTextProps) {
   const [containerRef, inView] = useInView<HTMLSpanElement>({ threshold: 0 });
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [leaving, setLeaving] = useState<number | null>(null);
 
   useEffect(() => {
-    // Doctrine rule 3: this loop is never finished, so it is allowed to run —
-    // but it stops the moment it scrolls out of the viewport.
     if (!inView) return;
-
-    let timeoutId: ReturnType<typeof setTimeout>;
+    let settle: ReturnType<typeof setTimeout>;
     const timer = setInterval(() => {
-      setIsAnimating(true);
-      timeoutId = setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % texts.length);
-        setIsAnimating(false);
-      }, 300);
+      setCurrent((prev) => {
+        setLeaving(prev);
+        return (prev + 1) % texts.length;
+      });
+      settle = setTimeout(() => setLeaving(null), 700);
     }, interval);
-
     return () => {
       clearInterval(timer);
-      clearTimeout(timeoutId);
+      clearTimeout(settle);
     };
   }, [texts.length, interval, inView]);
 
   return (
-    <span ref={containerRef} className="rotating-text-container">
-      <span
-        className={`rotating-text inline-block motion-token ${
-          isAnimating
-            ? "-translate-y-full opacity-0"
-            : "translate-y-0 opacity-100"
-        }`}
-      >
-        {texts[currentIndex]}
+    <span ref={containerRef} className="tagline">
+      {/* Every line, invisible, so the box is as wide as the widest. */}
+      {texts.map((t) => (
+        <span key={t} className="tagline-ghost" aria-hidden="true">
+          {t}
+        </span>
+      ))}
+      {leaving !== null && (
+        <span key={`out-${leaving}`} className="tagline-line tagline-out" aria-hidden="true">
+          {texts[leaving]}
+        </span>
+      )}
+      <span key={`in-${current}`} className={`tagline-line ${leaving !== null ? "tagline-in" : ""}`}>
+        {texts[current]}
       </span>
     </span>
   );

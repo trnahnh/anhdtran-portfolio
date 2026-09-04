@@ -69,7 +69,16 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://anhdtrn.com",
     siteName: "Anh Tran",
-    images: [{ url: "/profile/portrait.png" }],
+    // A 70 KB 1200x630 JPEG cut from the portrait. The 13 MB source used to
+    // be the preview image, and most link unfurlers give up on it.
+    images: [{ url: "/metadata/og.jpg", width: 1200, height: 630, alt: "Anh Tran" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anh Tran",
+    description:
+      "Full-stack Developer and Powerlifting Enthusiast. Explore my space now.",
+    images: ["/metadata/og.jpg"],
   },
 };
 
