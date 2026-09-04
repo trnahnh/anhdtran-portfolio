@@ -18,7 +18,8 @@ import { matrix } from "@/components/matrix/matrixStore";
  *
  * About four and a half seconds including the fade. Shown once per browser
  * session: the first time the site is opened in a tab, not again on a reload
- * or a route change, and again in a new tab or after the browser is closed.
+ * or a route change, and again in a new tab, after the browser is closed, or
+ * on a hard reload (Ctrl+Shift+R), which reads as asking for the site fresh.
  * Skippable by any input. Reduced motion or no WebGL shows nothing extra. The
  * page's arrival animations are held by a class on <html>, set before first
  * paint by app/layout.tsx, and released as the fade begins.
@@ -156,6 +157,20 @@ type Layout = {
   proj: Float32Array;
   captionTop: number; // CSS px
 };
+
+/**
+ * A hard reload fetches the document in full; a normal reload revalidates it
+ * and the navigation entry reports it as delivered from cache. Both are
+ * readable before first paint, so the gate script in app/layout.tsx applies
+ * the same test. A browser without deliveryType treats every reload as a
+ * normal one. A fresh deployment also fetches in full, and plays once.
+ */
+function isHardReload() {
+  const nav = performance.getEntriesByType("navigation")[0] as
+    | (PerformanceNavigationTiming & { deliveryType?: string })
+    | undefined;
+  return !!nav && nav.type === "reload" && "deliveryType" in nav && nav.deliveryType !== "cache";
+}
 
 function skipped(reason: string) {
   console.info(`[portrait scan] skipped: ${reason}`);
@@ -371,7 +386,7 @@ export default function PortraitScan() {
     try {
       localStorage.removeItem(LEGACY_STORAGE_KEY);
     } catch {}
-    const seen = sessionStorage.getItem(SCAN_STORAGE_KEY) === "true";
+    const seen = sessionStorage.getItem(SCAN_STORAGE_KEY) === "true" && !isHardReload();
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!seen && !reduced) {
       document.documentElement.classList.add(HTML_CLASS);
