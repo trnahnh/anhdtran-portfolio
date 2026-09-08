@@ -15,6 +15,34 @@ export interface Project {
 
 export const projects: Project[] = [
   {
+    name: "kiln",
+    readout: "timeline",
+    metric: {
+      value: "-45.5%",
+      label: "cluster spend · 0 SLA violations",
+      measured: "2026-09",
+    },
+    description:
+      "Internal developer platform with a cost-aware Kubernetes scheduler that cuts cluster spend 45.5% with zero SLA violations, plus self-service provisioning, sequential-test canary rollbacks, chaos experiments, and a tamper-evident audit log.",
+    link: "https://kiln-idp.vercel.app/",
+    techStack: [
+      "Go",
+      "Java (Spring Boot)",
+      "Kubernetes",
+      "kubebuilder/controller-runtime",
+      "Custom Scheduler",
+      "Crossplane v2",
+      "ArgoCD",
+      "Kyverno",
+      "Istio",
+      "Kafka",
+      "PostgreSQL",
+      "OpenTelemetry",
+      "Jaeger",
+    ],
+    status: "current",
+  },
+  {
     name: "commma",
     readout: "heatmap",
     description:
