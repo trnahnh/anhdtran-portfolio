@@ -31,7 +31,7 @@ export const experiences: Experience[] = [
     company: "KatanaID",
     companyUrl: "https://katanaid.com",
     description: "AI Branding Toolkit",
-    status: "current",
+    status: "past",
   },
   {
     title: "Technical Assistant Intern",
