@@ -115,12 +115,12 @@ export const projects: Project[] = [
     name: "Draft-Thinker",
     readout: "decay",
     metric: {
-      value: "-91.6%",
+      value: "-82.9%",
       label: "inference cost",
       measured: "2026-03",
     },
     description:
-      "Cost-aware LLM gateway that cuts inference costs by 91.6% through entropy-based draft-and-verify routing with speculative execution and semantic caching.",
+      "Cost-aware LLM gateway that cuts inference costs by 82.9% while holding 98.1% accuracy through entropy-based draft-and-verify routing with speculative execution and semantic caching.",
     link: "https://draft-thinker.vercel.app/",
     techStack: [
       "Go",
@@ -139,11 +139,11 @@ export const projects: Project[] = [
     readout: "histogram",
     metric: {
       value: "4.7M",
-      label: "orders/sec · sub-microsecond p50",
+      label: "orders/sec · 500ns p99",
       measured: "2026-02",
     },
     description:
-      "LMAX-inspired high-frequency order matching engine benchmarked at sub-microsecond latency and 4.7M simulated orders/sec.",
+      "LMAX-inspired high-frequency order matching engine benchmarked at 500ns p99 latency and 4.7M simulated orders/sec.",
     link: "https://ferrox-engine.vercel.app/",
     techStack: [
       "Rust",

@@ -142,7 +142,7 @@ export function drawHistogram(buf: Uint8Array, t: number): void {
   }
 }
 
-/** Draft-Thinker: cost collapsing 91.6%, with the baseline it collapsed from. */
+/** Draft-Thinker: cost collapsing 82.9%, with the baseline it collapsed from. */
 export function drawDecay(buf: Uint8Array, t: number): void {
   const baseline = Math.round(DATA_H * 0.82);
   for (let x = 0; x < DATA_W; x += 2) put(buf, x, baseline, 60);

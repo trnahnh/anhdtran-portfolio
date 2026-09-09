@@ -10,10 +10,10 @@ export const experiences: Experience[] = [
   {
     title: "AI Researcher",
     company: "University of Cincinnati Department of Computer Science",
-    status: "future",
+    status: "current",
   },
   {
-    title: "Founder, CTO",
+    title: "Founder & Lead Engineer",
     company: "Commma",
     companyUrl: "https://commma.dev",
     description: "Pace your Code",
@@ -24,7 +24,7 @@ export const experiences: Experience[] = [
     company: "Caphne",
     companyUrl: "https://caphne.co",
     description: "Study Buddies Matchmaking",
-    status: "current",
+    status: "past",
   },
   {
     title: "Founding Engineer",
