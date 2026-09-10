@@ -5,15 +5,19 @@ import { usePathname } from "next/navigation";
 import { Play } from "lucide-react";
 import { useMounted } from "@/hooks/useMounted";
 
-// The scan on / is once per session; the profile card is once per browser.
-const STORAGE_KEYS: Record<string, { store: "session" | "local"; key: string }> = {
-  "/": { store: "session", key: "portrait-scanned" },
-  "/profile": { store: "local", key: "intro-profile-seen" },
-};
+// The scan on / plays once per session, and the button is always there
+// underneath it: the overlay covers the header while the scan runs, and once
+// it is gone (finished, skipped for lack of WebGL, or the asset was slow)
+// the visitor can ask for it again. The profile card is once per browser and
+// its button shows only after the card has been seen.
+const PROFILE_KEY = "intro-profile-seen";
 
-function readFlag(entry: { store: "session" | "local"; key: string }) {
-  const store = entry.store === "session" ? sessionStorage : localStorage;
-  return store.getItem(entry.key) === "true";
+function readProfileFlag() {
+  try {
+    return localStorage.getItem(PROFILE_KEY) === "true";
+  } catch {
+    return false;
+  }
 }
 
 const subscribeNoop = () => () => {};
@@ -33,14 +37,9 @@ function getDarkModeSnapshot() {
 
 export default function ReplayIntro() {
   const pathname = usePathname();
-  const storageKey = STORAGE_KEYS[pathname];
   const mounted = useMounted();
 
-  const hasSeen = useSyncExternalStore(
-    subscribeNoop,
-    () => (storageKey ? readFlag(storageKey) : false),
-    () => false,
-  );
+  const profileSeen = useSyncExternalStore(subscribeNoop, readProfileFlag, () => false);
 
   const isDark = useSyncExternalStore(
     subscribeDarkMode,
@@ -48,8 +47,12 @@ export default function ReplayIntro() {
     () => true,
   );
 
-  if (!mounted || !storageKey || !hasSeen) return null;
-  if (pathname === "/profile" && !isDark) return null;
+  if (!mounted) return null;
+  if (pathname === "/profile") {
+    if (!profileSeen || !isDark) return null;
+  } else if (pathname !== "/") {
+    return null;
+  }
 
   return (
     <button

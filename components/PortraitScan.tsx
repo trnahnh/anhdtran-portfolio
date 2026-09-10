@@ -17,9 +17,9 @@ import { matrix } from "@/components/matrix/matrixStore";
  * volume as it fades, still in depth.
  *
  * About four and a half seconds including the fade. Shown once per browser
- * session: the first time the site is opened in a tab, not again on a reload
- * or a route change, and again in a new tab, after the browser is closed, or
- * on a hard reload (Ctrl+Shift+R), which reads as asking for the site fresh.
+ * session: the first time the site is opened in a tab, not again on a route
+ * change back to /, and again in a new tab, after the browser is closed, or
+ * on any reload, which reads as asking for the site fresh.
  * Skippable by any input. Reduced motion or no WebGL shows nothing extra. The
  * page's arrival animations are held by a class on <html>, set before first
  * paint by app/layout.tsx, and released as the fade begins.
@@ -72,7 +72,9 @@ const FACE_MAX_WIDTH = 640;
 const FACE_CROP = { x0: 0.31, x1: 0.75, y0: 0.0, y1: 0.52 };
 const FACE_FIT_W = 0.8;
 
-const ASSET_WAIT_MS = 2500;
+// Long enough for a cold mobile connection to bring in a 54 KB image. Past
+// this the network is the problem and the page should just show.
+const ASSET_WAIT_MS = 6000;
 
 // Fixed to the camera, upper left and in front, so the lit side changes as
 // the volume turns.
@@ -159,18 +161,24 @@ type Layout = {
 };
 
 /**
- * A hard reload fetches the document in full; a normal reload revalidates it
- * and the navigation entry reports it as delivered from cache. Both are
- * readable before first paint, so the gate script in app/layout.tsx applies
- * the same test. A browser without deliveryType treats every reload as a
- * normal one. A fresh deployment also fetches in full, and plays once.
+ * Any reload plays the scan again. Browsers give no dependable way to tell a
+ * hard reload from a normal one: Chrome reports a revalidated 304 as
+ * delivered from cache, Safari and Firefox report nothing, so the previous
+ * hard-only test replayed in some browsers and never in others. The
+ * navigation entry's type is readable before first paint, so the gate script
+ * in app/layout.tsx applies the same test.
  */
-function isHardReload() {
+function isReload() {
   const nav = performance.getEntriesByType("navigation")[0] as
-    | (PerformanceNavigationTiming & { deliveryType?: string })
+    | PerformanceNavigationTiming
     | undefined;
-  return !!nav && nav.type === "reload" && "deliveryType" in nav && nav.deliveryType !== "cache";
+  return !!nav && nav.type === "reload";
 }
+
+// The navigation entry belongs to the document, so it still says "reload"
+// when the component remounts on a route change back to /. A reload buys one
+// scan; once that scan has run the allowance is spent for the document.
+let reloadSpent = false;
 
 function skipped(reason: string) {
   console.info(`[portrait scan] skipped: ${reason}`);
@@ -386,7 +394,7 @@ export default function PortraitScan() {
     try {
       localStorage.removeItem(LEGACY_STORAGE_KEY);
     } catch {}
-    const seen = sessionStorage.getItem(SCAN_STORAGE_KEY) === "true" && !isHardReload();
+    const seen = sessionStorage.getItem(SCAN_STORAGE_KEY) === "true" && (reloadSpent || !isReload());
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (!seen && !reduced) {
       document.documentElement.classList.add(HTML_CLASS);
@@ -447,7 +455,10 @@ export default function PortraitScan() {
       cancelAnimationFrame(frame);
       release();
       // Only a scan that ran counts as seen; see the note at the top.
-      if (start > 0) sessionStorage.setItem(SCAN_STORAGE_KEY, "true");
+      if (start > 0) {
+        sessionStorage.setItem(SCAN_STORAGE_KEY, "true");
+        reloadSpent = true;
+      }
       matrix.locked = false;
       matrix.amp = 1;
       matrix.dirty = true;

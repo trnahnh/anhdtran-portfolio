@@ -688,7 +688,8 @@ html.motion-off *::after {
 
 /* While the portrait scan owns the viewport the page's arrival is held, so
    the name settles as the overlay leaves rather than under it. The class is
-   only ever set for a first visit; returning visitors never see it. */
+   set only when the scan will play: a first visit in the session, a reload,
+   or a replay. */
 html.scanning .fade-in-up,
 html.scanning .name-settle {
   animation-play-state: paused;
