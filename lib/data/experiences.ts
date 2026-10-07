@@ -46,6 +46,7 @@ export const experiences: Experience[] = [
   {
     title: "Fitness Floor Coordinator",
     company: "UC Campus Recreation Center",
+    description: "CPR/AED & First Aid certified",
     status: "current",
   },
   {

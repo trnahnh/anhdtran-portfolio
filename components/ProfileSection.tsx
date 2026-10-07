@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { HeartPulse } from "lucide-react";
+import UnderlineLink from "./UnderlineLink";
 import NowPlaying from "./NowPlaying";
 import SpotifyEmbed from "./SpotifyEmbed";
 import QuotesSection from "./QuotesSection";
@@ -95,6 +97,22 @@ export default function ProfileSection() {
             </ScrollReveal>
           ))}
         </div>
+
+        <ScrollReveal delay={400}>
+          <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <HeartPulse className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+            <span className="text-center">
+              CPR/AED &amp; First Aid certified &middot;{" "}
+              <UnderlineLink
+                href="/certifications/RedCrossCertificate_AD-20261007-5315113.PDF"
+                external
+                className="whitespace-nowrap"
+              >
+                American Red Cross
+              </UnderlineLink>
+            </span>
+          </p>
+        </ScrollReveal>
       </section>
 
       <QuotesSection />
