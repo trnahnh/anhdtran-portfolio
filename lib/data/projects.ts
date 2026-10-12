@@ -18,12 +18,12 @@ export const projects: Project[] = [
     name: "kiln",
     readout: "timeline",
     metric: {
-      value: "-45.5%",
-      label: "cluster spend · 0 SLA violations",
-      measured: "2026-09",
+      value: "57,012",
+      label: "replayed placements · 0 latency-class on spot",
+      measured: "2026-10",
     },
     description:
-      "Internal developer platform with a cost-aware Kubernetes scheduler that cuts cluster spend 45.5% with zero SLA violations, plus self-service provisioning, sequential-test canary rollbacks, chaos experiments, and a tamper-evident audit log.",
+      "Internal developer platform with a cost-aware Kubernetes scheduler that keeps every latency-class workload off spot capacity, validated across 57,012 replayed placements on a 12,477-machine cluster trace, plus 11s p50 self-service provisioning, sequential-test canary rollbacks, chaos experiments, and a tamper-evident audit log.",
     link: "https://kiln-idp.vercel.app/",
     techStack: [
       "Go",
@@ -120,7 +120,7 @@ export const projects: Project[] = [
       measured: "2026-03",
     },
     description:
-      "Cost-aware LLM gateway that cuts inference costs by 82.9% while holding 98.1% accuracy through entropy-based draft-and-verify routing with speculative execution and semantic caching.",
+      "Cost-aware LLM gateway that cuts inference costs by 82.9% while holding 98.1% accuracy through entropy-based draft-and-verify routing and semantic caching.",
     link: "https://draft-thinker.vercel.app/",
     techStack: [
       "Go",
@@ -139,14 +139,15 @@ export const projects: Project[] = [
     readout: "histogram",
     metric: {
       value: "4.7M",
-      label: "orders/sec · 500ns p99",
+      label: "simulated orders/sec · 67-85% faster cancels",
       measured: "2026-02",
     },
     description:
-      "LMAX-inspired high-frequency order matching engine benchmarked at 500ns p99 latency and 4.7M simulated orders/sec.",
+      "LMAX-inspired high-frequency order matching engine sustaining 4.7M simulated orders/sec, with its lock-free ring buffer ported to C++20 to measure the cost of memory orderings and bounds checks.",
     link: "https://ferrox-engine.vercel.app/",
     techStack: [
       "Rust",
+      "C++20",
       "Lock-Free SPSC Ring Buffer",
       "UDP Multicast",
       "Memory-Mapped I/O",
