@@ -44,7 +44,7 @@ export default function Header() {
               <UnderlineLink href="/profile">Profile</UnderlineLink>
             )}
             <UnderlineLink
-              href="/resume/Resume_Anh_Tran.pdf?v=2026-10"
+              href="/resume/Resume_Anh_Tran.pdf?v=2026-10-12"
               external
               showIcon={false}
             >
