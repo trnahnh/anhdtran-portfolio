@@ -14,6 +14,10 @@ import TerminalShortcut from "@/components/TerminalShortcut";
 import SmoothScroll from "@/components/SmoothScroll";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
+import { GoogleAnalytics } from "@next/third-parties/google";
+
+// Inlined at build time, so the tag is left out of any build made without it.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 // Display. Variable width axis (wdth 62–125) — the one aesthetic risk, spent
 // once on the name during calibration and nowhere else.
@@ -112,6 +116,7 @@ export default function RootLayout({
         <SpeedInsights />
         <Analytics />
       </body>
+      {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
     </html>
   );
 }
