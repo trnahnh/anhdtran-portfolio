@@ -1,7 +1,7 @@
 """
 Build the derived asset for the portrait scan intro.
 
-Reads public/profile/portrait.png, cuts the person out, estimates depth, crops
+Reads public/profile/portrait.webp, cuts the person out, estimates depth, crops
 to head and shoulders, and writes public/profile/portrait-scan.png: a small
 RGB image where
 
@@ -30,7 +30,7 @@ import numpy as np
 from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "public" / "profile" / "portrait.png"
+SRC = ROOT / "public" / "profile" / "portrait.webp"
 OUT = ROOT / "public" / "profile" / "portrait-scan.png"
 
 WORK = 1024        # processing resolution; the source is 4000x4000

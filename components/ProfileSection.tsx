@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { HeartPulse } from "lucide-react";
+import { Dumbbell, HeartPulse } from "lucide-react";
 import UnderlineLink from "./UnderlineLink";
 import NowPlaying from "./NowPlaying";
 import SpotifyEmbed from "./SpotifyEmbed";
@@ -12,26 +12,43 @@ import TiltCard from "./TiltCard";
 
 const photos = [
   {
-    src: "/profile/portrait.png",
-    alt: "Portrait",
+    src: "/profile/portrait.webp",
+    alt: "Anh in a navy quarter-zip, smiling on a city street",
     caption: "The face of the operation.",
   },
   {
-    src: "/profile/halloween.png",
-    alt: "Halloween",
+    src: "/profile/halloween.webp",
+    alt: "Anh in a Halloween costume, arms crossed, outside a party lit in red",
     caption: "Full-stack by day, full-scare by night.",
   },
   {
-    src: "/profile/tennis.png",
-    alt: "Tennis",
+    src: "/profile/tennis.webp",
+    alt: "Anh mid-swing on a tennis court at night",
     caption: "Rallying between deployments.",
   },
   {
-    src: "/profile/gym.png",
-    alt: "Gym",
+    src: "/profile/gym.webp",
+    alt: "Anh and a friend taking a mirror selfie at the gym",
     caption: "PRs on the platform and the platform only.",
   },
 ];
+
+// The lifting the gym photo hints at, made specific.
+const clubs = [
+  { name: "UC Powerlifting Team", href: "https://www.instagram.com/ucpowerlifting" },
+  { name: "UC Bodybuilding Club", href: "https://www.instagram.com/uc_bodybuilding_club" },
+];
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <h2 className="text-lg font-medium">
+      <span className="text-muted-foreground mr-2" aria-hidden="true">
+        &#9670;
+      </span>
+      {children}
+    </h2>
+  );
+}
 
 function PhotoCard({
   src,
@@ -81,9 +98,9 @@ export default function ProfileSection() {
   return (
     <>
       <section className="space-y-6">
-        <h2 className="fade-in-up fade-in-up-delay-1 text-sm font-medium uppercase tracking-widest text-muted-foreground">
-          Beyond the Code
-        </h2>
+        <div className="fade-in-up fade-in-up-delay-1">
+          <SectionHeading>Beyond the Code</SectionHeading>
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           {photos.map(({ src, alt, caption }, i) => (
@@ -99,28 +116,39 @@ export default function ProfileSection() {
         </div>
 
         <ScrollReveal delay={400}>
-          <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <HeartPulse className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-            <span className="text-center">
-              CPR/AED &amp; First Aid certified &middot;{" "}
-              <UnderlineLink
-                href="/certifications/RedCrossCertificate_AD-20261007-5315113.PDF"
-                external
-                className="whitespace-nowrap"
-              >
-                American Red Cross
-              </UnderlineLink>
-            </span>
-          </p>
+          <ul className="space-y-1.5 text-xs text-muted-foreground">
+            {clubs.map(({ name, href }) => (
+              <li key={name} className="flex items-center justify-center gap-2">
+                <Dumbbell className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                <span className="text-center">
+                  Active member &middot;{" "}
+                  <UnderlineLink href={href} external className="whitespace-nowrap">
+                    {name}
+                  </UnderlineLink>
+                </span>
+              </li>
+            ))}
+            <li className="flex items-center justify-center gap-2">
+              <HeartPulse className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span className="text-center">
+                CPR/AED &amp; First Aid certified &middot;{" "}
+                <UnderlineLink
+                  href="/certifications/RedCrossCertificate_AD-20261007-5315113.PDF"
+                  external
+                  className="whitespace-nowrap"
+                >
+                  American Red Cross
+                </UnderlineLink>
+              </span>
+            </li>
+          </ul>
         </ScrollReveal>
       </section>
 
       <QuotesSection />
 
       <section className="fade-in-up fade-in-up-delay-3 space-y-6">
-        <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
-          Currently Playing
-        </h2>
+        <SectionHeading>Currently Playing</SectionHeading>
         <NowPlaying />
         <SpotifyEmbed />
       </section>

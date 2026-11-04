@@ -4,10 +4,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { prime, ready } from "@/lib/sfx";
+import { markProfileIntroSeen, profileIntroSeen } from "@/lib/profileIntro";
 
 const SFX = "/sfx/tap-to-pay.mp3";
-
-const STORAGE_KEY = "intro-profile-seen";
 
 let hasPlayedThisLoad = false;
 
@@ -85,13 +84,13 @@ export default function CardIntroScreen() {
 
   const startIntro = useCallback(() => {
     hasPlayedThisLoad = true;
+    markProfileIntroSeen();
     clearAll();
     setFading(false);
     setShow(true);
 
     if (reducedMotion) {
       playTapSound();
-      localStorage.setItem(STORAGE_KEY, "true");
       fadeTimeoutRef.current = setTimeout(() => setFading(true), 800);
       hideTimeoutRef.current = setTimeout(() => setShow(false), 1300);
     }
@@ -100,7 +99,6 @@ export default function CardIntroScreen() {
   const handleSpinEnd = useCallback(() => {
     if (fading) return;
     playTapSound();
-    localStorage.setItem(STORAGE_KEY, "true");
     fadeTimeoutRef.current = setTimeout(() => setFading(true), 800);
     hideTimeoutRef.current = setTimeout(() => setShow(false), 1300);
   }, [fading, playTapSound]);
@@ -108,7 +106,6 @@ export default function CardIntroScreen() {
   const skip = useCallback(() => {
     clearAll();
     setFading(true);
-    localStorage.setItem(STORAGE_KEY, "true");
     hideTimeoutRef.current = setTimeout(() => setShow(false), 500);
   }, [clearAll]);
 
@@ -131,7 +128,7 @@ export default function CardIntroScreen() {
     const isDark = saved
       ? saved === "dark"
       : window.matchMedia("(prefers-color-scheme: dark)").matches;
-    if (!isDark || hasPlayedThisLoad) {
+    if (!isDark || hasPlayedThisLoad || profileIntroSeen()) {
       window.dispatchEvent(new Event("intro-done"));
       return;
     }
@@ -156,7 +153,7 @@ export default function CardIntroScreen() {
   useEffect(() => {
     const handleThemeChange = (e: Event) => {
       const theme = (e as CustomEvent).detail?.theme as string;
-      if (theme === "dark" && !hasPlayedThisLoad) {
+      if (theme === "dark" && !hasPlayedThisLoad && !profileIntroSeen()) {
         startIntroRef.current();
       } else if (theme === "light") {
         clearAll();
@@ -278,7 +275,7 @@ export default function CardIntroScreen() {
                       }}
                     >
                       <Image
-                        src="/profile/portrait.png"
+                        src="/profile/portrait.webp"
                         alt="Anh Tran"
                         width={90}
                         height={90}

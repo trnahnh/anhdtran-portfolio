@@ -4,23 +4,21 @@ import { useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { Play } from "lucide-react";
 import { useMounted } from "@/hooks/useMounted";
+import { profileIntroSeen } from "@/lib/profileIntro";
 
 // The scan on / plays once per session, and the button is always there
 // underneath it: the overlay covers the header while the scan runs, and once
 // it is gone (finished, skipped for lack of WebGL, or the asset was slow)
-// the visitor can ask for it again. The profile card is once per browser and
-// its button shows only after the card has been seen.
-const PROFILE_KEY = "intro-profile-seen";
-
-function readProfileFlag() {
-  try {
-    return localStorage.getItem(PROFILE_KEY) === "true";
-  } catch {
-    return false;
-  }
+// the visitor can ask for it again. The profile card is once per session too,
+// and its button shows once the card has played.
+function subscribeProfileIntro(callback: () => void) {
+  window.addEventListener("intro-shown", callback);
+  window.addEventListener("intro-done", callback);
+  return () => {
+    window.removeEventListener("intro-shown", callback);
+    window.removeEventListener("intro-done", callback);
+  };
 }
-
-const subscribeNoop = () => () => {};
 
 function subscribeDarkMode(callback: () => void) {
   const observer = new MutationObserver(callback);
@@ -39,7 +37,11 @@ export default function ReplayIntro() {
   const pathname = usePathname();
   const mounted = useMounted();
 
-  const profileSeen = useSyncExternalStore(subscribeNoop, readProfileFlag, () => false);
+  const profileSeen = useSyncExternalStore(
+    subscribeProfileIntro,
+    profileIntroSeen,
+    () => false,
+  );
 
   const isDark = useSyncExternalStore(
     subscribeDarkMode,

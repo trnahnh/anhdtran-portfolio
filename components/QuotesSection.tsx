@@ -16,9 +16,16 @@ const quotes = [
   { text: "Fortune favors the bold.", author: "Latin Proverb" },
 ];
 
+// Long enough to read a quote and its author twice over.
+const ADVANCE_MS = 6000;
+
 export default function QuotesSection() {
   const [index, setIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  // Held while the pointer or keyboard focus is on the carousel, so it never
+  // moves under someone who is reading or reaching for the arrows.
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   const prev = () => setIndex((i) => (i - 1 + quotes.length) % quotes.length);
@@ -35,10 +42,10 @@ export default function QuotesSection() {
   }, []);
 
   useEffect(() => {
-    if (!isVisible) return;
-    const interval = setInterval(next, 3000);
+    if (!isVisible || hovered || focused) return;
+    const interval = setInterval(next, ADVANCE_MS);
     return () => clearInterval(interval);
-  }, [isVisible, index, next]);
+  }, [isVisible, hovered, focused, index, next]);
 
   const { text, author } = quotes[index];
 
@@ -46,8 +53,17 @@ export default function QuotesSection() {
     <section
       ref={sectionRef}
       className="fade-in-up fade-in-up-delay-2 space-y-6"
+      onPointerEnter={() => setHovered(true)}
+      onPointerLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) setFocused(false);
+      }}
     >
-      <h2 className="text-sm font-medium uppercase tracking-widest text-muted-foreground">
+      <h2 className="text-lg font-medium">
+        <span className="text-muted-foreground mr-2" aria-hidden="true">
+          &#9670;
+        </span>
         Words to Live By
       </h2>
       <div className="flex items-center gap-4">

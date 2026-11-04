@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
 function withOpacity(rgba: string, opacity: number) {
   return rgba.replace(/,\s*[\d.]+\)$/, `, ${opacity})`);
@@ -169,6 +170,11 @@ export default function SolarSystem() {
   const starsY = useTransform(scrollY, [0, 1000], [0, -50]);
   const floatersY = useTransform(scrollY, [0, 1000], [0, -90]);
 
+  // Reduced motion gets the same sky, held still: no orbits, no parallax.
+  // The stars' twinkle is stopped in globals.css.
+  const still = usePrefersReducedMotion();
+  const spin = (deg: number) => (still ? undefined : { rotate: deg });
+
   useEffect(() => {
     const updateScale = () => {
       const w = window.innerWidth;
@@ -206,7 +212,7 @@ export default function SolarSystem() {
     >
       <motion.svg
         className="absolute inset-0 w-full h-full"
-        style={{ y: starsY, color: "var(--foreground)" }}
+        style={{ y: still ? 0 : starsY, color: "var(--foreground)" }}
       >
         {STARS.map((s) => (
           <circle
@@ -223,13 +229,13 @@ export default function SolarSystem() {
         ))}
       </motion.svg>
 
-      <motion.div className="absolute inset-0" style={{ y: floatersY }}>
+      <motion.div className="absolute inset-0" style={{ y: still ? 0 : floatersY }}>
         {BG_FLOATERS.map((p) => (
           <motion.div
             key={p.id}
             className="absolute"
             style={{ left: p.left, top: p.top }}
-            animate={{ rotate: 360 }}
+            animate={spin(360)}
             transition={{
               duration: p.duration,
               repeat: Infinity,
@@ -243,7 +249,7 @@ export default function SolarSystem() {
 
       <motion.div
         className="absolute"
-        style={{ left: "50%", top: "42%", y: solarY }}
+        style={{ left: "50%", top: "42%", y: still ? 0 : solarY }}
       >
         {/* All orbits share this anchor as (0,0) */}
         <div
@@ -301,7 +307,7 @@ export default function SolarSystem() {
                   left: -planet.orbitR,
                   top: -planet.orbitR,
                 }}
-                animate={{ rotate: 360 }}
+                animate={spin(360)}
                 transition={{
                   duration: planet.speed,
                   repeat: Infinity,
@@ -315,7 +321,7 @@ export default function SolarSystem() {
                     top: -(planet.size / 2),
                     left: planet.orbitR - planet.size / 2,
                   }}
-                  animate={{ rotate: -360 }}
+                  animate={spin(-360)}
                   transition={{
                     duration: planet.speed,
                     repeat: Infinity,
