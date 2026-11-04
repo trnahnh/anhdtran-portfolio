@@ -125,6 +125,9 @@
   --rule: var(--knurl); /* hairline dividers */
   --readout: var(--rack); /* mono labels */
   --readout-strong: var(--iron); /* mono values */
+  /* The one accent. Measured numbers and link underlines, nothing else, so
+     the eye lands on the evidence. 5.4:1 on chalk. */
+  --signal: var(--plate-25);
 }
 
 
@@ -172,6 +175,7 @@
   --rule: rgba(255, 255, 255, 0.1);
   --readout: var(--bar);
   --readout-strong: var(--chalk);
+  --signal: #f2555f; /* 5.9:1 on iron */
 }
 
 
@@ -224,6 +228,7 @@
   --color-rule: var(--rule);
   --color-readout: var(--readout);
   --color-readout-strong: var(--readout-strong);
+  --color-signal: var(--signal);
 
   --color-plate-25: var(--plate-25);
   --color-plate-20: var(--plate-20);
@@ -288,7 +293,9 @@ html.theme-transitioning * {
   position: relative;
   display: inline;
   text-decoration: none;
-  transition: transform var(--dur-arrive) var(--ease-out-expo);
+  transition:
+    transform var(--dur-arrive) var(--ease-out-expo),
+    color var(--dur-quick) var(--ease-smooth);
 }
 
 .underline-link::after {
@@ -298,7 +305,7 @@ html.theme-transitioning * {
   bottom: -2px;
   height: 1px;
   width: 100%;
-  background-color: currentColor;
+  background-color: var(--signal);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform var(--dur-quick) var(--ease-out-expo);
@@ -306,6 +313,7 @@ html.theme-transitioning * {
 
 .underline-link:hover {
   transform: translateY(-2px);
+  color: var(--signal);
 }
 
 .underline-link:hover::after {
@@ -651,6 +659,16 @@ html.motion-off *::after {
 .fog {
   background-color: color-mix(in srgb, var(--background) var(--fog), transparent);
   box-shadow: 0 0 70px 70px color-mix(in srgb, var(--background) var(--fog), transparent);
+  transition:
+    background-color var(--dur-travel) var(--ease-smooth),
+    box-shadow var(--dur-travel) var(--ease-smooth);
+}
+
+/* While the first-visit scan plays behind the page, the field is paused, so
+   the fog has nothing to hide and would only hide the figure. Thinned, not
+   removed: the prose still sits on a ground. See components/PortraitScan. */
+html.scan-ambient {
+  --fog: 45%;
 }
 
 /* ==========================================================================

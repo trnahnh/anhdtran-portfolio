@@ -56,7 +56,7 @@ export default function Footer() {
         >
           <span aria-hidden="true">$</span>
           <span>terminal</span>
-          <kbd className="text-readout/70 group-hover:text-readout">
+          <kbd className="text-readout group-hover:text-readout-strong">
             ctrl&nbsp;+&nbsp;`
           </kbd>
         </Link>

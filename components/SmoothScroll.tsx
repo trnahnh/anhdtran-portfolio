@@ -28,6 +28,9 @@ export default function SmoothScroll() {
       wheelMultiplier: 0.8,
       touchMultiplier: 1.5,
       autoRaf: true,
+      // In-page links (the highlight strip) glide to their target and stop
+      // short of the top edge, matching the cards' scroll-mt-24.
+      anchors: { offset: -96 },
     });
 
     lenisRef.current = lenis;

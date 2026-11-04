@@ -1,6 +1,7 @@
 import UnderlineLink from "./UnderlineLink";
 import ProjectCard from "./ProjectCard";
 import ProjectMetric from "./ProjectMetric";
+import ProjectArea, { CaseStudyLink } from "./ProjectArea";
 import ScrollReveal from "./ScrollReveal";
 import { currentProjects, pastProjects } from "@/lib/data/projects";
 
@@ -29,7 +30,7 @@ export default function ProjectsSection({
 }: ProjectsSectionProps) {
   return (
     <section data-load="Projects">
-      <h2 className="fade-in-up fade-in-up-delay-2 text-lg font-medium mb-4">
+      <h2 className="fade-in-up fade-in-up-delay-1 text-lg font-medium mb-4">
         <span className="text-muted-foreground mr-2" aria-hidden="true">
           &#9670;
         </span>
@@ -79,10 +80,12 @@ export default function ProjectsSection({
           {currentProjects.map((project, i) => (
             <ScrollReveal key={project.name} delay={i * 100}>
               <div
+                id={`project-${project.slug}`}
                 data-matrix={project.readout ?? "idle"}
-                className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3 lg:grid lg:grid-cols-[minmax(0,1fr)_12rem] lg:items-baseline lg:gap-x-8"
+                className="scroll-mt-24 text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3 lg:grid lg:grid-cols-[minmax(0,1fr)_12rem] lg:items-baseline lg:gap-x-8"
               >
                 <div>
+                  <ProjectArea project={project} className="pl-6" />
                   <span className="mr-2" aria-hidden="true">
                     &#8627;
                   </span>
@@ -98,6 +101,7 @@ export default function ProjectsSection({
                   </UnderlineLink>
                   <span className="mx-2">—</span>
                   <span>{project.description}</span>
+                  <CaseStudyLink project={project} />
                 </div>
                 {project.metric && <ProjectMetric metric={project.metric} />}
               </div>

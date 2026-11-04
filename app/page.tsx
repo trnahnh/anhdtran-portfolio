@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import Highlights from "@/components/Highlights";
 import PageShell from "@/components/PageShell";
 import ExperienceSection from "@/components/ExperienceSection";
 import ProjectsSection from "@/components/ProjectsSection";
@@ -15,8 +16,11 @@ export default function Home() {
       <PortraitScan />
       <PageShell>
           <Header />
-          <ExperienceSection />
+          <Highlights />
+          {/* Measured work before the list of titles: the projects are the
+              evidence, the roles are context for it. */}
           <ProjectsSection />
+          <ExperienceSection featuredOnly />
           <ContactSection />
           <Footer />
       </PageShell>

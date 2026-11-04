@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import UnderlineLink from "./UnderlineLink";
 import ProjectMetric from "./ProjectMetric";
+import ProjectArea, { CaseStudyLink } from "./ProjectArea";
 import type { Project } from "@/lib/data/projects";
 
 interface ProjectCardProps {
@@ -15,14 +16,16 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
   return (
     <div
+      id={`project-${project.slug}`}
       data-matrix={project.readout ?? "idle"}
-      className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3"
+      className="scroll-mt-24 text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3"
     >
       <div className="flex items-start gap-2">
         <span className="mt-0.5" aria-hidden="true">
           &#8627;
         </span>
         <div className="flex-1">
+          <ProjectArea project={project} className="-mb-1" />
           <div className="flex items-center gap-2">
             <UnderlineLink
               href={project.link}
@@ -53,6 +56,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </div>
           <div className="mt-1">
             <span>— {project.description}</span>
+            <CaseStudyLink project={project} />
           </div>
           {project.metric && <ProjectMetric metric={project.metric} />}
           {project.techStack && project.techStack.length > 0 && (

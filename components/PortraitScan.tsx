@@ -16,13 +16,22 @@ import { matrix } from "@/components/matrix/matrixStore";
  * A pointer adds parallax where one exists. The page arrives behind the
  * volume as it fades, still in depth.
  *
+ * Two modes. On a first visit it is AMBIENT: drawn behind the page at low
+ * opacity, with no backdrop, no sound, nothing held. The content is readable
+ * from the first frame, because the person most likely to arrive cold is a
+ * reviewer with a minute to spare, and a gate in front of the evidence costs
+ * more than the scan earns. The Replay button asks for the FULL version, the
+ * original overlay with backdrop, caption and tone, since that visitor has
+ * chosen to watch.
+ *
  * About four and a half seconds including the fade. Shown once per browser
  * session: the first time the site is opened in a tab, not again on a route
  * change back to /, and again in a new tab, after the browser is closed, or
  * on any reload, which reads as asking for the site fresh.
- * Skippable by any input. Reduced motion or no WebGL shows nothing extra. The
- * page's arrival animations are held by a class on <html>, set before first
- * paint by app/layout.tsx, and released as the fade begins.
+ * Skippable by any input. Reduced motion or no WebGL shows nothing extra.
+ * While the ambient scan runs, a class on <html> thins the reading column's
+ * fog (the matrix field it exists to hide is paused anyway) so the figure
+ * shows through behind the text; it comes back as the fade begins.
  *
  * The visitor is only marked as having seen it once the scan has actually
  * started. A bail-out before that (no WebGL context, the asset not arriving
@@ -36,6 +45,11 @@ export const SCAN_STORAGE_KEY = "portrait-scanned";
 const LEGACY_STORAGE_KEY = "portrait-scanned";
 const ASSET = "/profile/portrait-scan.png";
 const HTML_CLASS = "scanning";
+const AMBIENT_CLASS = "scan-ambient";
+// Peak opacity of the figure in ambient mode, before the fog it sits under.
+const AMBIENT_OPACITY = 0.55;
+
+type Mode = "ambient" | "full";
 
 // Same rule as InstrumentMatrix; the cloud runs at half its pitch.
 const CELL_MOBILE = 8;
@@ -378,7 +392,7 @@ function layout(asset: Asset, cssW: number, cssH: number, dpr: number): Layout {
 /* ------------------------------------------------------------------------ */
 
 export default function PortraitScan() {
-  const [show, setShow] = useState(false);
+  const [mode, setMode] = useState<Mode | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -388,31 +402,31 @@ export default function PortraitScan() {
   const hintRef = useRef<HTMLParagraphElement>(null);
   const skipRef = useRef<() => void>(() => {});
 
-  // Decide before first paint. The gate script in the layout has already
-  // set the class for a first visit; this keeps the two in step.
+  // Decide before first paint. Nothing is held: a first visit gets the
+  // ambient scan behind a page that arrives as normal.
   useLayoutEffect(() => {
     try {
       localStorage.removeItem(LEGACY_STORAGE_KEY);
     } catch {}
     const seen = sessionStorage.getItem(SCAN_STORAGE_KEY) === "true" && (reloadSpent || !isReload());
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.documentElement.classList.remove(HTML_CLASS);
     if (!seen && !reduced) {
-      document.documentElement.classList.add(HTML_CLASS);
-      setShow(true);
+      setMode("ambient");
     } else {
       skipped(seen ? "already seen this session" : "prefers-reduced-motion is set");
-      document.documentElement.classList.remove(HTML_CLASS);
     }
-    const onReplay = () => setShow(true);
+    const onReplay = () => setMode("full");
     window.addEventListener("replay-intro", onReplay);
     return () => {
       window.removeEventListener("replay-intro", onReplay);
-      document.documentElement.classList.remove(HTML_CLASS);
+      document.documentElement.classList.remove(HTML_CLASS, AMBIENT_CLASS);
     };
   }, []);
 
   useLayoutEffect(() => {
-    if (!show) return;
+    if (!mode) return;
+    const ambient = mode === "ambient";
     const canvas = canvasRef.current;
     const root = rootRef.current;
     const backdrop = backdropRef.current;
@@ -440,13 +454,17 @@ export default function PortraitScan() {
 
     matrix.locked = true;
     matrix.amp = 0;
-    window.dispatchEvent(new Event("intro-shown"));
+    // Only the full overlay is an intro. The ambient scan leaves the page,
+    // and everything that hides itself during intros, alone.
+    if (!ambient) window.dispatchEvent(new Event("intro-shown"));
+    else document.documentElement.classList.add(AMBIENT_CLASS);
 
-    // The handoff: the page's own arrival is allowed to happen.
+    // The handoff: the page's own arrival is allowed to happen, and the fog
+    // comes back over the returning field.
     const release = () => {
       if (released) return;
       released = true;
-      document.documentElement.classList.remove(HTML_CLASS);
+      document.documentElement.classList.remove(HTML_CLASS, AMBIENT_CLASS);
     };
 
     const finish = () => {
@@ -470,8 +488,8 @@ export default function PortraitScan() {
       observer?.disconnect();
       resizeObserver?.disconnect();
       if (gl && cloudBuf) gl.deleteBuffer(cloudBuf);
-      setShow(false);
-      window.dispatchEvent(new Event("intro-done"));
+      setMode(null);
+      if (!ambient) window.dispatchEvent(new Event("intro-done"));
     };
 
     const skip = () => {
@@ -490,7 +508,7 @@ export default function PortraitScan() {
     /* ---- audio: a tone that tracks the scan plane -------------------- */
 
     const startAudio = () => {
-      if (audio || disposed) return;
+      if (ambient || audio || disposed) return;
       const Ctor = window.AudioContext;
       if (!Ctor) return;
       const ctx = new Ctor();
@@ -698,9 +716,9 @@ export default function PortraitScan() {
       const fade = 1 - fadeP;
 
       // The page arrives first, under the volume; the matrix returns with it.
-      backdrop.style.opacity = String(1 - clamp01(fadeP / 0.6));
+      backdrop.style.opacity = ambient ? "0" : String(1 - clamp01(fadeP / 0.6));
       matrix.amp = fadeP;
-      root.style.opacity = String(fade);
+      root.style.opacity = String(ambient ? AMBIENT_OPACITY * fade : fade);
 
       g.uniform1f(uni.head, head);
       g.uniform1f(uni.fade, fade);
@@ -728,7 +746,7 @@ export default function PortraitScan() {
           `${ms} MS · YAW ${Number(deg) >= 0 ? "+" : ""}${deg}° · Z ${DEPTH_EXTENT.toFixed(2)}`,
         );
       }
-      hint.style.opacity = t < T_ROTATE ? "1" : "0";
+      hint.style.opacity = !ambient && t < T_ROTATE ? "1" : "0";
     };
 
     window.addEventListener("pointerdown", skip, { passive: true });
@@ -755,13 +773,14 @@ export default function PortraitScan() {
       // Route change or replay mid-flight: put everything back.
       finish();
     };
-  }, [show]);
+  }, [mode]);
 
   const onKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === "Escape" || e.key === " ") skipRef.current();
   }, []);
 
-  if (!show) return null;
+  if (!mode) return null;
+  const ambient = mode === "ambient";
 
   // Rendered at the end of <body>, not inside the page tree. The page
   // transition wrapper keeps a stacking context after its fade, so anything
@@ -770,13 +789,17 @@ export default function PortraitScan() {
   return createPortal(
     <div
       ref={rootRef}
-      role="button"
-      tabIndex={0}
-      aria-label="Skip intro"
-      onKeyDown={onKeyDown}
-      className="scan-root fixed inset-x-0 top-0 z-100 cursor-pointer select-none outline-none"
+      {...(ambient
+        ? { "aria-hidden": true }
+        : { role: "button", tabIndex: 0, "aria-label": "Skip intro", onKeyDown })}
+      className={`scan-root fixed inset-x-0 top-0 select-none outline-none ${
+        ambient ? "-z-10 pointer-events-none" : "z-100 cursor-pointer"
+      }`}
     >
-      <div ref={backdropRef} className="absolute inset-x-0 top-0 -bottom-[20%] bg-background" />
+      <div
+        ref={backdropRef}
+        className={`absolute inset-x-0 top-0 -bottom-[20%] bg-background ${ambient ? "opacity-0" : ""}`}
+      />
       <canvas
         ref={canvasRef}
         className="matrix-canvas absolute inset-x-0 top-0 w-full"
@@ -784,6 +807,7 @@ export default function PortraitScan() {
       />
       <p
         ref={captionRef}
+        hidden={ambient}
         className="absolute inset-x-0 px-4 text-center font-mono text-[11px] leading-5 tracking-[0.18em] text-muted-foreground"
         aria-live="off"
       >

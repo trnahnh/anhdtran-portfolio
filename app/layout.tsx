@@ -86,10 +86,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Mirrors the gate in components/PortraitScan.tsx; keep the two in step.
-const SCAN_GATE =
-  "try{var n=performance.getEntriesByType('navigation')[0];var reload=!!n&&n.type==='reload';if(location.pathname==='/'&&(reload||sessionStorage.getItem('portrait-scanned')!=='true')&&!matchMedia('(prefers-reduced-motion: reduce)').matches)document.documentElement.classList.add('scanning')}catch(e){}";
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -100,10 +96,6 @@ export default function RootLayout({
       <body
         className={`${archivo.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} antialiased`}
       >
-        {/* Runs while the HTML is still parsing, before anything has painted,
-            so the page's arrival animations are held before they start. The
-            component that owns the scan releases it, or never lets it run. */}
-        <script dangerouslySetInnerHTML={{ __html: SCAN_GATE }} />
         <MotionGate />
         <SmoothScroll />
         <GradientBlobs />

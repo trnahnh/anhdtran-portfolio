@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import {
   futureExperiences,
   currentExperiences,
@@ -16,6 +19,10 @@ import ScrollReveal from "./ScrollReveal";
  * would be structure that encodes nothing — the group heading already says
  * it. Wide screens get their structure where there is something true to put
  * in it: the measured metrics beside the projects, and the telemetry rail.
+ *
+ * With `featuredOnly`, the landing page shows the engineering roles with
+ * their measured impact, and the rest wait behind "Show all". Nothing is
+ * hidden from someone who asks; it just stops competing with the evidence.
  */
 
 const GROUPS: { title: string; items: Experience[] }[] = [
@@ -45,17 +52,34 @@ function Row({ exp }: { exp: Experience }) {
           <span>{exp.description}</span>
         </>
       )}
+      {exp.impact && (
+        <p className="mt-1 pl-6 text-sm">{exp.impact}</p>
+      )}
     </div>
   );
 }
 
-export default function ExperienceSection() {
+export default function ExperienceSection({
+  featuredOnly = false,
+}: {
+  featuredOnly?: boolean;
+}) {
+  const [showAll, setShowAll] = useState(!featuredOnly);
+  const hiddenCount = featuredOnly
+    ? GROUPS.reduce((n, g) => n + g.items.filter((e) => !e.featured).length, 0)
+    : 0;
+
+  const groups = GROUPS.map((group) => ({
+    ...group,
+    items: showAll ? group.items : group.items.filter((e) => e.featured),
+  })).filter((group) => group.items.length > 0);
+
   return (
     <section data-matrix="timeline" data-load="Experience">
       <div className="space-y-8">
-        {GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.title}>
-            <h2 className="fade-in-up fade-in-up-delay-1 text-lg font-medium mb-4">
+            <h2 className="fade-in-up fade-in-up-delay-2 text-lg font-medium mb-4">
               <span className="text-muted-foreground mr-2" aria-hidden="true">
                 &#9670;
               </span>
@@ -74,6 +98,16 @@ export default function ExperienceSection() {
           </div>
         ))}
       </div>
+      {featuredOnly && hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          aria-expanded={showAll}
+          className="underline-link interactive mt-4 ml-6 sm:ml-7 text-sm text-muted-foreground"
+        >
+          {showAll ? "Show fewer" : `Show all experience (+${hiddenCount})`}
+        </button>
+      )}
     </section>
   );
 }

@@ -1,7 +1,27 @@
 import type { ReadoutKind } from "@/components/matrix/readouts";
 
+/**
+ * The one area a project belongs to. A host from a given org should find
+ * their area in a second, so the vocabulary is small and fixed.
+ */
+export type ProjectArea =
+  | "Infra"
+  | "Systems"
+  | "ML Systems"
+  | "ML"
+  | "AI Tooling"
+  | "Security"
+  | "Product"
+  | "Cloud"
+  | "Full-stack";
+
 export interface Project {
   name: string;
+  /** Anchor id on the landing list and the case study URL segment. */
+  slug: string;
+  area: ProjectArea;
+  /** True when /projects/[slug] has a case study for this project. */
+  caseStudy?: boolean;
   nameAlt?: string;
   description: string;
   link: string;
@@ -15,7 +35,10 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    name: "kiln",
+    name: "Kiln-IDP",
+    slug: "kiln",
+    area: "Infra",
+    caseStudy: true,
     readout: "timeline",
     metric: {
       value: "57,012",
@@ -43,8 +66,15 @@ export const projects: Project[] = [
     status: "current",
   },
   {
-    name: "commma",
+    name: "Commma",
+    slug: "commma",
+    area: "Product",
     readout: "heatmap",
+    metric: {
+      value: "600+",
+      label: "downloads · VS Code + Open VSX",
+      measured: "2026-10",
+    },
     description:
       "Developer-activity tracker that turns coding into a sport - sessions, pace, streaks, and leaderboards, plus a shareable per-session keyboard heatmap.",
     link: "https://commma.dev/",
@@ -74,6 +104,8 @@ export const projects: Project[] = [
   },
   {
     name: "Dasi",
+    slug: "dasi",
+    area: "Security",
     readout: "cipher",
     description:
       "End-to-end encrypted journaling app - thoughts are encrypted on-device before sync with daily writing prompts to beat the blank page.",
@@ -87,10 +119,12 @@ export const projects: Project[] = [
       "TypeScript",
       "AWS Lambda",
     ],
-    status: "current",
+    status: "past",
   },
   {
     name: "RG2026-Predict",
+    slug: "rg2026-predict",
+    area: "ML",
     readout: "curve",
     metric: {
       value: "0.714",
@@ -109,10 +143,12 @@ export const projects: Project[] = [
       "Plotly",
       "Monte Carlo",
     ],
-    status: "current",
+    status: "past",
   },
   {
     name: "Draft-Thinker",
+    slug: "draft-thinker",
+    area: "ML Systems",
     readout: "decay",
     metric: {
       value: "-82.9%",
@@ -136,14 +172,17 @@ export const projects: Project[] = [
   },
   {
     name: "Ferrox",
+    slug: "ferrox",
+    area: "Systems",
+    caseStudy: true,
     readout: "histogram",
     metric: {
-      value: "4.7M",
-      label: "simulated orders/sec · 67-85% faster cancels",
-      measured: "2026-02",
+      value: "4.4M",
+      label: "simulated orders/sec · 82-85% faster worst-case cancels",
+      measured: "2026-10",
     },
     description:
-      "LMAX-inspired high-frequency order matching engine sustaining 4.7M simulated orders/sec, with its lock-free ring buffer ported to C++20 to measure the cost of memory orderings and bounds checks.",
+      "LMAX-inspired high-frequency order matching engine sustaining 4.4M simulated orders/sec, with its lock-free ring buffer ported to C++20 to measure the cost of memory orderings and bounds checks.",
     link: "https://ferrox-engine.vercel.app/",
     techStack: [
       "Rust",
@@ -159,6 +198,8 @@ export const projects: Project[] = [
   },
   {
     name: "Inyeon",
+    slug: "inyeon",
+    area: "AI Tooling",
     readout: "blocks",
     nameAlt: "(인연)",
     description:
@@ -181,6 +222,8 @@ export const projects: Project[] = [
   },
   {
     name: "AnyuDock",
+    slug: "anyudock",
+    area: "Cloud",
     readout: "blocks",
     nameAlt: "(暗语-Dock)",
     description:
@@ -196,10 +239,12 @@ export const projects: Project[] = [
       "PostgreSQL",
       "GitHub Actions CI/CD",
     ],
-    status: "current",
+    status: "past",
   },
   {
     name: "FixBuddy",
+    slug: "fixbuddy",
+    area: "Full-stack",
     description:
       "AI-powered web application that helps users diagnose and fix broken household items.",
     link: "https://github.com/jamesvo2103/Fix-Buddy",
@@ -217,6 +262,8 @@ export const projects: Project[] = [
   },
   {
     name: "ResumeHippocrates",
+    slug: "resumehippocrates",
+    area: "Full-stack",
     description:
       "AI-powered full-stack resume builder optimizing content for ATS (Applicant Tracking System) with OpenAI integration.",
     link: "https://github.com/trnahnh/Resume-Hippocrates",
@@ -233,6 +280,8 @@ export const projects: Project[] = [
   },
   {
     name: "DietApollo",
+    slug: "dietapollo",
+    area: "Full-stack",
     description:
       "Pixel-themed web application for managing meal plans, grocery lists, and calorie intake in a retro-styled interface.",
     link: "https://github.com/trnahnh/DietApollo",
@@ -244,3 +293,14 @@ export const projects: Project[] = [
 export const currentProjects = projects.filter((p) => p.status === "current");
 export const pastProjects = projects.filter((p) => p.status === "past");
 export const allProjects = projects;
+
+/**
+ * The three numbers under the name: infra depth, systems speed, real users.
+ * Each one is a project's own measured metric, so the strip can never say
+ * something the card below it does not.
+ */
+export const highlights = ["kiln", "ferrox", "commma"].map((slug) => {
+  const project = projects.find((p) => p.slug === slug);
+  if (!project?.metric) throw new Error(`highlight ${slug} has no metric`);
+  return { slug, name: project.name, metric: project.metric };
+});

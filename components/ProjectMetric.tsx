@@ -17,13 +17,13 @@ export default function ProjectMetric({
 }) {
   return (
     <p className="mt-2 lg:mt-0 lg:text-right">
-      <span className="block font-mono text-base tabular-nums leading-none text-readout-strong">
+      <span className="block font-mono text-base tabular-nums leading-none text-signal">
         {metric.value}
       </span>
       <span className="mt-1.5 block font-mono text-[10px] uppercase leading-snug tracking-[0.14em] text-readout">
         {metric.label}
       </span>
-      <span className="mt-1 block font-mono text-[10px] tabular-nums text-readout/60">
+      <span className="mt-1 block font-mono text-[10px] tabular-nums text-readout">
         measured {metric.measured}
       </span>
     </p>

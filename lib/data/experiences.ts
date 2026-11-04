@@ -3,6 +3,10 @@ export interface Experience {
   company: string;
   companyUrl?: string;
   description?: string;
+  /** One line of measured impact, drawn from the resume. */
+  impact?: string;
+  /** Shown on the landing page; the rest wait behind "Show all". */
+  featured?: boolean;
   status: "current" | "past" | "future";
 }
 
@@ -10,6 +14,9 @@ export const experiences: Experience[] = [
   {
     title: "AI Researcher",
     company: "University of Cincinnati Department of Computer Science",
+    impact:
+      "Cut voice-resynthesis time 15x (5.5s to 0.36s) after profiling pitch tracking to 89% of runtime.",
+    featured: true,
     status: "current",
   },
   {
@@ -17,6 +24,9 @@ export const experiences: Experience[] = [
     company: "Commma",
     companyUrl: "https://commma.dev",
     description: "Pace your Code",
+    impact:
+      "600+ downloads; coding-time totals made exact under concurrency and crashes with an advisory lock and a transactional outbox.",
+    featured: true,
     status: "current",
   },
   {
@@ -24,6 +34,9 @@ export const experiences: Experience[] = [
     company: "Caphne",
     companyUrl: "https://caphne.co",
     description: "Study Buddies Matchmaking",
+    impact:
+      "Led 6 engineers to 400+ active users; real-time chat cut API response time from 60s to 10s at 1.7K+ requests/min.",
+    featured: true,
     status: "past",
   },
   {
@@ -31,6 +44,7 @@ export const experiences: Experience[] = [
     company: "KatanaID",
     companyUrl: "https://katanaid.com",
     description: "AI Branding Toolkit",
+    featured: true,
     status: "past",
   },
   {
