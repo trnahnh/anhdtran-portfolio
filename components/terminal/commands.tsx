@@ -17,6 +17,9 @@ export interface OutputLine {
 
 const DOB = new Date(2006, 4, 11);
 
+// Matches metadataBase in app/layout.tsx; terminal links are plain text.
+const SITE_URL = "https://anhdtrn.com";
+
 function getAge(): number {
   const today = new Date();
   let age = today.getFullYear() - DOB.getFullYear();
@@ -93,12 +96,25 @@ const COMMANDS: Record<string, CommandDef> = {
       projects.forEach((p) => {
         const alt = p.nameAlt ? ` ${p.nameAlt}` : "";
         const badge = p.status === "current" ? "  \u25CF active" : "";
-        lines.push({ type: "accent", text: `${p.name}${alt}${badge}` });
+        lines.push({ type: "accent", text: `${p.name}${alt}  [${p.area}]${badge}` });
         lines.push({ type: "response", text: p.description });
+        // The same measured headline the homepage shows beside the card.
+        if (p.metric) {
+          lines.push({
+            type: "response",
+            text: `\u25B8 ${p.metric.value} ${p.metric.label} (measured ${p.metric.measured})`,
+          });
+        }
         if (p.techStack?.length) {
           lines.push({ type: "system", text: p.techStack.join(" \u00B7 ") });
         }
         lines.push({ type: "response", text: p.link });
+        if (p.caseStudy) {
+          lines.push({
+            type: "response",
+            text: `case study: ${SITE_URL}/projects/${p.slug}`,
+          });
+        }
         lines.push({ type: "response", text: "" });
       });
       return lines;
@@ -117,6 +133,9 @@ const COMMANDS: Record<string, CommandDef> = {
         });
         if (e.description) {
           lines.push({ type: "response", text: e.description });
+        }
+        if (e.impact) {
+          lines.push({ type: "response", text: `▸ ${e.impact}` });
         }
         lines.push({ type: "response", text: "" });
       });
