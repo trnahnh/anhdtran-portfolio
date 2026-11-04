@@ -262,7 +262,7 @@ export const caseStudies: CaseStudy[] = [
     slug: "inyeon",
     title: "Inyeon (인연)",
     summary:
-      "An agentic Git CLI that splits a working tree into commits, writes the messages, reviews the change and drafts the PR, and the first evaluation of it, which found what 245 passing tests did not.",
+      "An agentic Git CLI that splits a working tree into commits, writes the messages, reviews the change and drafts the PR, and its first evaluation, which found four bugs that 245 passing tests had missed. All four are fixed.",
     repo: "https://github.com/suka712/inyeon-upstream",
     live: "https://inyeon-upstream.vercel.app/",
     problem: [
@@ -320,26 +320,26 @@ export const caseStudies: CaseStudy[] = [
           "3,552 input and 306 output tokens on average; 3.1 s p50, 5.2 s p95.",
       },
       {
-        value: "0.474",
+        value: "0.525",
         label: "split agreement (ARI)",
         context:
-          "Against my real commit boundaries on 30 squashed cases. One group per file scores 0.385, and the gap's 95% CI, −0.06 to +0.24, includes zero.",
+          "The default strategy, on 12 held-out cases from repos the threshold was not tuned on. One group per file scores 0.352; the gap's 95% CI, +0.02 to +0.35, only just clears zero.",
       },
     ],
     resultNotes: [
-      "Semantic splitting never runs in the shipped code. The local engine builds its retriever with an argument the constructor does not take; the TypeError is caught and the retriever quietly becomes None. Semantic then falls back to hybrid, and hybrid without embeddings groups exactly like directory, which is why the three score identically on all 30 cases.",
-      "With embeddings supplied by the harness, the model the code pins, text-embedding-004, now returns 404. With its replacement, gemini-embedding-001, the 0.5 threshold merges every hunk into one group. The threshold was tuned for a model that no longer exists.",
-      "The one-command pipeline drops its own output: it reads the key message while the commit agent returns commit_message, so the generated message came back empty in 10 of 10 runs. Each later step also loses its first model call to a connection error (a fresh event loop reusing a cached client), and the review step reports success with nothing in it.",
-      "Scope: one run per configuration, n = 30, gpt-4.1-mini only (the local model was removed from the test machine mid-run), the in-process engine only, and only one split case interleaves edits within a file. The suite: 245 passed, 1 skipped.",
+      "The eval found four bugs. The one-command pipeline read the key message while the commit agent returns commit_message, so the generated message came back empty in 10 of 10 runs. Each step after the first lost its first model call to a connection error, because every step ran in a fresh event loop while reusing one cached client. Semantic splitting never ran at all: the retriever was built with an argument its constructor does not take, and the TypeError was caught and turned into None. And the pinned embedding model, text-embedding-004, had been retired.",
+      "All four are fixed. On the same runs afterwards, the commit message came back 10 times out of 10, none of 34 model calls failed, and PR descriptions came back 5 times out of 5 (2 before). Seven regression tests now pin the fixes, and every one fails on the old code. The original tests had passed because their mocks returned a response shape no backend actually produces.",
+      "Fixing semantic splitting exposed a fifth problem: on the replacement embedding model, the old 0.5 similarity threshold put every hunk in one group. I recalibrated it to 0.75 on three repos and tested on the other two. Semantic alone scores 0.513, against 0.352 for one group per file, but its interval includes zero. The default strategy is only just better than the baselines, and semantic on its own is not yet shown to be.",
+      "Scope: one run per configuration, 30 split and 30 commit cases (12 held out for the threshold), gpt-4.1-mini only, the in-process engine only, and only one split case interleaves edits within a file. The suite now stands at 251 passed, 2 skipped.",
     ],
     lessons: [
-      "Passing tests are not a working product. Each agent had tests; nothing tested the hand-off between them, and that is where the output was lost.",
+      "Passing tests are not a working product. Each agent had tests, but their mocks agreed with the bug instead of with the backend, and nothing tested the hand-off between agents, which is where the output was lost.",
       "A swallowed exception can switch a headline feature off without a trace. One except-and-return-None made semantic splitting a silent no-op.",
       "Start from the dumbest baseline. One commit per file landed inside the confidence interval of every strategy.",
       "Hosted models expire. A pinned embedding model and a threshold tuned to it both quietly went stale.",
     ],
     next:
-      "Fix the three bugs the eval found, rerun it, calibrate the clustering threshold per embedding model, and add an eval for review quality.",
+      "Tune the default strategy's threshold on its own rather than inheriting semantic's, grow the held-out set past 12 cases, test edits interleaved within a file, and add an eval for review quality.",
   },
 ];
 
