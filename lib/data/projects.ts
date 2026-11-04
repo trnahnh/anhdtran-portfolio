@@ -201,6 +201,7 @@ export const projects: Project[] = [
     name: "Inyeon",
     slug: "inyeon",
     area: "AI Tooling",
+    caseStudy: true,
     readout: "blocks",
     nameAlt: "(인연)",
     description:

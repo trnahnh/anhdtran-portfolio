@@ -258,6 +258,89 @@ export const caseStudies: CaseStudy[] = [
     next:
       "A router over the whole trace instead of a prefix, calibration per route, measuring what cancelled calls are actually billed, and a cache hit rate taken from real traffic.",
   },
+  {
+    slug: "inyeon",
+    title: "Inyeon (인연)",
+    summary:
+      "An agentic Git CLI that splits a working tree into commits, writes the messages, reviews the change and drafts the PR, and the first evaluation of it, which found what 245 passing tests did not.",
+    repo: "https://github.com/suka712/inyeon-upstream",
+    live: "https://inyeon-upstream.vercel.app/",
+    problem: [
+      "Every change ends in the same chores: cutting a messy working tree into commits that each do one thing, writing a message for each, reviewing the diff, and describing the pull request. None of it is hard, all of it is repetitive, and it is exactly the part that gets rushed.",
+      "Inyeon runs that whole loop from the terminal in one command, with the model of your choice: a hosted one, or a local one for code that should not leave the machine.",
+    ],
+    flow: [
+      { label: "CLI", detail: "Typer + Rich, diff cut at file boundaries" },
+      { label: "Engine", detail: "hosted FastAPI backend, or in-process" },
+      { label: "Pipeline", detail: "split → commit → review → PR" },
+      { label: "Agents", detail: "LangGraph state graphs with error nodes" },
+      { label: "Context", detail: "ChromaDB retrieval over the repo" },
+      { label: "Models", detail: "OpenAI, Gemini or Ollama, streamed" },
+    ],
+    built: [
+      "Seven agents, each a LangGraph state graph with conditional edges and its own error node: split, commit, review, PR, conflict resolution, changelog, and an orchestrator that routes a free-form request to the right one. The commit agent can ask to read files for context; those reads are sandboxed to the repository.",
+      "Splitting has four strategies. Directory groups hunks by folder. Semantic embeds each hunk and clusters them (agglomerative, cosine distance, threshold 0.5). Conventional asks the model to classify each file by commit type. Hybrid, the default, groups by directory first and sub-clusters any group larger than three hunks.",
+      "The same pipeline runs against a hosted backend or entirely in-process, behind one interface. It skips steps that cannot pay for themselves (no split for a single file, no review for a diff under 500 characters), and a failed review or PR step is skipped rather than failing the run.",
+    ],
+    rejected: [
+      {
+        option: "Remote-only execution",
+        reason: "one pipeline interface now runs against the hosted backend or in-process",
+      },
+      {
+        option: "Retrying on error-message text",
+        reason: "replaced with retries keyed on status codes",
+      },
+      {
+        option: "Failing the run when review or PR fails",
+        reason: "those steps degrade to skipped, so the commit still lands",
+      },
+      {
+        option: "Eager imports in the local engine",
+        reason: "made lazy, so the CLI starts without loading every model client",
+      },
+    ],
+    results: [
+      {
+        value: "93.3%",
+        label: "valid Conventional Commits",
+        context:
+          "28 of 30 real commits, gpt-4.1-mini. My own messages on the same commits: 66.7%.",
+      },
+      {
+        value: "65%",
+        label: "commit type matches mine",
+        context:
+          "13 of 20 commits that had a conventional message. Always guessing feat scores 45%.",
+      },
+      {
+        value: "2",
+        label: "LLM calls per commit message",
+        context:
+          "3,552 input and 306 output tokens on average; 3.1 s p50, 5.2 s p95.",
+      },
+      {
+        value: "0.474",
+        label: "split agreement (ARI)",
+        context:
+          "Against my real commit boundaries on 30 squashed cases. One group per file scores 0.385, and the gap's 95% CI, −0.06 to +0.24, includes zero.",
+      },
+    ],
+    resultNotes: [
+      "Semantic splitting never runs in the shipped code. The local engine builds its retriever with an argument the constructor does not take; the TypeError is caught and the retriever quietly becomes None. Semantic then falls back to hybrid, and hybrid without embeddings groups exactly like directory, which is why the three score identically on all 30 cases.",
+      "With embeddings supplied by the harness, the model the code pins, text-embedding-004, now returns 404. With its replacement, gemini-embedding-001, the 0.5 threshold merges every hunk into one group. The threshold was tuned for a model that no longer exists.",
+      "The one-command pipeline drops its own output: it reads the key message while the commit agent returns commit_message, so the generated message came back empty in 10 of 10 runs. Each later step also loses its first model call to a connection error (a fresh event loop reusing a cached client), and the review step reports success with nothing in it.",
+      "Scope: one run per configuration, n = 30, gpt-4.1-mini only (the local model was removed from the test machine mid-run), the in-process engine only, and only one split case interleaves edits within a file. The suite: 245 passed, 1 skipped.",
+    ],
+    lessons: [
+      "Passing tests are not a working product. Each agent had tests; nothing tested the hand-off between them, and that is where the output was lost.",
+      "A swallowed exception can switch a headline feature off without a trace. One except-and-return-None made semantic splitting a silent no-op.",
+      "Start from the dumbest baseline. One commit per file landed inside the confidence interval of every strategy.",
+      "Hosted models expire. A pinned embedding model and a threshold tuned to it both quietly went stale.",
+    ],
+    next:
+      "Fix the three bugs the eval found, rerun it, calibrate the clustering threshold per embedding model, and add an eval for review quality.",
+  },
 ];
 
 export function getCaseStudy(slug: string) {

@@ -77,7 +77,7 @@ export default async function CaseStudyPage({
             <Heading>
               <span id="results">Results</span>
             </Heading>
-            <dl className="grid gap-4 pl-6 sm:pl-7 sm:grid-cols-2">
+            <dl className="grid gap-4 pl-6 sm:pl-7 sm:grid-cols-2 sm:auto-rows-fr">
               {study.results.map((r) => (
                 <div key={r.label} className="rounded-xl border border-border p-4">
                   <dt className="font-mono text-xs uppercase leading-snug tracking-[0.1em] text-readout">
@@ -107,7 +107,7 @@ export default async function CaseStudyPage({
             <Heading>What I built</Heading>
             <div className="pl-6 sm:pl-7 space-y-6">
               {/* The path through the system, one box per step. */}
-              <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <ol className="grid gap-2 sm:grid-cols-2 sm:auto-rows-fr lg:grid-cols-3">
                 {study.flow.map((step, i) => (
                   <li
                     key={step.label}
