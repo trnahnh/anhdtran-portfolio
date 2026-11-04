@@ -188,7 +188,7 @@ export default function InstrumentRail() {
     // Now playing stays readable, because on the home page the rail is the
     // only place it appears.
     <aside className="hidden xl:block">
-      <div className="sticky top-24 select-none">
+      <div className="fog-rail sticky top-24 select-none">
         <Channel label="Age" hidden>
           <p
             ref={ageRef}

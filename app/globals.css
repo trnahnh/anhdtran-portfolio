@@ -170,7 +170,9 @@
   --matrix-ink: #83868f;
   --matrix-accent: #f2555f;
   --scan-ink: #9a9da6;
-  --fog: 82%;
+  /* 90, up from 82: at 82 the sweep showed clearly behind the column, and
+     the solid highlight cards read as holes cut out of it. */
+  --fog: 90%;
 
   --rule: rgba(255, 255, 255, 0.1);
   --readout: var(--bar);
@@ -656,9 +658,24 @@ html.motion-off *::after {
    can run under the whole site without ever competing with prose.
    ========================================================================== */
 
+/* The bleed is wide and mostly blur: a 70px spread with a 70px blur read as a
+   box, and the sweep visibly hit its edge. Now the field thins over roughly
+   300px on the way into the column, which also quiets it behind the rail. A
+   shadow, unlike a pseudo-element, never adds scrollable overflow on phones. */
 .fog {
   background-color: color-mix(in srgb, var(--background) var(--fog), transparent);
-  box-shadow: 0 0 70px 70px color-mix(in srgb, var(--background) var(--fog), transparent);
+  box-shadow: 0 0 200px 100px color-mix(in srgb, var(--background) var(--fog), transparent);
+  transition:
+    background-color var(--dur-travel) var(--ease-smooth),
+    box-shadow var(--dur-travel) var(--ease-smooth);
+}
+
+/* The rail's own, smaller bleed. It sits outside the column's, so without it
+   the sweep ran straight behind the clocks and labels. Follows the rail as it
+   sticks; the far margin beyond it keeps the field. */
+.fog-rail {
+  background-color: color-mix(in srgb, var(--background) var(--fog), transparent);
+  box-shadow: 0 0 96px 32px color-mix(in srgb, var(--background) var(--fog), transparent);
   transition:
     background-color var(--dur-travel) var(--ease-smooth),
     box-shadow var(--dur-travel) var(--ease-smooth);
