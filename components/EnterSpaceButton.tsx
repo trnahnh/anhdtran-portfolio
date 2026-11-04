@@ -58,7 +58,7 @@ export default function EnterSpaceButton() {
               Enter Space Mode
             </span>
           </motion.button>
-          <p className="text-white/20 text-[10px] tracking-widest uppercase">
+          <p className="text-white/50 text-[10px] tracking-widest uppercase">
             best experienced on desktop
           </p>
         </motion.div>

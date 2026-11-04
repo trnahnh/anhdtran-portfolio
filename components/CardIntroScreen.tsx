@@ -502,7 +502,7 @@ export default function CardIntroScreen() {
         </div>
       </div>
 
-      <p className="mt-5 text-sm select-none text-zinc-600">
+      <p className="mt-5 text-sm select-none text-zinc-400">
         Tap anywhere to skip.
       </p>
     </div>

@@ -94,7 +94,8 @@ export default function QuotesSection() {
             key={i}
             onClick={() => setIndex(i)}
             aria-label={`Go to quote ${i + 1}`}
-            className="p-2 flex items-center justify-center"
+            // 24px square: the smallest comfortable touch target.
+            className="w-6 h-6 flex items-center justify-center"
           >
             <span className="relative flex items-center justify-center w-1.5 h-1.5">
               {i === index && (

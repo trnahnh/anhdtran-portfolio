@@ -35,6 +35,7 @@ const TerminalInput = memo(
           <input
             ref={inputRef}
             type="text"
+            aria-label="Terminal command"
             defaultValue=""
             onKeyDown={(e) => {
               if (e.key === "Enter") {

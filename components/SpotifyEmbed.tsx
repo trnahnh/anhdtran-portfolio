@@ -14,6 +14,7 @@ export default function SpotifyEmbed() {
         <div className="absolute inset-0 bg-muted animate-pulse rounded-xl" />
       )}
       <iframe
+        title="Spotify playlist"
         style={{
           borderRadius: "12px",
           opacity: loaded ? 1 : 0,

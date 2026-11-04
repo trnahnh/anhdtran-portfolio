@@ -157,7 +157,7 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="text-black/20 dark:text-white/20 text-[10px] tracking-[0.3em] uppercase text-center mt-3">
+        <p className="text-black/60 dark:text-white/50 text-[10px] tracking-[0.3em] uppercase text-center mt-3">
           Tap anywhere to skip
         </p>
       </div>

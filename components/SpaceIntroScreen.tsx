@@ -166,7 +166,7 @@ export default function SpaceIntroScreen() {
         </p>
 
         {line2 !== null && (
-          <p className="font-display font-extralight text-sm sm:text-base lg:text-lg tracking-[0.4em] uppercase text-white/35">
+          <p className="font-display font-extralight text-sm sm:text-base lg:text-lg tracking-[0.4em] uppercase text-white/50">
             {LINE_2.slice(0, line2)}
             <span
               className={`inline-block w-[1.5px] h-3.5 sm:h-4 ml-0.5 align-middle bg-white/35 ${
@@ -179,7 +179,7 @@ export default function SpaceIntroScreen() {
         )}
       </div>
 
-      <p className="absolute bottom-8 text-white/20 text-[10px] tracking-[0.3em] uppercase">
+      <p className="absolute bottom-8 text-white/50 text-[10px] tracking-[0.3em] uppercase">
         Tap anywhere to skip
       </p>
     </div>

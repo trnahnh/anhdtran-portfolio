@@ -46,7 +46,7 @@ const CincinnatiClock = memo(function CincinnatiClock() {
   if (!time) return null;
 
   return (
-    <div className="mb-3 text-black/60 dark:text-white/40 text-[10px] sm:text-[11px] tracking-widest font-mono select-none transition-colors duration-300 text-center">
+    <div className="mb-3 text-black/60 dark:text-white/50 text-[10px] sm:text-[11px] tracking-widest font-mono select-none transition-colors duration-300 text-center">
       <p>Cincinnati, OH — {time.cinci}</p>
       <p>Hanoi, VN — {time.hanoi}</p>
     </div>
@@ -86,7 +86,7 @@ export default function Terminal({ onExit }: TerminalProps) {
             <span className="w-3 h-3 rounded-full bg-[#febc2e]" />
             <span className="w-3 h-3 rounded-full bg-[#28c840]" />
           </div>
-          <span className="flex-1 text-center text-black/40 dark:text-white/40 text-xs tracking-wide transition-colors duration-300">
+          <span className="flex-1 text-center text-black/60 dark:text-white/60 text-xs tracking-wide transition-colors duration-300">
             visitor@anhdtran — zsh
           </span>
           {/* Spacer to balance traffic lights */}
@@ -103,7 +103,7 @@ export default function Terminal({ onExit }: TerminalProps) {
         </div>
       </div>
 
-      <p className="mt-4 text-[10px] sm:text-xs text-black/40 dark:text-white/30 font-mono select-none transition-colors duration-300">
+      <p className="mt-4 text-[10px] sm:text-xs text-black/60 dark:text-white/50 font-mono select-none transition-colors duration-300">
         &copy; 2026 Anh Tran. All rights reserved.
       </p>
     </div>
