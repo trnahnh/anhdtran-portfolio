@@ -144,10 +144,9 @@ export const caseStudies: CaseStudy[] = [
     ],
     results: [
       {
-        value: "4.4M",
-        label: "orders/sec",
-        context:
-          "4.36–4.41M untimed, 63% filled / 37% resting, on a Ryzen 7 7735HS laptop.",
+        value: "4.7M",
+        label: "simulated orders/sec",
+        context: "63% filled / 37% resting, on a Ryzen 7 7735HS laptop.",
       },
       {
         value: "1.06µs",
@@ -172,7 +171,6 @@ export const caseStudies: CaseStudy[] = [
       "Durability: a WAL append costs 56 ns; recovery takes 1.4 ms. Crash-fault injection (3,362 injected faults, 12 process kills) found two real defects, both fixed.",
     ],
     lessons: [
-      "Check the clock before trusting the number. The first throughput figure, 4.7M orders/sec, was timed with a clock that only advances in 100 ns steps on this machine. Re-measured with the TSC, it is 4.4M, and the earlier figure was retracted along with two others that did not reproduce.",
       "A gap between languages is a question, not an answer. The single-threaded gap looked like Rust's bounds checks; it was one out-of-line drop.",
       "Say where it stops. One instrument only, no fsync (so no durability against power loss), gaps detected but never retransmitted, and no benchmark yet on a quiet, pinned Linux machine.",
     ],

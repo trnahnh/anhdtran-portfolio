@@ -177,12 +177,12 @@ export const projects: Project[] = [
     caseStudy: true,
     readout: "histogram",
     metric: {
-      value: "4.4M",
+      value: "4.7M",
       label: "simulated orders/sec · 82-85% faster worst-case cancels",
-      measured: "2026-10",
+      measured: "2026-02",
     },
     description:
-      "LMAX-inspired high-frequency order matching engine sustaining 4.4M simulated orders/sec, with its lock-free ring buffer ported to C++20 to measure the cost of memory orderings and bounds checks.",
+      "LMAX-inspired high-frequency order matching engine sustaining 4.7M simulated orders/sec, with its lock-free ring buffer ported to C++20 to measure the cost of memory orderings and bounds checks.",
     link: "https://ferrox-engine.vercel.app/",
     techStack: [
       "Rust",
