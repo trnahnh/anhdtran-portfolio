@@ -154,10 +154,10 @@ export const projects: Project[] = [
     metric: {
       value: "-82.9%",
       label: "inference cost",
-      measured: "2026-03",
+      measured: "2026-08",
     },
     description:
-      "Cost-aware LLM gateway that cuts inference costs by 82.9% while holding 98.1% accuracy through entropy-based draft-and-verify routing and semantic caching.",
+      "Cost-aware LLM gateway in Go that cut inference cost 82.9% at 98.1% judged accuracy by drafting on a cheap model, then benchmarked its entropy router against random escalation to find where the savings really come from.",
     link: "https://draft-thinker.vercel.app/",
     techStack: [
       "Go",
