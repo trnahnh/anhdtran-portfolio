@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Cloud } from "lucide-react";
 import UnderlineLink from "./UnderlineLink";
 import ProjectMetric from "./ProjectMetric";
 import ProjectArea, { CaseStudyLink } from "./ProjectArea";
 import type { Project } from "@/lib/data/projects";
-import { techIcon } from "@/lib/techIcons";
+import { isCloudService, techIcon } from "@/lib/techIcons";
 
 interface ProjectCardProps {
   project: Project;
@@ -89,6 +89,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
                           >
                             <path d={icon.path} />
                           </svg>
+                        )}
+                        {!icon && isCloudService(tech) && (
+                          <Cloud
+                            className="h-3 w-3 shrink-0"
+                            strokeWidth={2.5}
+                            aria-hidden="true"
+                          />
                         )}
                         {tech}
                       </span>

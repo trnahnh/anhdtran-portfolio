@@ -54,7 +54,8 @@ import {
  * Logo for each tech-stack name, from Simple Icons (CC0). Named imports, so
  * only these ship. Keyed by the exact strings in lib/data/projects.ts.
  *
- * A name with no entry renders as text alone. That is deliberate for:
+ * A name with no entry renders as text alone (AWS services get a neutral
+ * cloud glyph instead; see isCloudService). That is deliberate for:
  *   - AWS and OpenAI, whose owners asked Simple Icons to remove their marks;
  *   - ChromaDB, Crossplane, ImageKit, Kyverno, XGBoost, not in the set;
  *   - techniques rather than products (Monte Carlo, Arena Allocator, ...);
@@ -133,4 +134,14 @@ const TECH_ICONS: Record<string, SimpleIcon> = {
 
 export function techIcon(name: string): SimpleIcon | undefined {
   return TECH_ICONS[name];
+}
+
+/**
+ * AWS services get a neutral cloud glyph instead of a logo: Simple Icons has
+ * no Amazon marks at all (removed at Amazon's request), and the chips read
+ * better with an icon than without one. It stands for "a cloud service",
+ * not for AWS's mark.
+ */
+export function isCloudService(name: string): boolean {
+  return name.startsWith("AWS ");
 }
