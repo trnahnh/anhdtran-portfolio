@@ -7,6 +7,10 @@ export interface Experience {
   impact?: string;
   /** Shown on the landing page; the rest wait behind "Show all". */
   featured?: boolean;
+  /** Anchor id on the landing list, for a highlight that points here. */
+  slug?: string;
+  /** A headline number for the strip under the name. */
+  highlight?: { value: string; label: string };
   status: "current" | "past" | "future";
 }
 
@@ -37,6 +41,8 @@ export const experiences: Experience[] = [
     impact:
       "Led 6 engineers to 400+ active users; real-time chat cut API response time from 60s to 10s at 1.7K+ requests/min.",
     featured: true,
+    slug: "caphne",
+    highlight: { value: "400+", label: "active users · led 6 engineers" },
     status: "past",
   },
   {

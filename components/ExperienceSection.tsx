@@ -33,7 +33,9 @@ const GROUPS: { title: string; items: Experience[] }[] = [
 
 function Row({ exp }: { exp: Experience }) {
   return (
-    <div className="text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3">
+    <div
+      id={exp.slug ? `experience-${exp.slug}` : undefined}
+      className="scroll-mt-24 text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3">
       <span className="mr-2" aria-hidden="true">
         &#8627;
       </span>

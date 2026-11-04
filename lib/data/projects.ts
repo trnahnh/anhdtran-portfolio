@@ -294,14 +294,3 @@ export const projects: Project[] = [
 export const currentProjects = projects.filter((p) => p.status === "current");
 export const pastProjects = projects.filter((p) => p.status === "past");
 export const allProjects = projects;
-
-/**
- * The three numbers under the name: infra depth, systems speed, real users.
- * Each one is a project's own measured metric, so the strip can never say
- * something the card below it does not.
- */
-export const highlights = ["kiln", "ferrox", "commma"].map((slug) => {
-  const project = projects.find((p) => p.slug === slug);
-  if (!project?.metric) throw new Error(`highlight ${slug} has no metric`);
-  return { slug, name: project.name, metric: project.metric };
-});
