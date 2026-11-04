@@ -79,7 +79,7 @@ export default async function CaseStudyPage({
             </Heading>
             <dl className="grid gap-4 pl-6 sm:pl-7 sm:grid-cols-2 sm:auto-rows-fr">
               {study.results.map((r) => (
-                <div key={r.label} className="rounded-xl border border-border p-4">
+                <div key={r.label} className="rounded-xl border border-border bg-background p-4">
                   <dt className="font-mono text-xs uppercase leading-snug tracking-[0.1em] text-readout">
                     {r.label}
                   </dt>
@@ -111,7 +111,7 @@ export default async function CaseStudyPage({
                 {study.flow.map((step, i) => (
                   <li
                     key={step.label}
-                    className="rounded-lg border border-border px-3 py-2"
+                    className="rounded-lg border border-border bg-background px-3 py-2"
                   >
                     <span className="font-mono text-xs tabular-nums text-readout">
                       {String(i + 1).padStart(2, "0")}

@@ -35,7 +35,10 @@ export default function Highlights() {
             <a
               href={`#${target}`}
               onClick={(e) => jump(e, target)}
-              className="group flex h-full flex-col rounded-xl border border-border p-3 transition-colors duration-300 hover:bg-black/3 dark:hover:bg-white/3 sm:p-4"
+              // Solid, not transparent: the matrix field must never draw
+              // behind the numbers. The hover tint is mixed into the ground
+              // rather than layered over it, so hovering stays solid too.
+              className="group flex h-full flex-col rounded-xl border border-border bg-background p-3 transition-colors duration-300 hover:bg-[color-mix(in_srgb,var(--background),var(--foreground)_3%)] sm:p-4"
             >
               <span className="font-mono text-xl tabular-nums leading-none text-signal sm:text-2xl">
                 {value}
