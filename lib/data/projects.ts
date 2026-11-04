@@ -149,6 +149,7 @@ export const projects: Project[] = [
     name: "Draft-Thinker",
     slug: "draft-thinker",
     area: "ML Systems",
+    caseStudy: true,
     readout: "decay",
     metric: {
       value: "-82.9%",

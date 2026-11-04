@@ -177,6 +177,87 @@ export const caseStudies: CaseStudy[] = [
     next:
       "Kernel-bypass networking (AF_XDP or DPDK), multiple instruments, a FIX gateway, and hot-hot failover.",
   },
+  {
+    slug: "draft-thinker",
+    title: "Draft-Thinker",
+    summary:
+      "A Go gateway that answers with a cheap model and escalates when that model's own token entropy says it is unsure, and the evaluation that showed where the savings really come from.",
+    repo: "https://github.com/trnahnh/draft-thinker",
+    live: "https://draft-thinker.vercel.app/",
+    problem: [
+      "Most applications send every request to a frontier model, whatever the request. That costs money (most queries could be answered by a model 10 to 50 times cheaper), it spends rate limit, and it widens the blast radius when one provider goes down.",
+      "The hard part is knowing when the cheap model is good enough. A classifier on the prompt breaks when the traffic shifts. The bet here was to ask the cheap model itself: read its uncertainty token by token while it writes, and escalate only when it wavers.",
+    ],
+    flow: [
+      { label: "Ingress", detail: "OpenAI-compatible, model: \"auto\"" },
+      { label: "Cache", detail: "Qdrant semantic match, cosine ≥ 0.95" },
+      { label: "Draft", detail: "gpt-4.1-nano, streamed, top-5 logprobs" },
+      { label: "Entropy", detail: "10-token window against T = 2.0 bits" },
+      { label: "Route", detail: "accept, or escalate to gpt-4.1" },
+      { label: "Observe", detail: "decision header, Prometheus, Grafana" },
+    ],
+    built: [
+      "A drop-in OpenAI-compatible gateway in Go. A request for model \"auto\" is checked against a semantic cache, then drafted by gpt-4.1-nano with the top five log-probabilities streamed for every token. The gateway computes the Shannon entropy of each token's renormalized top-5 distribution (at most log2 5, about 2.32 bits) and escalates to gpt-4.1 if any of the first ten tokens, or the ten-token window's mean, crosses 2.0 bits. That threshold came from a sweep from 1.0 to 2.5.",
+      "Failures fall back in both directions: a drafter failure goes to the heavyweight, a heavyweight failure re-runs the drafter. Every response says how it was routed in a header, and the decision is exported to Prometheus.",
+      "Around the gateway sits the part that turned out to matter most: a benchmark harness with an oracle, an always-drafter and an always-heavyweight baseline, random escalation at the same rate as the router, bootstrapped confidence intervals, held-out public benchmarks, and offline learned routers (logistic regression and gradient boosting) to test whether a better rule existed.",
+    ],
+    rejected: [
+      {
+        option: "Prompt classifiers",
+        reason: "decide before the model has said anything, and break under distribution shift",
+      },
+      {
+        option: "Python / LangGraph orchestration",
+        reason: "replaced by a single Go service on the request path",
+      },
+      {
+        option: "Streaming the draft to the client",
+        reason: "an escalation would retract text the user had already read",
+      },
+      {
+        option: "Speculative execution",
+        reason: "fires on 70–89% of requests; cancelled calls could cost 80–88% of the all-heavyweight bill",
+      },
+    ],
+    results: [
+      {
+        value: "-82.9%",
+        label: "inference cost",
+        context:
+          "95% CI 79.6–86.0%, at 98.1% judged accuracy, on 519 prompts against sending everything to gpt-4.1.",
+      },
+      {
+        value: "-83.9%",
+        label: "random escalation, same rate",
+        context:
+          "Also 98.1% accurate. The savings are real, but the cheap drafter earns them, not the routing decision.",
+      },
+      {
+        value: "0.45–0.57",
+        label: "AUROC on public benchmarks",
+        context:
+          "How well token entropy flags a wrong draft on GSM8K, MMLU and ARC-Challenge; 0.5 is a coin flip.",
+      },
+      {
+        value: "61.7%",
+        label: "baseline ceiling, explained",
+        context:
+          "A confidence-threshold baseline could not save more. Traced to how the OpenAI API reports logprobs on 72 of 110 creative prompts; an open model shows no ceiling.",
+      },
+    ],
+    resultNotes: [
+      "The 98.1% is an LLM-as-judge score on 519 prompts I wrote, with gpt-4.1 grading drafts against its own answers. It says the cheap model's answers were judged equivalent, not that they were checked against ground truth.",
+      "On 500 held-out prompts per public benchmark, the router scores 90.4% on GSM8K at an 81.9% cost cut, 78.2% on MMLU at 73.7%, and 93.0% on ARC-Challenge at 79.0%. On all three it is 0.2 to 1.0 points below random escalation at the same rate. The learned routers beat random by 0.8 to 3.0 points but do no better than the mean entropy of the whole answer.",
+      "The semantic cache hit 0% of the project set and GSM8K and 1% of MMLU, where one of three hits served a wrong answer. Its lookup costs about 200 ms at p50, so on this traffic it adds latency rather than saving money.",
+    ],
+    lessons: [
+      "Put a random baseline at the same operating point next to every headline. Without it, 82.9% read as a routing result.",
+      "An uncertainty signal cannot route around errors it cannot see. All 11 bad drafts in the project set were written with low entropy: the model was confidently wrong.",
+      "A ceiling can belong to the instrument. The baseline's 61.7% cap came from the API's logprob encoding, not from the method, and disappeared on a model served locally.",
+    ],
+    next:
+      "A router over the whole trace instead of a prefix, calibration per route, measuring what cancelled calls are actually billed, and a cache hit rate taken from real traffic.",
+  },
 ];
 
 export function getCaseStudy(slug: string) {
