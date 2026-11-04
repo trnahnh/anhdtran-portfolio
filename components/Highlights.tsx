@@ -1,4 +1,15 @@
+"use client";
+
 import { highlights } from "@/lib/data/projects";
+
+// Lenis (SmoothScroll's `anchors` option) does the glide but leaves the
+// click's default alone, so the browser would also write #project-… into the
+// address bar. Cancel that; without Lenis (reduced motion), scroll here.
+function jump(e: React.MouseEvent<HTMLAnchorElement>, slug: string) {
+  e.preventDefault();
+  if (document.documentElement.classList.contains("lenis")) return;
+  document.getElementById(`project-${slug}`)?.scrollIntoView({ block: "start" });
+}
 
 /**
  * Three measured numbers directly under the name, before any section.
@@ -20,6 +31,7 @@ export default function Highlights() {
           <li key={slug}>
             <a
               href={`#project-${slug}`}
+              onClick={(e) => jump(e, slug)}
               className="group flex items-baseline gap-4 rounded-xl border border-border px-3 py-2.5 transition-colors duration-300 hover:bg-black/3 dark:hover:bg-white/3 sm:block sm:p-3"
             >
               {/* Phones: number beside its label, so three fit in one glance.
