@@ -82,7 +82,7 @@ export default function ProjectsSection({
               <div
                 id={`project-${project.slug}`}
                 data-matrix={project.readout ?? "idle"}
-                className="scroll-mt-24 text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3 lg:grid lg:grid-cols-[minmax(0,1fr)_12rem] lg:items-baseline lg:gap-x-8"
+                className="scroll-mt-24 text-muted-foreground rounded-xl p-3 -mx-3 transition-all duration-300 hover:shadow-depth hover-lift hover:bg-black/3 dark:hover:bg-white/3 lg:grid lg:grid-cols-[minmax(0,1fr)_14rem] lg:items-baseline lg:gap-x-8"
               >
                 <div>
                   <ProjectArea project={project} className="pl-6" />

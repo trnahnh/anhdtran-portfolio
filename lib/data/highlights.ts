@@ -10,6 +10,7 @@ import { experiences } from "./experiences";
 export interface Highlight {
   key: string;
   value: string;
+  /** Short on purpose; the full measurement sits on the row it points to. */
   label: string;
   /** What the number belongs to, shown under it. */
   name: string;
@@ -17,33 +18,33 @@ export interface Highlight {
   target: string;
 }
 
-function fromProject(slug: string): Highlight {
+function fromProject(slug: string, label: string): Highlight {
   const project = projects.find((p) => p.slug === slug);
   if (!project?.metric) throw new Error(`highlight ${slug} has no metric`);
   return {
     key: slug,
     value: project.metric.value,
-    label: project.metric.label,
+    label,
     name: project.name,
     target: `project-${slug}`,
   };
 }
 
-function fromExperience(slug: string): Highlight {
+function fromExperience(slug: string, label: string): Highlight {
   const exp = experiences.find((e) => e.slug === slug);
   if (!exp?.highlight) throw new Error(`highlight ${slug} has no number`);
   return {
     key: slug,
     value: exp.highlight.value,
-    label: exp.highlight.label,
+    label,
     name: exp.company,
     target: `experience-${slug}`,
   };
 }
 
 export const highlights: Highlight[] = [
-  fromProject("kiln"),
-  fromProject("ferrox"),
-  fromProject("commma"),
-  fromExperience("caphne"),
+  fromProject("kiln", "replayed placements"),
+  fromProject("ferrox", "orders / sec"),
+  fromProject("commma", "downloads"),
+  fromExperience("caphne", "active users"),
 ];

@@ -52,7 +52,7 @@ export default async function CaseStudyPage({
 
         <article className="space-y-14 text-muted-foreground">
           <header className="fade-in-up fade-in-up-delay-1 pl-6 sm:pl-7">
-            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-readout">
+            <p className="font-mono text-xs uppercase tracking-[0.1em] text-readout">
               Case study
             </p>
             <h1 className="mt-2 text-2xl sm:text-3xl font-medium tracking-tight text-foreground">
@@ -80,7 +80,7 @@ export default async function CaseStudyPage({
             <dl className="grid gap-4 pl-6 sm:pl-7 sm:grid-cols-2">
               {study.results.map((r) => (
                 <div key={r.label} className="rounded-xl border border-border p-4">
-                  <dt className="font-mono text-[10px] uppercase leading-snug tracking-[0.14em] text-readout">
+                  <dt className="font-mono text-xs uppercase leading-snug tracking-[0.1em] text-readout">
                     {r.label}
                   </dt>
                   <dd className="mt-1">
@@ -113,11 +113,11 @@ export default async function CaseStudyPage({
                     key={step.label}
                     className="rounded-lg border border-border px-3 py-2"
                   >
-                    <span className="font-mono text-[10px] tabular-nums text-readout">
+                    <span className="font-mono text-xs tabular-nums text-readout">
                       {String(i + 1).padStart(2, "0")}
                     </span>
                     <span className="ml-2 text-foreground">{step.label}</span>
-                    <span className="mt-0.5 block font-mono text-[11px] leading-snug text-readout">
+                    <span className="mt-0.5 block font-mono text-xs leading-snug text-readout">
                       {step.detail}
                     </span>
                   </li>
@@ -129,7 +129,7 @@ export default async function CaseStudyPage({
                 ))}
               </div>
               <div className="max-w-prose">
-                <h3 className="font-mono text-[10px] uppercase tracking-[0.14em] text-readout mb-2">
+                <h3 className="font-mono text-xs uppercase tracking-[0.1em] text-readout mb-2">
                   Considered and set aside
                 </h3>
                 <ul className="space-y-1.5">
@@ -170,7 +170,7 @@ export default async function CaseStudyPage({
               ))}
             </ul>
             <p className="mt-6 pl-6 sm:pl-7 max-w-prose">
-              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-readout mr-2">
+              <span className="font-mono text-xs uppercase tracking-[0.1em] text-readout mr-2">
                 Next
               </span>
               {study.next}

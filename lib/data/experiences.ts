@@ -9,8 +9,8 @@ export interface Experience {
   featured?: boolean;
   /** Anchor id on the landing list, for a highlight that points here. */
   slug?: string;
-  /** A headline number for the strip under the name. */
-  highlight?: { value: string; label: string };
+  /** A headline number for the strip under the name (its label lives in lib/data/highlights.ts). */
+  highlight?: { value: string };
   status: "current" | "past" | "future";
 }
 
@@ -42,7 +42,7 @@ export const experiences: Experience[] = [
       "Led 6 engineers to 400+ active users; real-time chat cut API response time from 60s to 10s at 1.7K+ requests/min.",
     featured: true,
     slug: "caphne",
-    highlight: { value: "400+", label: "active users · led 6 engineers" },
+    highlight: { value: "400+" },
     status: "past",
   },
   {

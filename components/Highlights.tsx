@@ -26,26 +26,25 @@ export default function Highlights() {
       aria-label="Highlights"
       className="fade-in-up fade-in-up-delay-1 -mt-6 pl-6 sm:pl-7"
     >
-      <ul className="grid auto-rows-fr grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
+      {/* Two by two at every width, so the strip keeps its proportions on a
+          phone. The labels are short on purpose: the full measurement sits
+          beside the card each number points to. */}
+      <ul className="grid auto-rows-fr grid-cols-2 gap-2 sm:gap-4">
         {highlights.map(({ key, value, label, name, target }) => (
           <li key={key}>
             <a
               href={`#${target}`}
               onClick={(e) => jump(e, target)}
-              className="group flex items-baseline gap-4 rounded-xl border border-border px-3 py-2.5 transition-colors duration-300 hover:bg-black/3 dark:hover:bg-white/3 h-full sm:flex-col sm:items-stretch sm:gap-0 sm:p-3"
+              className="group flex h-full flex-col rounded-xl border border-border p-3 transition-colors duration-300 hover:bg-black/3 dark:hover:bg-white/3 sm:p-4"
             >
-              {/* Phones: number beside its label, so all four fit in one
-                  glance. From sm: number above, two by two. */}
-              <span className="w-20 shrink-0 font-mono text-xl tabular-nums leading-none text-signal sm:block sm:w-auto sm:text-2xl">
+              <span className="font-mono text-xl tabular-nums leading-none text-signal sm:text-2xl">
                 {value}
               </span>
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="block font-mono text-[10px] uppercase leading-snug tracking-[0.14em] text-readout sm:mt-2">
-                  {label}
-                </span>
-                <span className="mt-auto block pt-1 text-xs text-muted-foreground transition-colors group-hover:text-foreground sm:pt-2">
-                  {name} &#8595;
-                </span>
+              <span className="mt-2 font-mono text-xs uppercase leading-snug tracking-[0.1em] text-readout">
+                {label}
+              </span>
+              <span className="mt-auto pt-2 text-xs text-muted-foreground transition-colors group-hover:text-foreground sm:text-sm">
+                {name} &#8595;
               </span>
             </a>
           </li>

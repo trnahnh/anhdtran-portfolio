@@ -15,7 +15,7 @@ export default function ProjectArea({
 }) {
   return (
     <span
-      className={`mb-1 block font-mono text-[10px] uppercase tracking-[0.14em] text-readout ${className}`}
+      className={`mb-1 block font-mono text-xs uppercase tracking-[0.1em] text-readout ${className}`}
     >
       {project.area}
     </span>
