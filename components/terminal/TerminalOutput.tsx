@@ -1,7 +1,53 @@
 "use client";
 
 import { forwardRef, memo } from "react";
+import Link from "next/link";
 import type { OutputLine } from "./commands";
+
+const URL_RE = /(https?:\/\/[^\s]+)/g;
+const OWN_SITE = /^https?:\/\/(www\.)?anhdtrn\.com(?=\/|$)/;
+
+const LINK_CLASS =
+  "underline decoration-dotted underline-offset-2 transition-colors hover:text-signal hover:decoration-solid";
+
+/**
+ * A link inside terminal output. Pages on this site open in place, like any
+ * other navigation; everything else (live demos, repos, profiles) opens in a
+ * new tab so the terminal session survives the click.
+ */
+function TermLink({ href, children }: { href: string; children: React.ReactNode }) {
+  if (OWN_SITE.test(href)) {
+    return (
+      <Link href={href.replace(OWN_SITE, "") || "/"} className={LINK_CLASS}>
+        {children}
+      </Link>
+    );
+  }
+  const external = !href.startsWith("mailto:");
+  return (
+    <a
+      href={href}
+      className={LINK_CLASS}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
+      {children}
+    </a>
+  );
+}
+
+/** Text with every URL in it turned into a link. */
+function Linkified({ text }: { text: string }) {
+  // split() with a capturing group puts each match at an odd index.
+  return text.split(URL_RE).map((part, i) =>
+    i % 2 === 1 ? (
+      <TermLink key={i} href={part}>
+        {part}
+      </TermLink>
+    ) : (
+      part
+    ),
+  );
+}
 
 interface TerminalOutputProps {
   history: OutputLine[];
@@ -31,12 +77,16 @@ const TerminalOutput = memo(
                   {line.columns[0]}
                 </span>
                 <span className="min-w-0 wrap-break-word">
-                  {line.columns[1]}
+                  {line.href ? (
+                    <TermLink href={line.href}>{line.columns[1]}</TermLink>
+                  ) : (
+                    line.columns[1]
+                  )}
                 </span>
               </div>
             ) : (
               <pre className="whitespace-pre-wrap font-mono text-xs sm:text-sm">
-                {line.text}
+                <Linkified text={line.text} />
               </pre>
             )}
           </div>

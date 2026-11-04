@@ -13,6 +13,8 @@ export interface OutputLine {
   type: OutputLineType;
   text: string;
   columns?: [string, string];
+  /** Makes the second column a link, for rows that show a handle, not a URL. */
+  href?: string;
 }
 
 const DOB = new Date(2006, 4, 11);
@@ -148,7 +150,7 @@ const COMMANDS: Record<string, CommandDef> = {
     execute: () => {
       const lines: OutputLine[] = [{ type: "accent", text: "" }];
       contacts.forEach((c) => {
-        lines.push({ type: "response", text: "", columns: [c.label, c.value] });
+        lines.push({ type: "response", text: "", columns: [c.label, c.value], href: c.href });
       });
       lines.push({ type: "accent", text: "" });
       return lines;
