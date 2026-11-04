@@ -6,6 +6,7 @@ import UnderlineLink from "./UnderlineLink";
 import ProjectMetric from "./ProjectMetric";
 import ProjectArea, { CaseStudyLink } from "./ProjectArea";
 import type { Project } from "@/lib/data/projects";
+import { techIcon } from "@/lib/techIcons";
 
 interface ProjectCardProps {
   project: Project;
@@ -69,14 +70,30 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             >
               <div className="overflow-hidden pb-px">
                 <div className="flex flex-wrap gap-2">
-                  {project.techStack.map((tech) => (
-                    <span
-                      key={tech}
-                      className="px-2.5 py-1 text-xs rounded-full bg-muted text-muted-foreground border border-border shadow-sm"
-                    >
-                      {tech}
-                    </span>
-                  ))}
+                  {project.techStack.map((tech) => {
+                    const icon = techIcon(tech);
+                    return (
+                      <span
+                        key={tech}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-muted text-muted-foreground border border-border shadow-sm"
+                      >
+                        {/* One colour, the chip's own: brand colours would
+                            put fifty accents beside the site's one. */}
+                        {icon && (
+                          <svg
+                            viewBox="0 0 24 24"
+                            className="h-3 w-3 shrink-0"
+                            fill="currentColor"
+                            aria-hidden="true"
+                            focusable="false"
+                          >
+                            <path d={icon.path} />
+                          </svg>
+                        )}
+                        {tech}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             </div>
