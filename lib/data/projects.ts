@@ -204,6 +204,12 @@ export const projects: Project[] = [
     caseStudy: true,
     readout: "blocks",
     nameAlt: "(인연)",
+    // inyeon-upstream/evals/RESULTS.md: 28 of 30 real commits, gpt-4.1-mini.
+    metric: {
+      value: "93.3%",
+      label: "valid Conventional Commits · vs 66.7% hand-written",
+      measured: "2026-11",
+    },
     description:
       "Agentic Git CLI that splits, commits, reviews and opens PRs in one command.",
     link: "https://inyeon-upstream.vercel.app/",
