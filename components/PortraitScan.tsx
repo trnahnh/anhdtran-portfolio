@@ -25,9 +25,9 @@ import { matrix } from "@/components/matrix/matrixStore";
  * chosen to watch.
  *
  * About four and a half seconds including the fade. Shown once per browser
- * session: the first time the site is opened in a tab, not again on a route
- * change back to /, and again in a new tab, after the browser is closed, or
- * on any reload, which reads as asking for the site fresh.
+ * session: the first time the site is opened in a tab, and not again on a
+ * reload or a route change back to /. It is an intro, so it plays on the way
+ * in and then gets out of the way; the Replay button is how to see it again.
  * Skippable by any input. Reduced motion or no WebGL shows nothing extra.
  * While the ambient scan runs, a class on <html> thins the reading column's
  * fog (the matrix field it exists to hide is paused anyway) so the figure
@@ -173,26 +173,6 @@ type Layout = {
   proj: Float32Array;
   captionTop: number; // CSS px
 };
-
-/**
- * Any reload plays the scan again. Browsers give no dependable way to tell a
- * hard reload from a normal one: Chrome reports a revalidated 304 as
- * delivered from cache, Safari and Firefox report nothing, so the previous
- * hard-only test replayed in some browsers and never in others. The
- * navigation entry's type is readable before first paint, so the gate script
- * in app/layout.tsx applies the same test.
- */
-function isReload() {
-  const nav = performance.getEntriesByType("navigation")[0] as
-    | PerformanceNavigationTiming
-    | undefined;
-  return !!nav && nav.type === "reload";
-}
-
-// The navigation entry belongs to the document, so it still says "reload"
-// when the component remounts on a route change back to /. A reload buys one
-// scan; once that scan has run the allowance is spent for the document.
-let reloadSpent = false;
 
 function skipped(reason: string) {
   console.info(`[portrait scan] skipped: ${reason}`);
@@ -408,7 +388,7 @@ export default function PortraitScan() {
     try {
       localStorage.removeItem(LEGACY_STORAGE_KEY);
     } catch {}
-    const seen = sessionStorage.getItem(SCAN_STORAGE_KEY) === "true" && (reloadSpent || !isReload());
+    const seen = sessionStorage.getItem(SCAN_STORAGE_KEY) === "true";
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     document.documentElement.classList.remove(HTML_CLASS);
     if (!seen && !reduced) {
@@ -475,7 +455,6 @@ export default function PortraitScan() {
       // Only a scan that ran counts as seen; see the note at the top.
       if (start > 0) {
         sessionStorage.setItem(SCAN_STORAGE_KEY, "true");
-        reloadSpent = true;
       }
       matrix.locked = false;
       matrix.amp = 1;
