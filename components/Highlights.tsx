@@ -26,24 +26,24 @@ export default function Highlights() {
       aria-label="Highlights"
       className="fade-in-up fade-in-up-delay-1 -mt-6 pl-6 sm:pl-7"
     >
-      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
+      <ul className="grid auto-rows-fr grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-4">
         {highlights.map(({ key, value, label, name, target }) => (
           <li key={key}>
             <a
               href={`#${target}`}
               onClick={(e) => jump(e, target)}
-              className="group flex items-baseline gap-4 rounded-xl border border-border px-3 py-2.5 transition-colors duration-300 hover:bg-black/3 dark:hover:bg-white/3 sm:block sm:h-full sm:p-3"
+              className="group flex items-baseline gap-4 rounded-xl border border-border px-3 py-2.5 transition-colors duration-300 hover:bg-black/3 dark:hover:bg-white/3 h-full sm:flex-col sm:items-stretch sm:gap-0 sm:p-3"
             >
               {/* Phones: number beside its label, so all four fit in one
                   glance. From sm: number above, two by two. */}
               <span className="w-20 shrink-0 font-mono text-xl tabular-nums leading-none text-signal sm:block sm:w-auto sm:text-2xl">
                 {value}
               </span>
-              <span className="min-w-0">
+              <span className="flex min-w-0 flex-1 flex-col">
                 <span className="block font-mono text-[10px] uppercase leading-snug tracking-[0.14em] text-readout sm:mt-2">
                   {label}
                 </span>
-                <span className="mt-1 block text-xs text-muted-foreground transition-colors group-hover:text-foreground sm:mt-1.5">
+                <span className="mt-auto block pt-1 text-xs text-muted-foreground transition-colors group-hover:text-foreground sm:pt-2">
                   {name} &#8595;
                 </span>
               </span>
