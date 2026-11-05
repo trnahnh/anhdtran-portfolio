@@ -50,6 +50,8 @@ export const experiences: Experience[] = [
     company: "KatanaID",
     companyUrl: "https://katanaid.com",
     description: "AI Branding Toolkit",
+    impact:
+      "Led 5 engineers; Go backend fans out 19+ external API calls per brand report with goroutines, serving 2,300+ requests/day.",
     featured: true,
     status: "past",
   },
