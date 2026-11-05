@@ -101,9 +101,13 @@ export default function ProjectsSection({
                   </UnderlineLink>
                   <span className="mx-2">—</span>
                   <span>{project.description}</span>
-                  <CaseStudyLink project={project} />
+                  {/* Desktop: under the description, the number in the
+                      gutter beside it. Phone: after the number, so the
+                      description and its number stay together. */}
+                  <CaseStudyLink project={project} className="hidden pl-6 lg:block" />
                 </div>
                 {project.metric && <ProjectMetric metric={project.metric} />}
+                <CaseStudyLink project={project} className="lg:hidden" />
               </div>
             </ScrollReveal>
           ))}

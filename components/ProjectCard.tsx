@@ -55,11 +55,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
               </button>
             )}
           </div>
-          <div className="mt-1">
-            <span>— {project.description}</span>
-            <CaseStudyLink project={project} />
-          </div>
+          <p className="mt-1">— {project.description}</p>
           {project.metric && <ProjectMetric metric={project.metric} />}
+          <CaseStudyLink project={project} />
           {project.techStack && project.techStack.length > 0 && (
             <div
               className={`grid transition-all duration-300 ease-in-out ${

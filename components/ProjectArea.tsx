@@ -22,15 +22,34 @@ export default function ProjectArea({
   );
 }
 
-/** Inline link to /projects/[slug], rendered only where a case study exists. */
-export function CaseStudyLink({ project }: { project: Project }) {
+/**
+ * Link to /projects/[slug], rendered only where a case study exists. It sits
+ * on its own line in the card's mono label style: tacked onto the end of the
+ * description it read as the sentence's last words and wrapped to a
+ * different spot on every card.
+ */
+export function CaseStudyLink({
+  project,
+  className = "",
+}: {
+  project: Project;
+  className?: string;
+}) {
   if (!project.caseStudy) return null;
   return (
-    <Link
-      href={`/projects/${project.slug}`}
-      className="underline-link interactive ml-2 whitespace-nowrap text-foreground"
-    >
-      Case study &#8594;
-    </Link>
+    <p className={`mt-2 font-mono text-xs uppercase leading-6 tracking-[0.1em] ${className}`}>
+      <Link
+        href={`/projects/${project.slug}`}
+        className="group underline-link interactive whitespace-nowrap text-foreground"
+      >
+        Read case study{" "}
+        <span
+          aria-hidden="true"
+          className="inline-block transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none"
+        >
+          &#8594;
+        </span>
+      </Link>
+    </p>
   );
 }
