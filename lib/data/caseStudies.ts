@@ -5,9 +5,6 @@
  * friends), and each one carries the conditions it was measured under. Where
  * a project loses, or a headline number does not hold up, the study says so:
  * the reader is an engineer who will click through to the repo.
- *
- * A private repo has no link, so its study says where the numbers come from
- * instead (sourceNote): the reader should know they cannot check them.
  */
 
 export interface CaseStudy {
@@ -15,9 +12,7 @@ export interface CaseStudy {
   title: string;
   /** One sentence under the title. */
   summary: string;
-  repo?: string;
-  /** Shown in place of the source link when the repo is private. */
-  sourceNote?: string;
+  repo: string;
   live?: string;
   problem: string[];
   /** The path a request (or an order) takes, one box per step. */
@@ -117,8 +112,7 @@ export const caseStudies: CaseStudy[] = [
     title: "Commma",
     summary:
       "A coding-activity tracker with 600+ downloads, and the concurrency and crash tests that showed its totals could be counted twice or lost, until an advisory lock and an outbox made them exact.",
-    sourceNote:
-      "The source is private. Every number here comes from its architecture decision records, its metrics doc and the saved output of the tests described below.",
+    repo: "https://github.com/trnahnh/commma-coding-progress-tracker",
     live: "https://commma.dev/",
     problem: [
       "Commma's numbers are its product. Coding time drives the streaks, the leaderboards and the weekly recap, and people compare them with each other. A total that is wrong in either direction is the bug users notice and take personally.",
