@@ -69,6 +69,7 @@ export const projects: Project[] = [
     name: "Commma",
     slug: "commma",
     area: "Product",
+    caseStudy: true,
     readout: "heatmap",
     metric: {
       value: "600+",

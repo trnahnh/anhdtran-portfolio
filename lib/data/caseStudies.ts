@@ -5,6 +5,9 @@
  * friends), and each one carries the conditions it was measured under. Where
  * a project loses, or a headline number does not hold up, the study says so:
  * the reader is an engineer who will click through to the repo.
+ *
+ * A private repo has no link, so its study says where the numbers come from
+ * instead (sourceNote): the reader should know they cannot check them.
  */
 
 export interface CaseStudy {
@@ -12,7 +15,9 @@ export interface CaseStudy {
   title: string;
   /** One sentence under the title. */
   summary: string;
-  repo: string;
+  repo?: string;
+  /** Shown in place of the source link when the repo is private. */
+  sourceNote?: string;
   live?: string;
   problem: string[];
   /** The path a request (or an order) takes, one box per step. */
@@ -106,6 +111,93 @@ export const caseStudies: CaseStudy[] = [
     ],
     next:
       "An Ed25519-signed external anchor for the audit hash chain, and running the GKE configuration that is written but has never been applied.",
+  },
+  {
+    slug: "commma",
+    title: "Commma",
+    summary:
+      "A coding-activity tracker with 600+ downloads, and the concurrency and crash tests that showed its totals could be counted twice or lost, until an advisory lock and an outbox made them exact.",
+    sourceNote:
+      "The source is private. Every number here comes from its architecture decision records, its metrics doc and the saved output of the tests described below.",
+    live: "https://commma.dev/",
+    problem: [
+      "Commma's numbers are its product. Coding time drives the streaks, the leaderboards and the weekly recap, and people compare them with each other. A total that is wrong in either direction is the bug users notice and take personally.",
+      "A VS Code extension sends activity in batches. Every five minutes an aggregator on the API turns finished stretches of it into sessions and adds their seconds to a Redis leaderboard. The design record called that aggregator idempotent. It was, for one run at a time. Nothing had checked two runs at once, or a crash halfway through.",
+    ],
+    flow: [
+      { label: "Capture", detail: "VS Code extension · key labels, never content" },
+      { label: "Ingest", detail: "Hono + Zod · rate cap, privacy enforced" },
+      { label: "Events", detail: "Postgres hot table, drained as it is used" },
+      { label: "Aggregate", detail: "every 5 min · 15-min idle gap ends a session" },
+      { label: "Finalize", detail: "advisory lock per user, one transaction" },
+      { label: "Leaderboard", detail: "outbox → absolute ZADD in Redis" },
+    ],
+    built: [
+      "The extension counts keystrokes by label (a letter, a digit, a modifier) and never records what was typed. The API enforces each user's privacy mode at ingest, so a user on the summary mode never has file paths or key counts stored, whatever a client sends. Raw events land in a Postgres table that is emptied as they become sessions, so it stays bounded.",
+      "Aggregation runs inside the API process on a five-minute interval, not through a queue. A session ends after 15 idle minutes, and only ended sessions are finalized: one transaction per user writes the session, its languages, files, heatmap and streak, and deletes the events it used.",
+      "Each user's finalize now starts with pg_try_advisory_xact_lock on a hash of the user id and re-reads that user's events inside the transaction. A second scanner that cannot take the lock skips the user this cycle instead of waiting; the holder finishes it.",
+      "The leaderboard sits behind an outbox. A session is inserted with leaderboard_pending set, in the same transaction. At the end of each cycle the scanner recomputes each affected user's total for the period from Postgres, writes that absolute value to Redis, and clears the flag. Replayed after a crash, it writes the same number again instead of adding it twice.",
+    ],
+    rejected: [
+      {
+        option: "BullMQ",
+        reason:
+          "an idle worker polls Redis nonstop, enough to spend the free tier's ~500K monthly commands before a single job runs",
+      },
+      {
+        option: "ZINCRBY inside the transaction",
+        reason: "a crash after the Redis write and before the commit double-counts on retry",
+      },
+      {
+        option: "A blocking advisory lock",
+        reason: "also correct, but stacks scanners behind one slow user; skipping never waits",
+      },
+      {
+        option: "Rebuilding the leaderboard on a schedule",
+        reason: "scans every session ever written, so its cost grows with history",
+      },
+    ],
+    results: [
+      {
+        value: "0 of 50",
+        label: "trials with duplicate sessions",
+        context:
+          "Two and then four concurrent scanners, 400 users, 1,220 expected sessions. Before the lock: 2,390 written, 1,170 of them duplicates, in all 50 trials.",
+      },
+      {
+        value: "0 of 40",
+        label: "crash trials with leaderboard drift",
+        context:
+          "The aggregator killed with SIGKILL mid-run, 20 users per trial. Before the outbox: 35 of 40 drifted, losing 91,841 seconds of coding time between them.",
+      },
+      {
+        value: "-70%",
+        label: "privacy lookup per ingest",
+        context:
+          "42 ms to 13 ms p50, measured server-side on prod, by serving each user's mode from Redis instead of reading Postgres on every request.",
+      },
+      {
+        value: "0",
+        label: "server errors under load",
+        context:
+          "4,500 ingest requests carrying 271,200 events against the live API on a t4g.small, then reads at about 155 ms p95 server-side.",
+      },
+    ],
+    resultNotes: [
+      "Both correctness numbers come from integration tests against Postgres and Redis, run before and after each fix. The concurrency test runs 50 trials of 400 users. The crash test kills the process at a different point in each of 40 trials, then checks every user's leaderboard score against the sum of their sessions.",
+      "Even before the fix, the crash test never lost or duplicated a session in Postgres: each user's finalize is one transaction. All the drift was in Redis, where ZINCRBY ran after the commit, and it only ever lost time. The outbox closes that gap, and because the write is an absolute total, a retry cannot overshoot either.",
+      "The cache had a race of its own. A read that started before a privacy change could finish after it and put the old mode back for up to 60 seconds. Writing the new value on change, and filling the cache only when the key is empty, took that window to 0 in the test written for it.",
+      "The load test is the weakest number here. It ran from my laptop, so its latencies include about 100 ms of network. Ingest levelled off near 95 requests a second, which looked like the server's ceiling, but it was my upload bandwidth: smaller batches reached about 340 a second, and the server never went above 25% CPU. Raising the database pool from 10 to 25 connections gave 2.3x the throughput when every query crossed the internet, and nothing on the real server, which sits in the same region as its database. The real ceiling is still unmeasured.",
+      "Two smaller checks. The extension adds about 0.6 µs per keystroke (p99 about 2 µs over 200,000 keystrokes) and activates in about 40 ms. A property test planted a secret in 9,000 random editing sessions, 361,455 edits in all, and no outgoing request ever contained it.",
+    ],
+    lessons: [
+      "Idempotent for one run is not idempotent. The design record said re-runs were safe; nothing had run two at once until a test did, and every trial failed.",
+      "Two stores and one commit need an outbox. Any write that happens after the commit can be lost by a crash between them, and making the write absolute instead of incremental is what makes the retry safe.",
+      "A cache fill can race its own invalidation. Deleting the key on change was not enough while a slower read was still in flight.",
+      "Find out what the load generator is measuring before calling anything a ceiling. Two of my numbers, a throughput cap and a pool-size win, were properties of my laptop.",
+    ],
+    next:
+      "An in-region load generator to find the real ingest ceiling, a leaderboard drift check that runs in production and not only in tests, and aggregation in its own worker once more than one API instance runs.",
   },
   {
     slug: "ferrox",

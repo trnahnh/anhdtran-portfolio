@@ -60,9 +60,11 @@ export default async function CaseStudyPage({
             </h1>
             <p className="mt-3 max-w-prose">{study.summary}</p>
             <p className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-sm">
-              <UnderlineLink href={study.repo} external className="text-foreground">
-                Source
-              </UnderlineLink>
+              {study.repo && (
+                <UnderlineLink href={study.repo} external className="text-foreground">
+                  Source
+                </UnderlineLink>
+              )}
               {study.live && (
                 <UnderlineLink href={study.live} external className="text-foreground">
                   Live
@@ -70,6 +72,11 @@ export default async function CaseStudyPage({
               )}
               <UnderlineLink href="/projects">All projects</UnderlineLink>
             </p>
+            {study.sourceNote && (
+              <p className="mt-3 max-w-prose font-mono text-xs leading-relaxed text-readout">
+                {study.sourceNote}
+              </p>
+            )}
           </header>
 
           {/* Results first: the reader came for them. */}
