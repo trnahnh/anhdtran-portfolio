@@ -29,7 +29,7 @@ export const experiences: Experience[] = [
     companyUrl: "https://commma.dev",
     description: "Pace your Code",
     impact:
-      "600+ downloads; coding-time totals made exact under concurrency and crashes with an advisory lock and a transactional outbox.",
+      "700+ downloads; coding-time totals made exact under concurrency and crashes with an advisory lock and a transactional outbox.",
     featured: true,
     status: "current",
   },

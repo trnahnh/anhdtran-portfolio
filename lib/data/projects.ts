@@ -72,7 +72,7 @@ export const projects: Project[] = [
     caseStudy: true,
     readout: "heatmap",
     metric: {
-      value: "600+",
+      value: "700+",
       label: "downloads · VS Code + Open VSX",
       measured: "2026-10",
     },

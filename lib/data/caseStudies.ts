@@ -111,7 +111,7 @@ export const caseStudies: CaseStudy[] = [
     slug: "commma",
     title: "Commma",
     summary:
-      "A coding-activity tracker with 600+ downloads, and the concurrency and crash tests that showed its totals could be counted twice or lost, until an advisory lock and an outbox made them exact.",
+      "A coding-activity tracker with 700+ downloads, and the concurrency and crash tests that showed its totals could be counted twice or lost, until an advisory lock and an outbox made them exact.",
     repo: "https://github.com/trnahnh/commma-coding-progress-tracker",
     live: "https://commma.dev/",
     problem: [
