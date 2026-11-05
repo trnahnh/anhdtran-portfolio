@@ -68,7 +68,7 @@ export default function Footer() {
       <p
         ref={ageRef}
         aria-hidden="true"
-        className="text-center text-xs text-readout/40 mt-2 font-mono tabular-nums tracking-wider min-h-[1rem] xl:hidden"
+        className="text-center text-xs text-readout/40 mt-2 font-mono tabular-nums tracking-wider min-h-[1rem]"
       />
     </footer>
   );
