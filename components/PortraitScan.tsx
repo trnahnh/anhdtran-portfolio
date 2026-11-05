@@ -461,7 +461,7 @@ export default function PortraitScan() {
       matrix.dirty = true;
       stopAudio();
       window.removeEventListener("pointerdown", skip);
-      window.removeEventListener("keydown", skip);
+      window.removeEventListener("keydown", onSkipKey);
       window.removeEventListener("wheel", skip);
       window.removeEventListener("pointermove", onPointer);
       observer?.disconnect();
@@ -478,6 +478,13 @@ export default function PortraitScan() {
       skipAt = performance.now();
     };
     skipRef.current = skip;
+
+    // Only the keys that mean "skip", as on the other intros. Any key used
+    // to count, and a volume or media key fires keydown too, so turning the
+    // sound down threw the intro away.
+    const onSkipKey = (e: KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === "Escape" || e.key === " ") skip();
+    };
 
     const onPointer = (e: PointerEvent) => {
       pointer.tx = (e.clientX / window.innerWidth) * 2 - 1;
@@ -729,7 +736,7 @@ export default function PortraitScan() {
     };
 
     window.addEventListener("pointerdown", skip, { passive: true });
-    window.addEventListener("keydown", skip);
+    window.addEventListener("keydown", onSkipKey);
     window.addEventListener("wheel", skip, { passive: true });
     window.addEventListener("pointermove", onPointer, { passive: true });
 
