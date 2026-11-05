@@ -17,7 +17,7 @@ const quotes = [
 ];
 
 // Long enough to read a quote and its author twice over.
-const ADVANCE_MS = 6000;
+const ADVANCE_MS = 5000;
 
 export default function QuotesSection() {
   const [index, setIndex] = useState(0);
