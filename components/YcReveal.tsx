@@ -3,7 +3,14 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  animate,
+  motion,
+  useMotionValue,
+  useTransform,
+  type MotionStyle,
+} from "framer-motion";
 import { X } from "lucide-react";
 import { useMounted } from "@/hooks/useMounted";
 
@@ -48,11 +55,14 @@ const Y_RIGHT_TOP: [number, number] = [925, 259];
 const Y_JOIN: [number, number] = [621, 835];
 const Y_FOOT = 1275;
 const Y_STROKE = 120;
-// Centre of the Y as a fraction of the photo, and its size against the photo
-// width (0.6 wide, 0.85 tall). The zoom scales about this point.
-const Y_ORIGIN = "51.5% 48%";
-const Y_W = 0.6;
-const Y_H = 0.85;
+// The Y's outer edges (strokes included) and its centre, as fractions of the
+// photo's width and height. The zoom scales about the centre.
+const Y_BOX = { left: 0.217, right: 0.813, top: 0.162, bottom: 0.797 };
+const Y_CX = 0.515;
+const Y_CY = 0.48;
+const Y_ORIGIN = `${Y_CX * 100}% ${Y_CY * 100}%`;
+// The slow push-in while the Y draws, on top of the starting zoom.
+const PUSH = 1.06;
 
 // The LED sign's red, sampled from the photo.
 const SIGN_FIELD =
@@ -64,23 +74,40 @@ const SIGN_DOTS =
 const at = (phase: Phase, from: Phase) =>
   PHASES.indexOf(phase) >= PHASES.indexOf(from);
 
-/** Card width: big, but the 3:4 photo and its caption fit the screen. */
+/**
+ * Card width: big, but the 3:4 photo fits the screen with ~76px to spare
+ * below for the caption. The card is centred on its own (the caption sits
+ * outside the layout), which is what lets zoomFor know where the Y is.
+ */
 function cardWidth() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  return Math.round(Math.min(vw * 0.92, 640, (vh - 128) * 0.75));
+  return Math.round(Math.min(vw * 0.92, 640, (vh - 152) * 0.75));
 }
 
 /**
- * How far the card starts zoomed in, so the Y nearly fills the screen. Kept
- * to ~68% of the height: the caption below the card puts the Y's centre a
- * little above the screen's, and the push-in adds another 6%, so anything
- * bigger crops the arms off the top.
+ * How far the card starts zoomed in: as big as the Y can get, at the end of
+ * the push-in, with all four edges of it still inside the screen and clear
+ * of a margin. Worked out from where the Y actually lands, since the card is
+ * centred but the Y isn't centred in the photo. On a phone the width is the
+ * limit; on a laptop, the height.
  */
 function zoomFor(w: number) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  return Math.max(1, Math.min((vh * 0.68) / (Y_H * w), (vw * 0.82) / (Y_W * w)));
+  const h = (w * 4) / 3;
+  // The zoom's fixed point, on screen.
+  const ox = vw / 2 + (Y_CX - 0.5) * w;
+  const oy = vh / 2 + (Y_CY - 0.5) * h;
+  const mx = Math.max(16, vw * 0.04);
+  const my = Math.max(24, vh * 0.07);
+  const fit = Math.min(
+    (ox - mx) / ((Y_CX - Y_BOX.left) * w),
+    (vw - mx - ox) / ((Y_BOX.right - Y_CX) * w),
+    (oy - my) / ((Y_CY - Y_BOX.top) * h),
+    (vh - my - oy) / ((Y_BOX.bottom - Y_CY) * h),
+  );
+  return Math.max(1, fit / PUSH);
 }
 
 export default function YcReveal({
@@ -121,6 +148,9 @@ function Reveal({
   const [loaded, setLoaded] = useState(false);
   const [w, setW] = useState(cardWidth);
   const zoom = zoomFor(w);
+  // A phone on its side leaves a card under 200px wide: the stamp and the
+  // close button shrink to suit it.
+  const compact = w < 280;
   const timers = useRef<number[]>([]);
   const overlayRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -170,11 +200,49 @@ function Reveal({
   }, [onClose]);
 
   const done = phase === "done";
-  const zoomed = !at(phase, "pull");
   const showPhoto = at(phase, "match") && loaded;
+  // The pull back waits for the photo too, or it would pull back from nothing.
+  const pulling = at(phase, "pull") && loaded;
+
+  /*
+   * The pull back is one progress value, 0 → 1, and the card's scale, the
+   * mask opening and the red fading are all read off it. Run on separate
+   * clocks they drifted apart: the mask and the red finished first and left
+   * a still-oversized photo hanging off both sides of a phone, on black.
+   */
+  const push = useMotionValue(still ? 1 : zoom);
+  const pull = useMotionValue(still ? 1 : 0);
+  const cardScale = useTransform([push, pull], ([s, p]: number[]) => s + (1 - s) * p);
+  // The oval holds while the card is bigger than the screen and opens as it
+  // lands. On a phone the zoomed photo stays wider than the screen until
+  // ~85% of the way back, so anything earlier shows its edges hanging off
+  // both sides; the red goes in step, so there's never a bare photo on black.
+  const maskX = useTransform(pull, [0, 0.7, 1], ["52%", "64%", "150%"]);
+  const maskY = useTransform(pull, [0, 0.7, 1], ["56%", "68%", "150%"]);
+  const redOpacity = useTransform(pull, [0.45, 1], [1, 0]);
+
+  useEffect(() => {
+    if (still) return;
+    if (!at(phase, "sign")) {
+      push.set(zoom);
+      return;
+    }
+    // The slow push-in while the Y draws.
+    const c = animate(push, zoom * PUSH, { duration: 1.4, ease: "linear" });
+    return () => c.stop();
+  }, [phase, zoom, still, push]);
+
+  useEffect(() => {
+    if (!pulling || still) return;
+    const c = animate(pull, 1, { type: "spring", stiffness: 70, damping: 16, mass: 0.9 });
+    return () => c.stop();
+  }, [pulling, still, pull]);
   // The drawn Y: on while it draws, and kept on past the match-cut until the
   // real one has loaded to take over from it.
   const showY = !still && (phase === "sign" || (at(phase, "match") && !loaded));
+  // The card is at its real size with the photo in it: time for the stamp,
+  // the caption and the close button.
+  const settled = done && loaded;
 
   return (
     <motion.div
@@ -218,18 +286,17 @@ function Reveal({
             style={{
               backgroundImage: `${SIGN_DOTS}, ${SIGN_FIELD}`,
               backgroundSize: "6px 6px, 100% 100%",
+              // Held through the match-cut, so the photo's red sign melts
+              // into it, and let go as the camera pulls back.
+              opacity: redOpacity,
             }}
-            initial={{ clipPath: "circle(0% at 50% 50%)", opacity: 1 }}
+            initial={{ clipPath: "circle(0% at 50% 50%)" }}
             animate={{
               clipPath: at(phase, "dive")
                 ? "circle(150% at 50% 50%)"
                 : "circle(0% at 50% 50%)",
-              opacity: showPhoto ? 0 : 1,
             }}
-            transition={{
-              clipPath: { duration: 0.6, ease: [0.7, 0, 0.84, 0] },
-              opacity: { duration: 0.7, delay: 0.15 },
-            }}
+            transition={{ duration: 0.6, ease: [0.7, 0, 0.84, 0] }}
           />
           <motion.div
             className="absolute inset-0 bg-white pointer-events-none"
@@ -240,27 +307,15 @@ function Reveal({
         </>
       )}
 
-      <div className="absolute inset-0 flex flex-col items-center justify-center p-4 pointer-events-none">
-        <motion.figure
+      {/* No padding here: the card must sit dead centre for zoomFor's sums,
+          and cardWidth already keeps it clear of the edges. */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <figure
           role="dialog"
           aria-modal="true"
           aria-label="Y Combinator Startup School 2026"
           className="relative m-0 pointer-events-auto"
-          style={{ width: w, transformOrigin: Y_ORIGIN }}
-          initial={{ opacity: 0, scale: still ? 1 : zoom }}
-          animate={{
-            opacity: at(phase, "sign") ? 1 : 0,
-            // A slow push-in while the Y draws, then the pull back.
-            scale: zoomed ? (at(phase, "sign") ? zoom * 1.06 : zoom) : 1,
-            x: phase === "sign" ? [0, -7, 6, -4, 2, 0] : 0,
-          }}
-          transition={{
-            opacity: { duration: 0.01 },
-            scale: zoomed
-              ? { duration: 1.4, ease: "linear" }
-              : { type: "spring", stiffness: 70, damping: 16, mass: 0.9 },
-            x: { duration: 0.4 },
-          }}
+          style={{ width: w }}
           onClick={(e) => {
             // Inside the card, a click only skips the intro, never closes.
             e.stopPropagation();
@@ -268,15 +323,37 @@ function Reveal({
           }}
         >
           <motion.div
-            className="relative overflow-hidden rounded-xl"
+            className="relative aspect-3/4 overflow-hidden rounded-xl"
+            style={{ transformOrigin: Y_ORIGIN, scale: cardScale }}
+            initial={{ opacity: 0 }}
             animate={{
-              boxShadow: done
+              opacity: at(phase, "sign") ? 1 : 0,
+              x: phase === "sign" ? [0, -7, 6, -4, 2, 0] : 0,
+              boxShadow: settled
                 ? "0 30px 80px -20px rgba(242,101,34,0.45), 0 0 0 1px rgba(255,255,255,0.1)"
                 : "0 0 0 0 rgba(0,0,0,0)",
             }}
-            transition={{ duration: 0.8 }}
+            transition={{
+              opacity: { duration: 0.01 },
+              x: { duration: 0.4 },
+              boxShadow: { duration: 0.8 },
+            }}
           >
+            {/* Through the match-cut the photo shows only through a soft oval
+                around the Y, so its edges dissolve into the red instead of
+                a hard rectangle appearing. The oval opens as the camera
+                pulls back. */}
             <motion.div
+              // CSS variables driven by motion values; framer supports them,
+              // its types don't list them.
+              style={
+                {
+                  "--mx": maskX,
+                  "--my": maskY,
+                  maskImage: `radial-gradient(ellipse var(--mx) var(--my) at ${Y_ORIGIN}, #000 58%, transparent 92%)`,
+                  WebkitMaskImage: `radial-gradient(ellipse var(--mx) var(--my) at ${Y_ORIGIN}, #000 58%, transparent 92%)`,
+                } as MotionStyle
+              }
               initial={{ opacity: 0 }}
               animate={{ opacity: showPhoto ? 1 : 0 }}
               transition={{ duration: 0.5 }}
@@ -332,18 +409,26 @@ function Reveal({
             </motion.svg>
 
             <motion.div
-              className="absolute bottom-4 left-4 rounded-md border-2 bg-black/60 px-3 py-1.5 font-mono uppercase leading-tight"
+              className={`absolute rounded-md border-2 bg-black/60 font-mono uppercase leading-tight whitespace-nowrap ${
+                compact ? "bottom-2 left-2 px-2 py-1" : "bottom-4 left-4 px-3 py-1.5"
+              }`}
               style={{ borderColor: YC, color: YC, rotate: -8 }}
               initial={{ opacity: 0, scale: still ? 1 : 2.4 }}
-              animate={done ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 2.4 }}
+              animate={settled ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 2.4 }}
               transition={
                 still
                   ? { duration: 0.2 }
                   : { delay: 0.15, type: "spring", stiffness: 520, damping: 17 }
               }
             >
-              <span className="block text-[10px] sm:text-xs tracking-[0.2em]">Y Combinator</span>
-              <span className="block text-sm sm:text-base font-bold tracking-wider">
+              <span
+                className={`block tracking-[0.2em] ${compact ? "text-[7px]" : "text-[10px] sm:text-xs"}`}
+              >
+                Y Combinator
+              </span>
+              <span
+                className={`block font-bold tracking-wider ${compact ? "text-[10px]" : "text-sm sm:text-base"}`}
+              >
                 Startup School &rsquo;26
               </span>
             </motion.div>
@@ -356,27 +441,38 @@ function Reveal({
                 onClose();
               }}
               aria-label="Close"
-              className="absolute top-2 right-2 w-11 h-11 flex items-center justify-center rounded-full bg-black/50 text-white/90 hover:bg-black/70 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              className={`absolute flex items-center justify-center rounded-full bg-black/50 text-white/90 hover:bg-black/70 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
+                compact ? "top-1.5 right-1.5 w-9 h-9" : "top-2 right-2 w-11 h-11"
+              }`}
+              // Only once the card has landed at its real size: while it's
+              // still zoomed, its corner can be off the edge of a phone.
               initial={{ opacity: 0 }}
-              animate={{ opacity: at(phase, "pull") ? 1 : 0 }}
+              animate={{ opacity: settled ? 1 : 0 }}
               transition={{ duration: 0.4 }}
             >
               <X className="w-4 h-4" />
             </motion.button>
           </motion.div>
-        </motion.figure>
 
-        <motion.figcaption
-          className="mt-4 text-center space-y-1"
-          initial={{ opacity: 0, y: 10 }}
-          animate={done ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-          transition={{ duration: 0.5, delay: still ? 0 : 0.35 }}
-        >
-          <p className="font-display text-base sm:text-lg text-white">
+          {/* Outside the layout, so the card alone decides where centre is.
+              Free to run wider than the card, so a narrow card (a phone on
+              its side) doesn't wrap it onto lines the screen can't fit. */}
+          <motion.figcaption
+            className={`absolute left-1/2 top-full -translate-x-1/2 w-max max-w-[92vw] text-center ${
+              compact ? "mt-2 space-y-0" : "mt-4 space-y-1"
+            }`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={settled ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+            transition={{ duration: 0.5, delay: still ? 0 : 0.35 }}
+          >
+          <p className={`font-display text-white ${compact ? "text-sm" : "text-base sm:text-lg"}`}>
             You found the orange planet.
           </p>
-          <p className="text-xs sm:text-sm text-white/60">Y Combinator Startup School, 2026.</p>
-        </motion.figcaption>
+          <p className={`text-white/60 ${compact ? "text-[11px]" : "text-xs sm:text-sm"}`}>
+            Y Combinator Startup School, 2026.
+          </p>
+          </motion.figcaption>
+        </figure>
       </div>
     </motion.div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useMounted } from "@/hooks/useMounted";
@@ -56,6 +56,47 @@ const easeOutBack = (p: number) => {
 };
 
 /**
+ * Whether a full-screen intro (the /profile card) owns the viewport. The
+ * planet stays unmounted until it's over: loading Three.js, building the
+ * texture and opening a WebGL context while the card spins made both stutter.
+ *
+ * The listeners attach when this module loads, ahead of every mount effect,
+ * so the card's first intro-shown or intro-done is never missed (the planet
+ * mounts after the card, and the card dispatches from its own mount effect).
+ * Until one arrives the answer is "busy": the card always sends one or the
+ * other on mount.
+ *
+ * On a later client-side visit the value may be a stale "done" from an
+ * earlier intro. That's harmless: the planet waits ARRIVE_DELAY_MS before
+ * mounting, and the card's intro-shown lands in its mount effect, well
+ * inside that wait, cancelling it.
+ */
+let introBusy = true;
+const introSubs = new Set<() => void>();
+const setIntroBusy = (busy: boolean) => {
+  introBusy = busy;
+  introSubs.forEach((notify) => notify());
+};
+if (typeof window !== "undefined") {
+  window.addEventListener("intro-shown", () => setIntroBusy(true));
+  window.addEventListener("intro-done", () => setIntroBusy(false));
+}
+function useIntroBusy() {
+  return useSyncExternalStore(
+    (notify) => {
+      introSubs.add(notify);
+      return () => introSubs.delete(notify);
+    },
+    () => introBusy,
+    () => true,
+  );
+}
+
+// After the card has gone, a beat before the planet arrives, so the page
+// settles (and the fluid cursor starts) before the WebGL work begins.
+const ARRIVE_DELAY_MS = 700;
+
+/**
  * The page's root is `relative z-10`, a stacking context of its own, so
  * anything inside it stays under the body-level reveal overlay whatever its
  * z-index. Mounting on <body> lets the planet dive in front of the overlay.
@@ -67,8 +108,12 @@ function PlanetPortal({ children }: { children: React.ReactNode }) {
 
 export default function YcPlanet() {
   const still = usePrefersReducedMotion();
-  // The planet only exists once the portal has mounted it.
   const mounted = useMounted();
+  const introBusyNow = useIntroBusy();
+  const [arrived, setArrived] = useState(false);
+  // The planet only exists once the intro is over and the beat after it has
+  // passed. While a replayed intro plays it goes away again.
+  const present = mounted && !introBusyNow && arrived;
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [flying, setFlying] = useState(false);
@@ -93,8 +138,18 @@ export default function YcPlanet() {
   };
 
   useEffect(() => {
+    if (introBusyNow) return;
+    const id = window.setTimeout(() => setArrived(true), ARRIVE_DELAY_MS);
+    return () => clearTimeout(id);
+  }, [introBusyNow]);
+
+  useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
+
+    // Arrive with the same pop-in it uses when coming back from the reveal.
+    modeRef.current = "return";
+    modeAt.current = performance.now();
 
     // Start somewhere different on each visit.
     let t = Math.random() * 200;
@@ -174,7 +229,7 @@ export default function YcPlanet() {
       stopLoop();
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [mounted]);
+  }, [present]);
 
   const launch = () => {
     setHovered(false);
@@ -200,6 +255,7 @@ export default function YcPlanet() {
 
   return (
     <>
+      {present && (
       <PlanetPortal>
       <div
         ref={wrapRef}
@@ -229,6 +285,7 @@ export default function YcPlanet() {
         />
       </div>
       </PlanetPortal>
+      )}
 
       <YcReveal open={open} still={still} onClose={close} onSkip={skip} />
     </>
