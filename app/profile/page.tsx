@@ -8,6 +8,7 @@ import SolarSystem from "@/components/SolarSystem";
 import ConditionalSplashCursor from "@/components/ConditionalSplashCursor";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import EnterSpaceButton from "@/components/EnterSpaceButton";
+import YcPlanet from "@/components/YcPlanet";
 
 export const metadata = {
   title: "Anh Tran",
@@ -29,6 +30,7 @@ export default function ProfilePage() {
           <EnterSpaceButton />
           <Footer />
       </PageShell>
+      <YcPlanet />
     </div>
   );
 }

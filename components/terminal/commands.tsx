@@ -33,13 +33,15 @@ function getAge(): number {
 interface CommandDef {
   description: string;
   execute: () => OutputLine[];
+  /** Left out of `help` and Tab completion, so it stays an easter egg. */
+  hidden?: boolean;
 }
 
 const COMMANDS: Record<string, CommandDef> = {
   help: {
     description: "List all available commands",
     execute: () => {
-      const entries = Object.entries(COMMANDS);
+      const entries = Object.entries(COMMANDS).filter(([, cmd]) => !cmd.hidden);
       const lines: OutputLine[] = [{ type: "accent", text: "" }];
       for (const [name, cmd] of entries) {
         lines.push({
@@ -195,9 +197,34 @@ const COMMANDS: Record<string, CommandDef> = {
       return [{ type: "system", text: `Switched to ${newTheme} mode.` }];
     },
   },
+
+  yc: {
+    description: "Y Combinator",
+    hidden: true,
+    execute: () => [
+      { type: "accent", text: "" },
+      { type: "response", text: "  +-----------+" },
+      { type: "response", text: "  |  \\     /  |" },
+      { type: "response", text: "  |   \\   /   |" },
+      { type: "response", text: "  |    \\ /    |" },
+      { type: "response", text: "  |     |     |" },
+      { type: "response", text: "  |     |     |" },
+      { type: "response", text: "  +-----------+" },
+      { type: "response", text: "" },
+      { type: "accent", text: "Y Combinator Startup School, 2026" },
+      { type: "response", text: "You found the hidden command. There's a photo, too:" },
+      {
+        type: "system",
+        text: `go poke the orange planet on ${SITE_URL}/profile`,
+      },
+      { type: "accent", text: "" },
+    ],
+  },
 };
 
-export const COMMAND_NAMES = Object.keys(COMMANDS);
+export const COMMAND_NAMES = Object.keys(COMMANDS).filter(
+  (name) => !COMMANDS[name].hidden,
+);
 
 export function executeCommand(input: string): OutputLine[] {
   const trimmed = input.trim();
