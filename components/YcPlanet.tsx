@@ -28,15 +28,17 @@ const EDGE_TOP = 64;
 const EDGE_BOTTOM = 16;
 
 /**
- * A slow Lissajous loop across the viewport, its width and height breathing
+ * A slow Lissajous loop across the screen, its width and height breathing
  * a little so it doesn't trace the exact same figure every lap. One lap
- * across takes about 80 seconds.
+ * across takes about 80 seconds. W and H are the planet layer's measured
+ * size, not window.innerWidth: on iOS that reports the visual viewport,
+ * which changes when the page is zoomed.
  */
-function pathAt(t: number) {
+function pathAt(t: number, W: number, H: number) {
   const minX = EDGE_X;
-  const maxX = Math.max(minX, window.innerWidth - PLANET_W - EDGE_X);
+  const maxX = Math.max(minX, W - PLANET_W - EDGE_X);
   const minY = EDGE_TOP;
-  const maxY = Math.max(minY, window.innerHeight - PLANET_H - EDGE_BOTTOM);
+  const maxY = Math.max(minY, H - PLANET_H - EDGE_BOTTOM);
   const cx = (minX + maxX) / 2;
   const cy = (minY + maxY) / 2;
   const ax = (maxX - minX) / 2;
@@ -118,6 +120,7 @@ export default function YcPlanet() {
   const [hovered, setHovered] = useState(false);
   const [flying, setFlying] = useState(false);
 
+  const layerRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const hitRef = useRef<HTMLButtonElement>(null);
   const modeRef = useRef<Mode>("roam");
@@ -144,12 +147,22 @@ export default function YcPlanet() {
   }, [introBusyNow]);
 
   useEffect(() => {
+    const layer = layerRef.current;
     const el = wrapRef.current;
-    if (!el) return;
+    if (!layer || !el) return;
 
     // Arrive with the same pop-in it uses when coming back from the reveal.
     modeRef.current = "return";
     modeAt.current = performance.now();
+
+    // The layer is exactly the screen; its size is the planet's world.
+    let W = layer.clientWidth;
+    let H = layer.clientHeight;
+    const ro = new ResizeObserver(() => {
+      W = layer.clientWidth;
+      H = layer.clientHeight;
+    });
+    ro.observe(layer);
 
     // Start somewhere different on each visit.
     let t = Math.random() * 200;
@@ -157,14 +170,15 @@ export default function YcPlanet() {
     let pace = stillRef.current ? 0 : 1;
     let last = performance.now();
     let raf = 0;
-    let from = pathAt(t);
+    let from = pathAt(t, W, H);
     let prevX = from.x;
     let bank = 0;
 
     const place = (x: number, y: number, scale: number, opacity: number, z: number) => {
       el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${bank}deg) scale(${scale})`;
       el.style.opacity = String(opacity);
-      el.style.zIndex = String(z);
+      // The layer carries the z-index: it is the stacking context.
+      layer.style.zIndex = String(z);
     };
 
     const frame = (now: number) => {
@@ -178,7 +192,7 @@ export default function YcPlanet() {
         const target = hoveredRef.current || stillRef.current ? 0 : 1;
         pace += (target - pace) * Math.min(1, dt * 3);
         t += dt * pace;
-        const p = pathAt(t);
+        const p = pathAt(t, W, H);
         // Lean into the direction of travel, like it's banking.
         const vx = (p.x - prevX) / Math.max(dt, 0.001);
         prevX = p.x;
@@ -194,8 +208,8 @@ export default function YcPlanet() {
         }
       } else if (mode === "fly") {
         // To the centre, growing, then a plunge into the screen.
-        const cx = window.innerWidth / 2 - PLANET_W / 2;
-        const cy = window.innerHeight / 2 - PLANET_H / 2;
+        const cx = W / 2 - PLANET_W / 2;
+        const cy = H / 2 - PLANET_H / 2;
         bank += (0 - bank) * Math.min(1, dt * 6);
         if (since < FLY_MS) {
           const k = easeInOutCubic(since / FLY_MS);
@@ -227,6 +241,7 @@ export default function YcPlanet() {
     document.addEventListener("visibilitychange", onVisibility);
     return () => {
       stopLoop();
+      ro.disconnect();
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [present]);
@@ -257,9 +272,19 @@ export default function YcPlanet() {
     <>
       {present && (
       <PlanetPortal>
+      {/* A screen-sized clipping layer. iOS Safari counts a fixed element
+          that pokes past the screen edge as page width: the planet grows
+          24x in its dive (and its ring can graze the edge while roaming),
+          which widened the page, so Safari zoomed the whole page out and
+          the reveal overlay covered only part of the screen. Clipped here,
+          nothing can reach past the edge. */}
+      <div
+        ref={layerRef}
+        className="fixed inset-0 z-40 overflow-hidden pointer-events-none"
+      >
       <div
         ref={wrapRef}
-        className="fixed top-0 left-0 z-40 pointer-events-none will-change-transform"
+        className="absolute top-0 left-0 pointer-events-none will-change-transform"
         style={{ width: PLANET_W, height: PLANET_H, opacity: 0 }}
       >
         <YcPlanetCanvas fast={hovered || flying} still={still} />
@@ -281,8 +306,13 @@ export default function YcPlanet() {
           aria-label="An orange planet"
           aria-haspopup="dialog"
           disabled={open}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full pointer-events-auto cursor-pointer outline-none focus-visible:ring-1 focus-visible:ring-[#F26522]/70"
+          // While the reveal is open the planet dives in front of it, scaled
+          // up mid-screen; it must not swallow the tap that skips the intro.
+          className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full cursor-pointer outline-none focus-visible:ring-1 focus-visible:ring-[#F26522]/70 ${
+            open ? "pointer-events-none" : "pointer-events-auto"
+          }`}
         />
+      </div>
       </div>
       </PlanetPortal>
       )}

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   AnimatePresence,
@@ -79,9 +79,7 @@ const at = (phase: Phase, from: Phase) =>
  * below for the caption. The card is centred on its own (the caption sits
  * outside the layout), which is what lets zoomFor know where the Y is.
  */
-function cardWidth() {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+function cardWidth(vw: number, vh: number) {
   return Math.round(Math.min(vw * 0.92, 640, (vh - 152) * 0.75));
 }
 
@@ -92,9 +90,7 @@ function cardWidth() {
  * centred but the Y isn't centred in the photo. On a phone the width is the
  * limit; on a laptop, the height.
  */
-function zoomFor(w: number) {
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+function zoomFor(w: number, vw: number, vh: number) {
   const h = (w * 4) / 3;
   // The zoom's fixed point, on screen.
   const ox = vw / 2 + (Y_CX - 0.5) * w;
@@ -146,13 +142,36 @@ function Reveal({
   // The photo starts loading on click. On a slow connection it may not be
   // there by the match-cut, so the drawn Y and the red hold until it is.
   const [loaded, setLoaded] = useState(false);
-  const [w, setW] = useState(cardWidth);
-  const zoom = zoomFor(w);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  /*
+   * Everything is sized from the overlay's own box, the thing it's drawn in,
+   * rather than window.innerWidth/innerHeight. On iOS those report the visual
+   * viewport, which drifts from the fixed overlay's box whenever the page is
+   * zoomed, and the card and the Y landed off-centre. The first guess (the
+   * layout viewport) is corrected before paint.
+   */
+  const [box, setBox] = useState(() => ({
+    vw: document.documentElement.clientWidth,
+    vh: document.documentElement.clientHeight,
+  }));
+  useLayoutEffect(() => {
+    const el = overlayRef.current;
+    if (!el) return;
+    const measure = () => {
+      const r = el.getBoundingClientRect();
+      setBox((b) => (b.vw === r.width && b.vh === r.height ? b : { vw: r.width, vh: r.height }));
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const w = cardWidth(box.vw, box.vh);
+  const zoom = zoomFor(w, box.vw, box.vh);
   // A phone on its side leaves a card under 200px wide: the stamp and the
   // close button shrink to suit it.
   const compact = w < 280;
   const timers = useRef<number[]>([]);
-  const overlayRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -169,7 +188,6 @@ function Reveal({
 
   useEffect(() => {
     closeRef.current?.focus();
-    const onResize = () => setW(cardWidth());
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       // One focusable control, so Tab stays on it.
@@ -178,7 +196,6 @@ function Reveal({
         closeRef.current?.focus();
       }
     };
-    window.addEventListener("resize", onResize);
     window.addEventListener("keydown", onKey);
 
     // Lenis listens for wheel and touch on window. Stopping them here keeps
@@ -192,7 +209,6 @@ function Reveal({
     el?.addEventListener("touchmove", block, { passive: false });
 
     return () => {
-      window.removeEventListener("resize", onResize);
       window.removeEventListener("keydown", onKey);
       el?.removeEventListener("wheel", block);
       el?.removeEventListener("touchmove", block);
@@ -493,15 +509,18 @@ function WarpStreaks() {
     const dpr = Math.min(window.devicePixelRatio, 1.5);
     let W = 0;
     let H = 0;
+    // Sized from its own box (the overlay), not window.innerWidth, which on
+    // iOS is the visual viewport and drifts from it when the page is zoomed.
     const size = () => {
-      W = window.innerWidth;
-      H = window.innerHeight;
+      W = canvas.clientWidth;
+      H = canvas.clientHeight;
       canvas.width = W * dpr;
       canvas.height = H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     size();
-    window.addEventListener("resize", size);
+    const ro = new ResizeObserver(size);
+    ro.observe(canvas);
 
     const N = W < 640 ? 160 : 280;
     const spawn = (z = Math.random() * 0.9 + 0.1) => ({
@@ -553,7 +572,7 @@ function WarpStreaks() {
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", size);
+      ro.disconnect();
     };
   }, []);
 
