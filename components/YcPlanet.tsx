@@ -76,12 +76,18 @@ type DiveSound = {
 const NO_SOUND: DiveSound = { cut() {}, stamp() {}, stop() {} };
 
 function playDiveSound(): DiveSound {
+  // iPhones mute Web Audio on silent mode, unlike the <audio> the other
+  // intros use. "playback" (Safari 17+) makes it play like those do.
+  const session = (navigator as { audioSession?: { type: string } }).audioSession;
+  if (session) session.type = "playback";
   let ctx: AudioContext;
   try {
     ctx = new AudioContext();
   } catch {
     return NO_SOUND;
   }
+  // Some iOS versions start a new context suspended even inside a tap.
+  ctx.resume().catch(() => {});
   const t0 = ctx.currentTime;
   const dive = t0 + DIVE_AT / 1000;
   const sign = dive + DIVE_MS / 1000;
@@ -146,6 +152,7 @@ function playDiveSound(): DiveSound {
     if (closed) return;
     closed = true;
     ctx.close().catch(() => {});
+    if (session) session.type = "auto";
   };
   // In case the stamp never comes (a photo that never loads).
   const giveUp = window.setTimeout(close, 10000);
