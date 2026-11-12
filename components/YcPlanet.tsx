@@ -281,6 +281,8 @@ export default function YcPlanet() {
       <div
         ref={layerRef}
         className="fixed inset-0 z-40 overflow-hidden pointer-events-none"
+        // clip, so focusing the planet can never scroll the layer.
+        style={{ overflow: "clip" }}
       >
       <div
         ref={wrapRef}

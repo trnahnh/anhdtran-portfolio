@@ -187,13 +187,16 @@ function Reveal({
   }, [onSkip]);
 
   useEffect(() => {
-    closeRef.current?.focus();
+    // preventScroll: while the card is zoomed in, this button is far off
+    // screen. A plain focus() scrolls the overlay to show it, and on iPhone
+    // that slid the whole intro sideways, leaving a strip of page uncovered.
+    closeRef.current?.focus({ preventScroll: true });
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
       // One focusable control, so Tab stays on it.
       if (e.key === "Tab") {
         e.preventDefault();
-        closeRef.current?.focus();
+        closeRef.current?.focus({ preventScroll: true });
       }
     };
     window.addEventListener("keydown", onKey);
@@ -266,6 +269,9 @@ function Reveal({
       // Above the page peel (z-60), below the intro card (z-100). The planet
       // rides at z-95 during its dive, in front of all of this.
       className="fixed inset-0 z-90 overflow-hidden"
+      // clip, not just hidden: a hidden box can still be scrolled by code
+      // (focus, scrollIntoView), and a scrolled overlay leaves a gap.
+      style={{ overflow: "clip" }}
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
