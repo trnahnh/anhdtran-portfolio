@@ -111,19 +111,24 @@ export default function YcReveal({
   still,
   onClose,
   onSkip,
+  onStamp,
 }: {
   open: boolean;
   still: boolean;
   onClose: () => void;
   /** Called when the intro is cut short, so the planet can stop its dive. */
   onSkip: () => void;
+  /** Called the moment the stamp hits the photo, for its sound. */
+  onStamp: () => void;
 }) {
   const mounted = useMounted();
   if (!mounted) return null;
 
   return createPortal(
     <AnimatePresence>
-      {open && <Reveal still={still} onClose={onClose} onSkip={onSkip} />}
+      {open && (
+        <Reveal still={still} onClose={onClose} onSkip={onSkip} onStamp={onStamp} />
+      )}
     </AnimatePresence>,
     document.body,
   );
@@ -133,10 +138,12 @@ function Reveal({
   still,
   onClose,
   onSkip,
+  onStamp,
 }: {
   still: boolean;
   onClose: () => void;
   onSkip: () => void;
+  onStamp: () => void;
 }) {
   const [phase, setPhase] = useState<Phase>(still ? "done" : "warp");
   // The photo starts loading on click. On a slow connection it may not be
@@ -262,6 +269,14 @@ function Reveal({
   // The card is at its real size with the photo in it: time for the stamp,
   // the caption and the close button.
   const settled = done && loaded;
+
+  // The stamp's spring (0.15s delay, then ~90ms to first touch the photo)
+  // lands about 240ms after settling; the sound goes with it.
+  useEffect(() => {
+    if (!settled || still) return;
+    const id = window.setTimeout(onStamp, 240);
+    return () => clearTimeout(id);
+  }, [settled, still, onStamp]);
 
   return (
     <motion.div

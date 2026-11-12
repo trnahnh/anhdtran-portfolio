@@ -58,6 +58,143 @@ const easeOutBack = (p: number) => {
 };
 
 /**
+ * The dive's sound, synthesised so there's nothing to download: a whoosh
+ * that rises as the planet flies in, a thump as it plunges and the red
+ * floods, and a short buzz as the Y lights up. Everything is scheduled on
+ * the audio clock from the click, so it stays in step with the animation.
+ * Started from the click itself, which is what lets iOS play it; the same
+ * context plays the stamp later, so that's allowed too.
+ */
+type DiveSound = {
+  /** Silence the dive (the intro was skipped); the stamp can still play. */
+  cut: () => void;
+  /** The stamp hitting the photo. */
+  stamp: () => void;
+  /** Silence everything (the reveal closed). */
+  stop: () => void;
+};
+const NO_SOUND: DiveSound = { cut() {}, stamp() {}, stop() {} };
+
+function playDiveSound(): DiveSound {
+  let ctx: AudioContext;
+  try {
+    ctx = new AudioContext();
+  } catch {
+    return NO_SOUND;
+  }
+  const t0 = ctx.currentTime;
+  const dive = t0 + DIVE_AT / 1000;
+  const sign = dive + DIVE_MS / 1000;
+
+  const master = ctx.createGain();
+  master.gain.value = 0.5;
+  master.connect(ctx.destination);
+  // The dive's layers share a bus, so a skip can cut them alone.
+  const diveBus = ctx.createGain();
+  diveBus.connect(master);
+
+  // Whoosh: noise through a band that sweeps up as the planet speeds in.
+  const noise = ctx.createBuffer(1, ctx.sampleRate * 1.2, ctx.sampleRate);
+  const data = noise.getChannelData(0);
+  for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+  const whoosh = ctx.createBufferSource();
+  whoosh.buffer = noise;
+  const band = ctx.createBiquadFilter();
+  band.type = "bandpass";
+  band.Q.value = 1.2;
+  band.frequency.setValueAtTime(250, t0);
+  band.frequency.exponentialRampToValueAtTime(2600, dive);
+  const whooshGain = ctx.createGain();
+  whooshGain.gain.setValueAtTime(0.0001, t0);
+  whooshGain.gain.exponentialRampToValueAtTime(0.35, dive - 0.05);
+  whooshGain.gain.exponentialRampToValueAtTime(0.0001, dive + 0.25);
+  whoosh.connect(band).connect(whooshGain).connect(diveBus);
+  whoosh.start(t0);
+  whoosh.stop(dive + 0.3);
+
+  // Thump: a falling sine, the planet going in.
+  const thump = ctx.createOscillator();
+  thump.frequency.setValueAtTime(120, dive);
+  thump.frequency.exponentialRampToValueAtTime(38, dive + 0.4);
+  const thumpGain = ctx.createGain();
+  thumpGain.gain.setValueAtTime(0.0001, t0);
+  thumpGain.gain.setValueAtTime(0.0001, dive);
+  thumpGain.gain.exponentialRampToValueAtTime(0.9, dive + 0.02);
+  thumpGain.gain.exponentialRampToValueAtTime(0.0001, dive + 0.55);
+  thump.connect(thumpGain).connect(diveBus);
+  thump.start(dive);
+  thump.stop(dive + 0.6);
+
+  // Buzz: the LED sign switching on, low and brief.
+  const buzz = ctx.createOscillator();
+  buzz.type = "sawtooth";
+  buzz.frequency.value = 60;
+  const buzzTone = ctx.createBiquadFilter();
+  buzzTone.type = "lowpass";
+  buzzTone.frequency.value = 900;
+  const buzzGain = ctx.createGain();
+  buzzGain.gain.setValueAtTime(0.0001, t0);
+  buzzGain.gain.setValueAtTime(0.0001, sign);
+  buzzGain.gain.exponentialRampToValueAtTime(0.12, sign + 0.03);
+  buzzGain.gain.exponentialRampToValueAtTime(0.0001, sign + 0.7);
+  buzz.connect(buzzTone).connect(buzzGain).connect(diveBus);
+  buzz.start(sign);
+  buzz.stop(sign + 0.75);
+
+  let closed = false;
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    ctx.close().catch(() => {});
+  };
+  // In case the stamp never comes (a photo that never loads).
+  const giveUp = window.setTimeout(close, 10000);
+
+  return {
+    cut() {
+      if (!closed) diveBus.gain.setTargetAtTime(0, ctx.currentTime, 0.03);
+    },
+    stamp() {
+      if (closed) return;
+      const t = ctx.currentTime;
+      // A low thud for the weight of it...
+      const thud = ctx.createOscillator();
+      thud.frequency.setValueAtTime(170, t);
+      thud.frequency.exponentialRampToValueAtTime(55, t + 0.12);
+      const thudGain = ctx.createGain();
+      thudGain.gain.setValueAtTime(0.8, t);
+      thudGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+      thud.connect(thudGain).connect(master);
+      thud.start(t);
+      thud.stop(t + 0.2);
+      // ...and a short muffled slap for the rubber meeting the photo.
+      const slapBuf = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
+      const d = slapBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      const slap = ctx.createBufferSource();
+      slap.buffer = slapBuf;
+      const muffle = ctx.createBiquadFilter();
+      muffle.type = "lowpass";
+      muffle.frequency.value = 1400;
+      const slapGain = ctx.createGain();
+      slapGain.gain.setValueAtTime(0.6, t);
+      slapGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+      slap.connect(muffle).connect(slapGain).connect(master);
+      slap.start(t);
+      clearTimeout(giveUp);
+      window.setTimeout(close, 500);
+    },
+    stop() {
+      clearTimeout(giveUp);
+      if (closed) return;
+      // A quick fade rather than a click.
+      master.gain.setTargetAtTime(0, ctx.currentTime, 0.03);
+      window.setTimeout(close, 150);
+    },
+  };
+}
+
+/**
  * Whether a full-screen intro (the /profile card) owns the viewport. The
  * planet stays unmounted until it's over: loading Three.js, building the
  * texture and opening a WebGL context while the card spins made both stutter.
@@ -127,6 +264,7 @@ export default function YcPlanet() {
   const modeAt = useRef(0);
   const hoveredRef = useRef(false);
   const stillRef = useRef(still);
+  const sound = useRef<DiveSound>(NO_SOUND);
 
   useEffect(() => {
     hoveredRef.current = hovered;
@@ -255,11 +393,18 @@ export default function YcPlanet() {
     }
     setFlying(true);
     setMode("fly");
+    sound.current = playDiveSound();
   };
 
-  const skip = useCallback(() => setMode("gone"), []);
+  const skip = useCallback(() => {
+    sound.current.cut();
+    setMode("gone");
+  }, []);
+
+  const stamp = useCallback(() => sound.current.stamp(), []);
 
   const close = useCallback(() => {
+    sound.current.stop();
     setOpen(false);
     setFlying(false);
     setMode("return");
@@ -319,7 +464,13 @@ export default function YcPlanet() {
       </PlanetPortal>
       )}
 
-      <YcReveal open={open} still={still} onClose={close} onSkip={skip} />
+      <YcReveal
+        open={open}
+        still={still}
+        onClose={close}
+        onSkip={skip}
+        onStamp={stamp}
+      />
     </>
   );
 }
