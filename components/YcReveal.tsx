@@ -247,6 +247,28 @@ function Reveal({
   const maskY = useTransform(pull, [0, 0.7, 1], ["56%", "68%", "150%"]);
   const redOpacity = useTransform(pull, [0.45, 1], [1, 0]);
 
+  // The card is centred alone through the zoom (zoomFor depends on it), and
+  // the caption hangs below it. As the camera pulls back, the whole figure
+  // rises by half the caption's height, so photo and caption land centred
+  // together.
+  const capRef = useRef<HTMLElement>(null);
+  const lift = useMotionValue(0);
+  useLayoutEffect(() => {
+    const cap = capRef.current;
+    if (!cap) return;
+    // Watched, not measured once: a late web font or a resize can change
+    // how tall the caption is.
+    const measure = () => {
+      const gap = parseFloat(getComputedStyle(cap).marginTop) || 0;
+      lift.set((cap.offsetHeight + gap) / 2);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(cap);
+    return () => ro.disconnect();
+  }, [compact, lift]);
+  const figureY = useTransform([pull, lift], ([p, l]: number[]) => -l * p);
+
   useEffect(() => {
     if (still) return;
     if (!at(phase, "sign")) {
@@ -347,12 +369,12 @@ function Reveal({
       {/* No padding here: the card must sit dead centre for zoomFor's sums,
           and cardWidth already keeps it clear of the edges. */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <figure
+        <motion.figure
           role="dialog"
           aria-modal="true"
           aria-label="Y Combinator Startup School 2026"
           className="relative m-0 pointer-events-auto"
-          style={{ width: w }}
+          style={{ width: w, y: figureY }}
           onClick={(e) => {
             // Inside the card, a click only skips the intro, never closes.
             e.stopPropagation();
@@ -495,6 +517,7 @@ function Reveal({
               Free to run wider than the card, so a narrow card (a phone on
               its side) doesn't wrap it onto lines the screen can't fit. */}
           <motion.figcaption
+            ref={capRef}
             className={`absolute left-1/2 top-full -translate-x-1/2 w-max max-w-[92vw] text-center ${
               compact ? "mt-2 space-y-0" : "mt-4 space-y-1"
             }`}
@@ -509,7 +532,7 @@ function Reveal({
             Y Combinator Startup School, 2026.
           </p>
           </motion.figcaption>
-        </figure>
+        </motion.figure>
       </div>
     </motion.div>
   );
