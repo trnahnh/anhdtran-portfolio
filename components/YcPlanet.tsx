@@ -9,9 +9,9 @@ import YcReveal, { DIVE_AT, DIVE_MS } from "./YcReveal";
 
 /**
  * The /profile easter egg: a live 3D orange planet that drifts over the whole
- * page. It eases to a stop under the pointer so it can be caught. Clicking it
- * sends it diving into the screen, which plays the YcReveal intro and ends on
- * the Startup School photo. The terminal's hidden `yc` command points here.
+ * page, spinning faster under the pointer. Clicking it sends it diving into
+ * the screen, which plays the YcReveal intro and ends on the Startup School
+ * photo. The terminal's hidden `yc` command points here.
  *
  * The loop writes the transform straight to the element rather than through
  * React, since it changes every frame.
@@ -269,13 +269,9 @@ export default function YcPlanet() {
   const hitRef = useRef<HTMLButtonElement>(null);
   const modeRef = useRef<Mode>("roam");
   const modeAt = useRef(0);
-  const hoveredRef = useRef(false);
   const stillRef = useRef(still);
   const sound = useRef<DiveSound>(NO_SOUND);
 
-  useEffect(() => {
-    hoveredRef.current = hovered;
-  }, [hovered]);
   useEffect(() => {
     stillRef.current = still;
   }, [still]);
@@ -333,8 +329,8 @@ export default function YcPlanet() {
       const mode = modeRef.current;
 
       if (mode === "roam" || mode === "return") {
-        // Ease to a stop under the pointer, and stay put with reduced motion.
-        const target = hoveredRef.current || stillRef.current ? 0 : 1;
+        // Keeps drifting under the pointer; stays put with reduced motion.
+        const target = stillRef.current ? 0 : 1;
         pace += (target - pace) * Math.min(1, dt * 3);
         t += dt * pace;
         const p = pathAt(t, W, H);
@@ -450,9 +446,9 @@ export default function YcPlanet() {
           onClick={launch}
           onPointerEnter={() => setHovered(true)}
           onPointerLeave={() => setHovered(false)}
-          // Keyboard focus parks it too, so it can be reached with Tab. Not
-          // mouse or programmatic focus: closing the reveal hands focus back
-          // here, and that shouldn't freeze it until the next click.
+          // Keyboard focus spins it up too, as hover does. Not mouse or
+          // programmatic focus: closing the reveal hands focus back here,
+          // and that shouldn't leave it spinning fast until the next click.
           onFocus={(e) => {
             if (e.currentTarget.matches(":focus-visible")) setHovered(true);
           }}
