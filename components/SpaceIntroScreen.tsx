@@ -9,8 +9,15 @@ const INTERVAL = 90; // ms per character — slightly slower for drama
 export default function SpaceIntroScreen() {
   const [mounted, setMounted] = useState(false);
   const [show, setShow] = useState(true);
+  // The cleanup, not a show=false effect, sends intro-done: the parent
+  // unmounts this in the same render that hides it, and without the cleanup
+  // everything waiting on intro-done (the page peel) stays hidden.
   useEffect(() => {
-    window.dispatchEvent(new Event(show ? "intro-shown" : "intro-done"));
+    if (!show) return;
+    window.dispatchEvent(new Event("intro-shown"));
+    return () => {
+      window.dispatchEvent(new Event("intro-done"));
+    };
   }, [show]);
   const [fading, setFading] = useState(false);
   const [line1, setLine1] = useState(0);

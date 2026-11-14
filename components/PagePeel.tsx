@@ -9,6 +9,7 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useMounted } from "@/hooks/useMounted";
+import { prime, unlock, TERMINAL_SFX } from "@/lib/sfx";
 
 const HIDDEN_ROUTES = ["/terminal", "/space"];
 
@@ -452,6 +453,10 @@ export default function PagePeel() {
       const s = sim.current;
       if (s.mode === "expand") return;
       e.preventDefault();
+      // The terminal's boot sound plays after the gesture is over. A mouse
+      // press counts as a gesture; a finger only counts once it lifts.
+      if (e.pointerType === "mouse") unlock(TERMINAL_SFX);
+      else prime(TERMINAL_SFX);
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
       const lx = e.clientX;
       const ly = dims.current.H - e.clientY;
@@ -505,6 +510,11 @@ export default function PagePeel() {
   const handlePointerUp = useCallback(
     (e: React.PointerEvent) => {
       const s = sim.current;
+      // Even after a drag has already torn the page away: the finger
+      // lifting is the first moment a phone allows the sound.
+      if (e.type === "pointerup" && e.pointerType !== "mouse") {
+        unlock(TERMINAL_SFX);
+      }
       if (s.mode !== "drag") return;
       if (hitRef.current) hitRef.current.style.cursor = "grab";
       const { commitDist, idleSize } = dims.current;
@@ -551,6 +561,7 @@ export default function PagePeel() {
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
+        unlock(TERMINAL_SFX);
         triggerExpand();
       }
     },
@@ -793,29 +804,31 @@ export default function PagePeel() {
         />
       </svg>
 
-      {!expanding && (
-        <div
-          ref={hitRef}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onPointerEnter={handleEnter}
-          onPointerLeave={handleLeave}
-          onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (sim.current.mode === "idle") setRest("hover");
-          }}
-          onBlur={() => {
-            if (sim.current.mode === "hover") setRest("idle");
-          }}
-          aria-label="Open terminal (drag the corner or press Enter)"
-          role="button"
-          tabIndex={0}
-          className="fixed bottom-0 left-0 z-51 touch-none select-none rounded-tr-2xl outline-none focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-plate-25"
-          style={{ width: 90, height: 90, cursor: "grab" }}
-        />
-      )}
+      {/* Stays mounted through the tear-off so the finger lifting still
+          lands here (see handlePointerUp). */}
+      <div
+        ref={hitRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        // iOS has always honoured touchend for sound; belt and braces.
+        onTouchEnd={() => unlock(TERMINAL_SFX)}
+        onPointerEnter={handleEnter}
+        onPointerLeave={handleLeave}
+        onKeyDown={handleKeyDown}
+        onFocus={() => {
+          if (sim.current.mode === "idle") setRest("hover");
+        }}
+        onBlur={() => {
+          if (sim.current.mode === "hover") setRest("idle");
+        }}
+        aria-label="Open terminal (drag the corner or press Enter)"
+        role="button"
+        tabIndex={0}
+        className="fixed bottom-0 left-0 z-51 touch-none select-none rounded-tr-2xl outline-none focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-plate-25"
+        style={{ width: 90, height: 90, cursor: "grab" }}
+      />
     </>
   );
 }

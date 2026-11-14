@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useMounted } from "@/hooks/useMounted";
+import { prime, play, TERMINAL_SFX } from "@/lib/sfx";
 
 const BOOT_LINES = [
   { text: "BIOS v2.4.1 ... OK", delay: 120 },
@@ -21,8 +22,15 @@ interface Props {
 export default function TerminalIntroScreen({ onComplete }: Props) {
   const mounted = useMounted();
   const [show, setShow] = useState(true);
+  // The cleanup, not a show=false effect, sends intro-done: the parent
+  // unmounts this in the same render that hides it, and without the cleanup
+  // everything waiting on intro-done (the page peel) stays hidden.
   useEffect(() => {
-    window.dispatchEvent(new Event(show ? "intro-shown" : "intro-done"));
+    if (!show) return;
+    window.dispatchEvent(new Event("intro-shown"));
+    return () => {
+      window.dispatchEvent(new Event("intro-done"));
+    };
   }, [show]);
   const [fading, setFading] = useState(false);
   const [visibleLines, setVisibleLines] = useState(0);
@@ -33,6 +41,17 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
   const removeUnlockRef = useRef<(() => void) | null>(null);
   const finishedRef = useRef(false);
 
+  const stopAudio = useCallback(() => {
+    if (!audioRef.current) return;
+    audioRef.current.pause();
+    // Rewind but keep the source: the element is shared and cached (the page
+    // peel unlocks it during the drag), so clearing src would throw that away.
+    try {
+      audioRef.current.currentTime = 0;
+    } catch {}
+    audioRef.current = null;
+  }, []);
+
   const finish = useCallback(() => {
     if (finishedRef.current) return;
     finishedRef.current = true;
@@ -42,18 +61,14 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
       removeUnlockRef.current();
       removeUnlockRef.current = null;
     }
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = "";
-      audioRef.current = null;
-    }
+    stopAudio();
     setFading(true);
     const t = setTimeout(() => {
       setShow(false);
       onComplete();
     }, 500);
     timersRef.current.push(t);
-  }, [onComplete]);
+  }, [onComplete, stopAudio]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -65,31 +80,37 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
   );
 
   useEffect(() => {
-    const audio = new Audio("/sfx/keyboard-typing.mp3");
+    const audio = prime(TERMINAL_SFX);
+    if (!audio) return;
     audioRef.current = audio;
+    // Phones count a finger lifting as a tap, not a finger landing.
+    const UNLOCK_EVENTS = [
+      "click",
+      "keydown",
+      "touchstart",
+      "touchend",
+      "pointerup",
+      "mousemove",
+    ] as const;
 
-    const unlock = () => {
-      document.removeEventListener("click", unlock);
-      document.removeEventListener("keydown", unlock);
-      document.removeEventListener("touchstart", unlock);
-      document.removeEventListener("mousemove", unlock);
+    const removeUnlock = () => {
+      UNLOCK_EVENTS.forEach((t) => document.removeEventListener(t, unlock));
       removeUnlockRef.current = null;
-      if (audioRef.current) audioRef.current.play().catch(() => {});
     };
+    function unlock() {
+      removeUnlock();
+      if (audioRef.current) play(audioRef.current);
+    }
 
+    audio.muted = false;
+    try {
+      audio.currentTime = 0;
+    } catch {}
     audio.play().catch((err: unknown) => {
       if (!(err instanceof DOMException && err.name === "NotAllowedError"))
         return;
-      document.addEventListener("click", unlock);
-      document.addEventListener("keydown", unlock);
-      document.addEventListener("touchstart", unlock);
-      document.addEventListener("mousemove", unlock);
-      removeUnlockRef.current = () => {
-        document.removeEventListener("click", unlock);
-        document.removeEventListener("keydown", unlock);
-        document.removeEventListener("touchstart", unlock);
-        document.removeEventListener("mousemove", unlock);
-      };
+      UNLOCK_EVENTS.forEach((t) => document.addEventListener(t, unlock));
+      removeUnlockRef.current = removeUnlock;
     });
 
     let elapsed = 0;
@@ -111,13 +132,9 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
         removeUnlockRef.current();
         removeUnlockRef.current = null;
       }
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-        audioRef.current = null;
-      }
+      stopAudio();
     };
-  }, [onComplete, finish]);
+  }, [onComplete, finish, stopAudio]);
 
   if (!mounted || !show) return null;
 
