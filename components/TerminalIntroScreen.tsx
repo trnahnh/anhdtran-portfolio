@@ -45,7 +45,7 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
     if (!audioRef.current) return;
     audioRef.current.pause();
     // Rewind but keep the source: the element is shared and cached (the page
-    // peel unlocks it during the drag), so clearing src would throw that away.
+    // peel starts it during the gesture), so clearing src would lose that.
     try {
       audioRef.current.currentTime = 0;
     } catch {}
@@ -102,16 +102,22 @@ export default function TerminalIntroScreen({ onComplete }: Props) {
       if (audioRef.current) play(audioRef.current);
     }
 
-    audio.muted = false;
-    try {
-      audio.currentTime = 0;
-    } catch {}
-    audio.play().catch((err: unknown) => {
-      if (!(err instanceof DOMException && err.name === "NotAllowedError"))
-        return;
-      UNLOCK_EVENTS.forEach((t) => document.addEventListener(t, unlock));
-      removeUnlockRef.current = removeUnlock;
-    });
+    // Opened from the page peel, the typing is already going: it had to
+    // start inside the finger-lift that tore the page, the only moment an
+    // iPhone allows it. Keep it rather than restarting it here, where the
+    // phone would refuse.
+    if (audio.paused || audio.muted) {
+      audio.muted = false;
+      try {
+        audio.currentTime = 0;
+      } catch {}
+      audio.play().catch((err: unknown) => {
+        if (!(err instanceof DOMException && err.name === "NotAllowedError"))
+          return;
+        UNLOCK_EVENTS.forEach((t) => document.addEventListener(t, unlock));
+        removeUnlockRef.current = removeUnlock;
+      });
+    }
 
     let elapsed = 0;
     BOOT_LINES.forEach((line, i) => {

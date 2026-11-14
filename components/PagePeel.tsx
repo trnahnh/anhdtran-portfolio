@@ -9,7 +9,7 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useMounted } from "@/hooks/useMounted";
-import { prime, unlock, TERMINAL_SFX } from "@/lib/sfx";
+import { prime, start, TERMINAL_SFX } from "@/lib/sfx";
 
 const HIDDEN_ROUTES = ["/terminal", "/space"];
 
@@ -215,7 +215,12 @@ export default function PagePeel() {
     ex1: 0,
     ey1: 0,
     et0: 0,
+    // The tear-off has finished drawing; navigation waits on the finger.
+    animDone: false,
+    navigated: false,
+    holdTimer: 0,
     // drag
+    down: false,
     grabDX: 0,
     grabDY: 0,
     pvx: 0,
@@ -340,6 +345,14 @@ export default function PagePeel() {
     }
   }, []);
 
+  const navigate = useCallback(() => {
+    const s = sim.current;
+    if (s.navigated) return;
+    s.navigated = true;
+    clearTimeout(s.holdTimer);
+    router.push("/terminal");
+  }, [router]);
+
   /* ------------------------------------------------------------- physics */
 
   // Advances one frame; false once there is nothing left to animate.
@@ -358,7 +371,12 @@ export default function PagePeel() {
         s.py = s.ey0 + (s.ey1 - s.ey0) * e;
         draw();
         if (t >= 1) {
-          router.push("/terminal");
+          s.animDone = true;
+          // A finger still on the glass hasn't given the phone its gesture
+          // yet, and the boot sound needs one. Hold on the covered screen
+          // until it lifts, but not forever.
+          if (s.down) s.holdTimer = window.setTimeout(navigate, 1500);
+          else navigate();
           return false;
         }
         return true;
@@ -404,7 +422,7 @@ export default function PagePeel() {
       }
       return true;
     },
-    [draw, router],
+    [draw, navigate],
   );
 
   const kick = useCallback(() => {
@@ -442,9 +460,27 @@ export default function PagePeel() {
     s.ex1 = W * 2.15 + 40;
     s.ey1 = H * 2.15 + 40;
     s.et0 = performance.now();
+    s.animDone = false;
+    s.navigated = false;
+    // The typing starts as the page tears. Where this runs inside a gesture
+    // (a key, a mouse, a finger lifting on Android) it plays now; on an
+    // iPhone mid-drag it is refused and handleTouchEnd starts it instead.
+    start(TERMINAL_SFX);
     setExpanding(true);
     kick();
   }, [kick]);
+
+  // A finger lifting is the gesture iOS needs for sound (pointerup is not).
+  // Once the page is tearing, start the typing here and, if the tear-off
+  // has finished drawing, go. Deferred a tick so a pointerup that arrives
+  // first can't navigate away before this touchend runs.
+  const releaseTear = useCallback(() => {
+    const s = sim.current;
+    s.down = false;
+    if (s.mode !== "expand") return;
+    start(TERMINAL_SFX);
+    if (s.animDone) window.setTimeout(navigate, 0);
+  }, [navigate]);
 
   /* ------------------------------------------------------------- pointer */
 
@@ -452,11 +488,12 @@ export default function PagePeel() {
     (e: React.PointerEvent) => {
       const s = sim.current;
       if (s.mode === "expand") return;
-      e.preventDefault();
-      // The terminal's boot sound plays after the gesture is over. A mouse
-      // press counts as a gesture; a finger only counts once it lifts.
-      if (e.pointerType === "mouse") unlock(TERMINAL_SFX);
-      else prime(TERMINAL_SFX);
+      // Mouse only: on iOS, cancelling a touch's pointerdown can swallow the
+      // touchend that the boot sound depends on. touch-action and
+      // select-none already stop scrolling and selection for fingers.
+      if (e.pointerType === "mouse") e.preventDefault();
+      prime(TERMINAL_SFX);
+      s.down = true;
       (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
       const lx = e.clientX;
       const ly = dims.current.H - e.clientY;
@@ -510,11 +547,16 @@ export default function PagePeel() {
   const handlePointerUp = useCallback(
     (e: React.PointerEvent) => {
       const s = sim.current;
-      // Even after a drag has already torn the page away: the finger
-      // lifting is the first moment a phone allows the sound.
-      if (e.type === "pointerup" && e.pointerType !== "mouse") {
-        unlock(TERMINAL_SFX);
+      if (s.mode === "expand") {
+        // Torn off mid-drag, released now.
+        if (e.type === "pointerup") releaseTear();
+        else {
+          s.down = false;
+          if (s.animDone) navigate();
+        }
+        return;
       }
+      s.down = false;
       if (s.mode !== "drag") return;
       if (hitRef.current) hitRef.current.style.cursor = "grab";
       const { commitDist, idleSize } = dims.current;
@@ -538,7 +580,7 @@ export default function PagePeel() {
         hitRef.current?.matches(":hover") === true;
       setRest(over ? "hover" : "idle");
     },
-    [setRest, triggerExpand],
+    [setRest, triggerExpand, releaseTear, navigate],
   );
 
   const handleEnter = useCallback(
@@ -561,7 +603,6 @@ export default function PagePeel() {
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        unlock(TERMINAL_SFX);
         triggerExpand();
       }
     },
@@ -577,6 +618,9 @@ export default function PagePeel() {
     if (!visible) return;
     const s = sim.current;
     s.mode = "idle";
+    s.down = false;
+    s.animDone = false;
+    s.navigated = false;
     s.px = s.py = 1;
     s.vx = s.vy = 0;
     s.tx = s.ty = dims.current.idleSize;
@@ -585,6 +629,7 @@ export default function PagePeel() {
     return () => {
       if (s.raf) cancelAnimationFrame(s.raf);
       s.raf = 0;
+      clearTimeout(s.holdTimer);
     };
   }, [visible, pathname, draw, kick]);
 
@@ -812,8 +857,7 @@ export default function PagePeel() {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        // iOS has always honoured touchend for sound; belt and braces.
-        onTouchEnd={() => unlock(TERMINAL_SFX)}
+        onTouchEnd={releaseTear}
         onPointerEnter={handleEnter}
         onPointerLeave={handleLeave}
         onKeyDown={handleKeyDown}
@@ -826,7 +870,7 @@ export default function PagePeel() {
         aria-label="Open terminal (drag the corner or press Enter)"
         role="button"
         tabIndex={0}
-        className="fixed bottom-0 left-0 z-51 touch-none select-none rounded-tr-2xl outline-none focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-plate-25"
+        className="fixed bottom-0 left-0 z-51 touch-none select-none [-webkit-touch-callout:none] rounded-tr-2xl outline-none focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-plate-25"
         style={{ width: 90, height: 90, cursor: "grab" }}
       />
     </>

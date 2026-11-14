@@ -67,30 +67,21 @@ export function ready(
 }
 
 /**
- * Call inside a tap or keypress for a sound that will play later, after the
- * gesture is over. Phones only allow sound in direct response to a gesture,
- * but an element that has played once inside one may play again later, so
- * this plays it muted and stops it straight away.
+ * Start a sound from the top, unless it is already playing out loud.
+ *
+ * Phones only allow sound inside a tap, a keypress or a finger lifting, so
+ * call this from the event itself. Called anywhere else it may be refused,
+ * which is harmless: the element stays paused, and the next call from a
+ * real gesture starts it.
  */
-export function unlock(src: string): void {
+export function start(src: string): void {
   const audio = prime(src);
-  if (!audio || !audio.paused) return;
-  audio.muted = true;
-  audio
-    .play()
-    .then(() => {
-      // Still muted means nobody started it for real in the meantime.
-      if (audio.muted) {
-        audio.pause();
-        try {
-          audio.currentTime = 0;
-        } catch {}
-      }
-    })
-    .catch(() => {})
-    .finally(() => {
-      audio.muted = false;
-    });
+  if (!audio || (!audio.paused && !audio.muted)) return;
+  audio.muted = false;
+  try {
+    audio.currentTime = 0;
+  } catch {}
+  void audio.play().catch(() => {});
 }
 
 /** Rewind and play. Returns the element so callers can stop it later. */
