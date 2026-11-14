@@ -548,29 +548,19 @@ html.theme-transitioning * {
   }
 }
 
-/* Page peel expand animation */
-@keyframes peelExpand {
-  0% {
-    clip-path: polygon(0 100%, 0 100%, 0 100%);
-  }
-  100% {
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-  }
+/* Page peel: the cursor of the terminal printed under the corner */
+@keyframes peelBlink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 
-@keyframes peelPromptFade {
-  from { opacity: 0; }
-  to   { opacity: 0.5; }
-}
-
-.peel-expand-overlay {
-  animation: peelExpand var(--dur-arrive) var(--ease-settle) forwards;
+.peel-cursor {
+  animation: peelBlink 1.06s step-end infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .peel-expand-overlay {
+  .peel-cursor {
     animation: none;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   }
 }
 
