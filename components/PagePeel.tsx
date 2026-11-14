@@ -217,10 +217,6 @@ export default function PagePeel() {
     // drag
     grabDX: 0,
     grabDY: 0,
-    downX: 0,
-    downY: 0,
-    downT: 0,
-    moved: 0,
     pvx: 0,
     pvy: 0,
     lastPX: 0,
@@ -462,14 +458,10 @@ export default function PagePeel() {
       s.mode = "drag";
       s.grabDX = s.px - lx;
       s.grabDY = s.py - ly;
-      s.downX = e.clientX;
-      s.downY = e.clientY;
-      s.downT = performance.now();
-      s.moved = 0;
       s.pvx = s.pvy = 0;
       s.lastPX = lx;
       s.lastPY = ly;
-      s.lastPT = s.downT;
+      s.lastPT = performance.now();
       if (hitRef.current) hitRef.current.style.cursor = "grabbing";
       kick();
     },
@@ -493,10 +485,6 @@ export default function PagePeel() {
         s.lastPX = lx;
         s.lastPY = ly;
         s.lastPT = now;
-        s.moved = Math.max(
-          s.moved,
-          Math.hypot(e.clientX - s.downX, e.clientY - s.downY),
-        );
         s.tx = Math.max(1, lx + s.grabDX);
         s.ty = Math.max(1, ly + s.grabDY);
         if (Math.hypot(s.tx, s.ty) >= tearDist) triggerExpand();
@@ -524,13 +512,8 @@ export default function PagePeel() {
       const len = Math.max(dist, 1);
       // Speed of the flick away from the corner.
       const outward = (s.pvx * s.tx + s.pvy * s.ty) / len;
-      const tap =
-        e.type === "pointerup" &&
-        s.moved < 6 &&
-        performance.now() - s.downT < 350;
       const fresh = performance.now() - s.lastPT < 80;
       if (
-        tap ||
         dist >= commitDist ||
         (fresh && outward > 900 && dist > idleSize * 2)
       ) {
