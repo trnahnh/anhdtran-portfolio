@@ -32,18 +32,39 @@ const LONG_HAUL_MS = 2400;
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 
-/** True when moving between stages a and b crosses a change of country. */
-function crossesLongHaul(a: number, b: number) {
-  const [lo, hi] = a < b ? [a, b] : [b, a];
-  for (let i = Math.floor(lo); i < Math.ceil(hi); i++) {
-    if (LEGS[i].place.region !== LEGS[i + 1].place.region) return true;
-  }
-  return false;
+/** Time for the leg from stage i to i + 1, alone or as part of a longer flight. */
+function legMs(i: number, through: boolean) {
+  const long = LEGS[i].place.region !== LEGS[i + 1].place.region;
+  if (!through) return long ? LONG_HAUL_MS : HOP_MS;
+  return long ? LONG_HAUL_MS * 0.75 : HOP_MS / 2;
 }
 
-function flightMs(from: number, to: number) {
-  const hops = Math.abs(to - from);
-  return Math.min(3200, hops * 450 + 450 + (crossesLongHaul(from, to) ? LONG_HAUL_MS - HOP_MS : 0));
+/**
+ * A flight from stage `from` to `to` (either may be fractional), as its
+ * length and a map from eased progress to stage. Every leg crossed gets a
+ * share of the trip in proportion to its own time, so the rewind spends its
+ * time on the Pacific rather than flashing across it at peak speed while the
+ * short Hue hops eat the rest.
+ */
+function flightPath(from: number, to: number) {
+  const dir = Math.sign(to - from);
+  const pieces: { a: number; b: number; ms: number }[] = [];
+  const through = Math.abs(to - from) > 1;
+  for (let a = from; a !== to; ) {
+    const b = dir > 0 ? Math.min(to, Math.floor(a) + 1) : Math.max(to, Math.ceil(a) - 1);
+    pieces.push({ a, b, ms: legMs(Math.floor(Math.min(a, b)), through) * Math.abs(b - a) });
+    a = b;
+  }
+  const ms = pieces.reduce((sum, p) => sum + p.ms, 0);
+  const at = (e: number) => {
+    let d = e * ms;
+    for (const p of pieces) {
+      if (d <= p.ms) return p.a + (p.b - p.a) * (d / p.ms);
+      d -= p.ms;
+    }
+    return to;
+  };
+  return { ms, at };
 }
 
 function coords({ lat, lon }: Place) {
@@ -86,8 +107,11 @@ export default function FlightLog() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stageRef = useRef(0);
   const drawRef = useRef<() => void>(() => {});
-  const tweenRef = useRef(0);
+  // Cuts the flight in progress short, settling its promise as false so
+  // whatever awaits it can stand down instead of hanging.
+  const stopRef = useRef<() => void>(() => {});
   const resumeRef = useRef(0);
+  const inViewRef = useRef(false);
   // Bumped by anything that takes over the globe, so a running tour knows
   // to stand down.
   const runRef = useRef(0);
@@ -105,24 +129,31 @@ export default function FlightLog() {
   const fly = useCallback(
     (to: number) =>
       new Promise<boolean>((resolve) => {
-        cancelAnimationFrame(tweenRef.current);
+        stopRef.current();
         const from = stageRef.current;
         if (reducedMotion || from === to) {
           show(to);
           resolve(true);
           return;
         }
-        const ms = flightMs(from, to);
+        const path = flightPath(from, to);
         const start = performance.now();
-        const run = runRef.current;
-        const step = (now: number) => {
-          if (run !== runRef.current) return resolve(false);
-          const t = Math.min(1, (now - start) / ms);
-          show(from + (to - from) * easeInOut(t));
-          if (t < 1) tweenRef.current = requestAnimationFrame(step);
-          else resolve(true);
+        let frame = 0;
+        const settle = (arrived: boolean) => {
+          stopRef.current = () => {};
+          resolve(arrived);
         };
-        tweenRef.current = requestAnimationFrame(step);
+        const step = (now: number) => {
+          const t = Math.min(1, (now - start) / path.ms);
+          show(path.at(easeInOut(t)));
+          if (t < 1) frame = requestAnimationFrame(step);
+          else settle(true);
+        };
+        stopRef.current = () => {
+          cancelAnimationFrame(frame);
+          settle(false);
+        };
+        frame = requestAnimationFrame(step);
       }),
     [reducedMotion, show],
   );
@@ -137,7 +168,9 @@ export default function FlightLog() {
       const alive = () => run === runRef.current;
       setTouring(true);
       let i = from ?? Math.round(stageRef.current);
-      show(i);
+      // Settle on a whole leg first: flown to, not cut to, whether the
+      // replay asked for Hue or the loop was paused between two legs.
+      if (!(await fly(i))) return;
       while (alive()) {
         await new Promise((r) => setTimeout(r, i === LAST ? LANDED_MS : DWELL_MS));
         if (!alive()) return;
@@ -146,13 +179,13 @@ export default function FlightLog() {
         i = next;
       }
     },
-    [fly, show],
+    [fly],
   );
 
   /** Stops whatever tour, flight or pending resume is running. */
   const halt = useCallback(() => {
     runRef.current++;
-    cancelAnimationFrame(tweenRef.current);
+    stopRef.current();
     clearTimeout(resumeRef.current);
   }, []);
 
@@ -160,7 +193,10 @@ export default function FlightLog() {
     halt();
     setTouring(false);
     fly(i);
-    if (!reducedMotion) resumeRef.current = window.setTimeout(() => tour(), RESUME_MS);
+    // Off-screen by then, the loop waits for the section to come back.
+    if (!reducedMotion) {
+      resumeRef.current = window.setTimeout(() => inViewRef.current && tour(), RESUME_MS);
+    }
   };
 
   // The canvas: size, inks, and a draw function the tweens call.
@@ -228,6 +264,7 @@ export default function FlightLog() {
     let seen = false;
     const io = new IntersectionObserver(
       ([entry]) => {
+        inViewRef.current = entry.isIntersecting;
         if (reducedMotion) {
           if (entry.isIntersecting && !seen) show(LAST);
         } else if (entry.isIntersecting) tour();
