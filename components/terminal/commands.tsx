@@ -1,6 +1,7 @@
 import { projects } from "@/lib/data/projects";
 import { experiences } from "@/lib/data/experiences";
 import { contacts } from "@/lib/data/contacts";
+import { LEGS, VARSITY } from "@/lib/data/journey";
 
 export type OutputLineType =
   | "command"
@@ -195,6 +196,38 @@ const COMMANDS: Record<string, CommandDef> = {
         document.documentElement.classList.remove("theme-transitioning");
       }, 300);
       return [{ type: "system", text: `Switched to ${newTheme} mode.` }];
+    },
+  },
+
+  traceroute: {
+    description: "How I got here",
+    execute: () => {
+      const hostW = Math.max(...LEGS.map((l) => l.place.host.length)) + 2;
+      const spanW = Math.max(...LEGS.map((l) => l.span.length)) + 2;
+      const last = LEGS.length - 1;
+      return [
+        { type: "accent", text: "" },
+        { type: "system", text: `traceroute to anh (present), ${LEGS.length} hops max` },
+        ...LEGS.map((leg, i): OutputLine => ({
+          type: i === last ? "accent" : "response",
+          text: (
+            `${String(i + 1).padStart(2)}  ${leg.place.code}  ` +
+            `${leg.place.host.padEnd(hostW)}${leg.span.padEnd(spanW)}` +
+            (leg.kind === "stop" || leg.kind === "now" ? leg.title : "") +
+            (i === last ? "  * * *" : "")
+          ).trimEnd(),
+        })),
+        { type: "system", text: "    (still routing)" },
+        { type: "response", text: "" },
+        { type: "response", text: "ex-varsity, selective team:" },
+        ...VARSITY.map(
+          (s): OutputLine => ({
+            type: "response",
+            text: `  ${s.name.toLowerCase().padEnd(15)}${s.school.span}  ${s.school.title}`,
+          }),
+        ),
+        { type: "accent", text: "" },
+      ];
     },
   },
 
