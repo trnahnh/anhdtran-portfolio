@@ -260,14 +260,20 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* clip, not hidden: hidden on both html and body turns body into its own
+     scroll container, and every position: sticky on the site (the rail, the
+     Flight Log globe) stops sticking. hidden stays as the pre-Safari-16
+     fallback. */
   html {
     overflow-x: hidden;
+    overflow-x: clip;
     scrollbar-width: thin;
     scrollbar-color: var(--muted-foreground) var(--background);
   }
   body {
     @apply bg-background text-foreground font-sans;
     overflow-x: hidden;
+    overflow-x: clip;
     transition:
       background-color var(--dur-quick) var(--ease-smooth),
       color var(--dur-quick) var(--ease-smooth);
