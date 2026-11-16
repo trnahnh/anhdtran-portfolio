@@ -9,6 +9,7 @@ import SpotifyEmbed from "./SpotifyEmbed";
 import QuotesSection from "./QuotesSection";
 import ScrollReveal from "./ScrollReveal";
 import TiltCard from "./TiltCard";
+import FlightLog from "./flightlog/FlightLog";
 
 const photos = [
   {
@@ -143,6 +144,13 @@ export default function ProfileSection() {
             </li>
           </ul>
         </ScrollReveal>
+      </section>
+
+      <section className="space-y-6">
+        <div className="fade-in-up fade-in-up-delay-2">
+          <SectionHeading>Flight Log</SectionHeading>
+        </div>
+        <FlightLog />
       </section>
 
       <QuotesSection />
