@@ -5,6 +5,7 @@ import GradientBlobs from "@/components/GradientBlobs";
 import InstrumentMatrix from "@/components/matrix/InstrumentMatrix";
 import MatrixScore from "@/components/matrix/MatrixScore";
 import MotionGate from "@/components/MotionGate";
+import AudioUnlock from "@/components/AudioUnlock";
 // LoadBar (the scroll progress column) is unmounted at the user's request;
 // the component stays in components/ per the nothing-deleted rule.
 import PageTransition from "@/components/PageTransition";
@@ -97,6 +98,7 @@ export default function RootLayout({
         className={`${archivo.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} antialiased`}
       >
         <MotionGate />
+        <AudioUnlock />
         <SmoothScroll />
         <GradientBlobs />
         <InstrumentMatrix />

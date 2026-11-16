@@ -4,9 +4,16 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { prime, ready } from "@/lib/sfx";
+import { playSpinSound, type SpinSound } from "@/lib/spinSound";
+import { warmAudio } from "@/lib/audio";
 import { markProfileIntroSeen, profileIntroSeen } from "@/lib/profileIntro";
 
 const SFX = "/sfx/tap-to-pay.mp3";
+// The file opens on ~50ms of silence. Skipping it lets the chime follow the
+// spin's last tick straight away instead of after a gap.
+const SFX_LEAD = 0.045;
+
+type SpinToken = { sound: SpinSound | null; live: boolean; chimeTaken: boolean };
 
 let hasPlayedThisLoad = false;
 
@@ -18,6 +25,10 @@ export default function CardIntroScreen() {
   const hideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const removeUnlockRef = useRef<(() => void) | null>(null);
+  // Each spin gets a token, so a sound that resolves after a skip or a
+  // replay knows it is stale and silences itself. `chimeTaken` is set once
+  // the <audio> fallback has played the chime, so the spin's clock won't too.
+  const spinRef = useRef<SpinToken | null>(null);
 
   const reducedMotion = usePrefersReducedMotion();
 
@@ -43,6 +54,39 @@ export default function CardIntroScreen() {
       removeUnlockRef.current();
       removeUnlockRef.current = null;
     }
+    if (spinRef.current) {
+      spinRef.current.live = false;
+      spinRef.current.sound?.stop();
+      spinRef.current = null;
+    }
+  }, []);
+
+  const handleSpinStart = useCallback((e: React.AnimationEvent) => {
+    if (e.target !== e.currentTarget) return;
+    // With motion switched off the spin ends as it starts; nothing to hear.
+    if (document.documentElement.classList.contains("motion-off")) return;
+    if (spinRef.current) {
+      spinRef.current.live = false;
+      spinRef.current.sound?.stop();
+    }
+    const spin: SpinToken = { sound: null, live: true, chimeTaken: false };
+    spinRef.current = spin;
+    // The event can arrive a frame or more after the spin really began (a
+    // busy main thread, a throttled tab). The animation's own clock knows
+    // exactly how far in it is, so the ticks start in step regardless.
+    const anim = e.currentTarget
+      .getAnimations()
+      .find((a) => (a as CSSAnimation).animationName === e.animationName);
+    const spinStart =
+      performance.now() -
+      (typeof anim?.currentTime === "number" ? anim.currentTime : e.elapsedTime * 1000);
+    // The chime rides the spin's audio clock, so it follows the last tick
+    // exactly. If that clock isn't running, handleSpinEnd plays it instead.
+    const chime = { src: SFX, offset: SFX_LEAD, allowed: () => spin.live && !spin.chimeTaken };
+    void playSpinSound(spinStart, chime).then((sound) => {
+      if (spin.live) spin.sound = sound;
+      else sound.stop();
+    });
   }, []);
 
   const playTapSound = useCallback(() => {
@@ -53,7 +97,7 @@ export default function CardIntroScreen() {
       if (!audio) return;
       audioRef.current = audio;
       try {
-        audio.currentTime = 0;
+        audio.currentTime = SFX_LEAD;
       } catch {}
 
       const unlock = () => {
@@ -86,6 +130,9 @@ export default function CardIntroScreen() {
     hasPlayedThisLoad = true;
     markProfileIntroSeen();
     clearAll();
+    // Get the audio clock moving now, so the spin's first ticks aren't
+    // spent waiting for it to wake.
+    warmAudio();
     setFading(false);
     setShow(true);
 
@@ -98,7 +145,11 @@ export default function CardIntroScreen() {
 
   const handleSpinEnd = useCallback(() => {
     if (fading) return;
-    playTapSound();
+    const spin = spinRef.current;
+    if (!spin?.sound?.chimed) {
+      if (spin) spin.chimeTaken = true;
+      playTapSound();
+    }
     fadeTimeoutRef.current = setTimeout(() => setFading(true), 800);
     hideTimeoutRef.current = setTimeout(() => setShow(false), 1300);
   }, [fading, playTapSound]);
@@ -190,6 +241,7 @@ export default function CardIntroScreen() {
         <div
           className={reducedMotion ? "" : "card-spin"}
           style={{ transformStyle: "preserve-3d" }}
+          onAnimationStart={handleSpinStart}
           onAnimationEnd={handleSpinEnd}
         >
           <div
