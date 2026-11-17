@@ -25,8 +25,20 @@ import ScrollReveal from "./ScrollReveal";
  * hidden from someone who asks; it just stops competing with the evidence.
  */
 
+// Until a role is announced, Incoming holds a placeholder rather than
+// disappearing. Featured, so the landing page keeps it in view.
+const INCOMING_PLACEHOLDER: Experience = {
+  title: "TBD",
+  company: "TBD",
+  featured: true,
+  status: "future",
+};
+
 const GROUPS: { title: string; items: Experience[] }[] = [
-  { title: "Incoming Experience", items: futureExperiences },
+  {
+    title: "Incoming Experience",
+    items: futureExperiences.length > 0 ? futureExperiences : [INCOMING_PLACEHOLDER],
+  },
   { title: "Current Experience", items: currentExperiences },
   { title: "Past Experience", items: pastExperiences },
 ];
