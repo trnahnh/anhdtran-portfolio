@@ -9,6 +9,7 @@ import {
 } from "@/lib/data/experiences";
 import UnderlineLink from "./UnderlineLink";
 import ScrollReveal from "./ScrollReveal";
+import IncomingReveal from "./IncomingReveal";
 
 /**
  * Three groups, one component. This was the same forty lines of JSX pasted
@@ -25,11 +26,23 @@ import ScrollReveal from "./ScrollReveal";
  * hidden from someone who asks; it just stops competing with the evidence.
  */
 
+// Incoming is not in this list: it always shows, sealed behind a reveal,
+// even before there is a role to put in it (see IncomingReveal).
 const GROUPS: { title: string; items: Experience[] }[] = [
-  { title: "Incoming Experience", items: futureExperiences },
   { title: "Current Experience", items: currentExperiences },
   { title: "Past Experience", items: pastExperiences },
 ];
+
+function GroupHeading({ children }: { children: string }) {
+  return (
+    <h2 className="fade-in-up fade-in-up-delay-2 text-lg font-medium mb-4">
+      <span className="text-muted-foreground mr-2" aria-hidden="true">
+        &#9670;
+      </span>
+      {children}
+    </h2>
+  );
+}
 
 function Row({ exp }: { exp: Experience }) {
   return (
@@ -79,14 +92,17 @@ export default function ExperienceSection({
   return (
     <section data-matrix="timeline" data-load="Experience">
       <div className="space-y-8">
+        <div>
+          <GroupHeading>Incoming Experience</GroupHeading>
+          <div className="pl-6 sm:pl-7">
+            <ScrollReveal>
+              <IncomingReveal items={futureExperiences} />
+            </ScrollReveal>
+          </div>
+        </div>
         {groups.map((group) => (
           <div key={group.title}>
-            <h2 className="fade-in-up fade-in-up-delay-2 text-lg font-medium mb-4">
-              <span className="text-muted-foreground mr-2" aria-hidden="true">
-                &#9670;
-              </span>
-              {group.title}
-            </h2>
+            <GroupHeading>{group.title}</GroupHeading>
             <div className="space-y-3 pl-6 sm:pl-7">
               {group.items.map((exp, i) => (
                 <ScrollReveal
