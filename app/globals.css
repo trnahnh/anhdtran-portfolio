@@ -3,8 +3,6 @@
 @import "lenis/dist/lenis.css";
 
 @custom-variant dark (&:is(.dark *));
-/* Little height to spare: a phone on its side. */
-@custom-variant short (@media (max-height: 520px));
 
 /* ==========================================================================
    INSTRUMENT — design tokens
