@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RotateCcw } from "lucide-react";
-import { ARRIVED, LEGS, type Place } from "@/lib/data/journey";
+import { ARRIVED_TZ, ARRIVED_WALL, LEGS, type Place } from "@/lib/data/journey";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { drawGlobe, type Palette } from "./globe";
 import VarsityCards from "./VarsityCards";
@@ -85,9 +85,26 @@ function Elapsed() {
 
   useEffect(() => {
     const pad = (n: number) => String(n).padStart(2, "0");
+    // Cincinnati's wall clock, read live, so the hours step with daylight
+    // saving and match the rail's clock instead of drifting an hour off it.
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: ARRIVED_TZ,
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hourCycle: "h23",
+    });
+    const wallNow = () => {
+      const p: Record<string, number> = {};
+      for (const { type, value } of fmt.formatToParts(Date.now())) p[type] = Number(value);
+      return Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second);
+    };
     const paint = () => {
       if (!ref.current) return;
-      const s = Math.max(0, Math.floor((Date.now() - ARRIVED.getTime()) / 1000));
+      const s = Math.max(0, Math.floor((wallNow() - ARRIVED_WALL) / 1000));
       const d = Math.floor(s / 86400);
       ref.current.textContent = `T+ ${d}d ${pad(Math.floor((s % 86400) / 3600))}:${pad(
         Math.floor((s % 3600) / 60),

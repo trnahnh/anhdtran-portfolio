@@ -44,9 +44,13 @@ export const LEGS: Leg[] = [
 
 /**
  * When the Cincinnati leg's clock starts. The first day of UC's fall 2024
- * semester, standing in for the actual landing date.
+ * semester, standing in for the actual landing date. Midnight on Cincinnati's
+ * wall clock, as a UTC-encoded wall time: compare it against Cincinnati's
+ * wall clock, not Date.now(), so the readout steps with daylight saving the
+ * way the rail's clock does and reads the same in every visitor's timezone.
  */
-export const ARRIVED = new Date(2024, 7, 26);
+export const ARRIVED_TZ = "America/New_York";
+export const ARRIVED_WALL = Date.UTC(2024, 7, 26);
 
 export interface Sport {
   name: string;
