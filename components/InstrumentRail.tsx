@@ -536,19 +536,17 @@ function RailDrawer({ track }: { track: Track }) {
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="mb-8 flex items-center justify-between">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-readout-strong">
-            Telemetry
-          </p>
-          <button
-            type="button"
-            onClick={close}
-            aria-label="Close telemetry"
-            className="-mr-2 rounded-md px-2 py-1 font-mono text-[13px] text-readout transition-colors duration-[var(--dur-tap)] hover:text-readout-strong focus-visible:outline-2 focus-visible:outline-plate-25"
-          >
-            ✕
-          </button>
-        </div>
+        {/* No heading: the rail has none, so the drawer opens straight onto
+            the same readings. The close button sits in the corner, beside
+            Age rather than above it. */}
+        <button
+          type="button"
+          onClick={close}
+          aria-label="Close telemetry"
+          className="absolute right-3 top-[max(1rem,calc(env(safe-area-inset-top)-0.5rem))] rounded-md px-2 py-1 font-mono text-[13px] text-readout transition-colors duration-[var(--dur-tap)] hover:text-readout-strong focus-visible:outline-2 focus-visible:outline-plate-25"
+        >
+          ✕
+        </button>
         <Readings active={open || dragging} track={track} />
       </div>
     </>
