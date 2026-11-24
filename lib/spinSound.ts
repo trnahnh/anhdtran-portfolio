@@ -17,10 +17,12 @@
  *
  * It plays on the site's shared context (lib/audio.ts), unlocked by the
  * visitor's first gesture, because on phones a context started by the spin
- * itself would be refused. If the context still can't run (no gesture yet,
- * e.g. /profile opened straight from a link), this stays silent rather than
- * starting late and out of step with the card; the chime then falls back to
- * the <audio> path, which has its own way of getting heard.
+ * itself would be refused. A context that is slow to start (the first visit,
+ * when the tap that led here has only just created it) is waited on for as
+ * long as the card turns, and joins in step with whatever ticks are left. If
+ * it never runs (no gesture yet, e.g. /profile opened straight from a link),
+ * this stays silent; the chime then falls back to the <audio> path, which
+ * has its own way of getting heard.
  */
 
 import { releaseAudio, sharedAudio, wakeAudio } from "@/lib/audio";
@@ -171,7 +173,14 @@ export async function playSpinSound(spinStart: number, chime?: Chime): Promise<S
   // Where the clock stood before waking: a running clock's timestamp is
   // already good, a rested one's only once it passes this.
   const restedAt = ctx.state === "running" ? -1 : ctx.currentTime;
-  if (!(await wakeAudio(ctx))) {
+  // Wait as long as the card is still turning, not a fixed moment. The
+  // first time through, the context was only created by the tap that led
+  // here, and the audio device can take a few hundred ms to start: a short
+  // wait gave up on it and left the chime to play alone. Ticks are placed on
+  // the spin's own timeline, so a clock that arrives late just skips the
+  // ones already gone and joins the rest in step.
+  const spinLeft = spinStart + DURATION * 1000 - performance.now() - 50;
+  if (!(await wakeAudio(ctx, Math.max(150, spinLeft)))) {
     releaseAudio(ctx);
     return NO_SPIN;
   }
