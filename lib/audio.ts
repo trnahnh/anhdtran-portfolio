@@ -33,6 +33,8 @@ export function sharedAudio(): AudioContext | null {
 
 /** Whether the shared context has been started by a gesture. */
 let unlocked = false;
+/** A gesture has asked it to start, and the device is still coming up. */
+let unlocking = false;
 export const audioUnlocked = () => unlocked;
 
 /**
@@ -49,6 +51,7 @@ export function unlockAudio(): void {
     src.connect(ctx.destination);
     src.start();
   } catch {}
+  unlocking = true;
   ctx
     .resume()
     .then(() => {
@@ -57,7 +60,10 @@ export function unlockAudio(): void {
       // Rest unless something started playing in the meantime.
       if (active === 0) ctx.suspend().catch(() => {});
     })
-    .catch(() => {});
+    .catch(() => {})
+    .finally(() => {
+      unlocking = false;
+    });
 }
 
 /** Sounds currently using the context; it is suspended when this hits 0. */
@@ -74,8 +80,13 @@ export function wakeAudio(ctx: AudioContext, maxWaitMs = 150): Promise<boolean> 
   // (Safari 17+) makes it play like the other intro sounds do.
   if (session) session.type = "playback";
   if (ctx.state === "running") return Promise.resolve(true);
+  const resumed = ctx.resume().then(() => {
+    // Started after the caller stopped waiting and released it: rest again.
+    if (active === 0 && ctx.state === "running") ctx.suspend().catch(() => {});
+    return ctx.state === "running";
+  });
   return Promise.race([
-    ctx.resume().then(() => ctx.state === "running"),
+    resumed,
     new Promise<boolean>((r) => setTimeout(() => r(false), maxWaitMs)),
   ]).catch(() => false);
 }
@@ -83,13 +94,15 @@ export function wakeAudio(ctx: AudioContext, maxWaitMs = 150): Promise<boolean> 
 /**
  * Wake an already-unlocked context ahead of a sound that is about to start,
  * so its clock is moving by the time that sound schedules. Holds it awake
- * for `holdMs`. Does nothing before an unlock: creating a context then would
- * only be refused.
+ * for `holdMs`. Also runs while an unlock is still starting the device —
+ * the first visit to /profile, where the tap that led there has only just
+ * created the context. Does nothing before any gesture: creating a context
+ * then would only be refused.
  */
 export function warmAudio(holdMs = 3000): void {
   const ctx = shared;
-  if (!ctx || !unlocked) return;
-  void wakeAudio(ctx).then(() => setTimeout(() => releaseAudio(ctx), holdMs));
+  if (!ctx || !(unlocked || unlocking)) return;
+  void wakeAudio(ctx, holdMs).then(() => setTimeout(() => releaseAudio(ctx), holdMs));
 }
 
 /** Done with the context; it rests once nothing else is using it. */
